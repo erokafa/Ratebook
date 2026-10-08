@@ -42,7 +42,7 @@
     <!-- Giriş Yapılmamışsa Butonlar -->
     <div id="auth-buttons" class="space-x-2 shrink-0">
       <button onclick="showSection('login-section')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium">Giriş Yap</button>
-      <button onclick="showSection('register-section')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
+      <button onclick="openRegister()" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
     </div>
 
     <!-- Ortalanmış Arama Çubuğu -->
@@ -94,8 +94,11 @@
       <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
       <form onsubmit="handleRegister(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
-          <input type="text" id="reg-fullname" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Adını Listeden Seç</label>
+          <input type="text" id="roster-search" oninput="renderRosterList()" placeholder="Adını ara..."
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="roster-list" class="mt-2 max-h-44 overflow-y-auto rounded-xl border border-gray-300 dark:border-borderdark divide-y divide-gray-100 dark:divide-borderdark"></div>
+          <p id="roster-selected" class="text-xs text-gray-500 mt-1.5">Seçilen: -</p>
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
@@ -215,8 +218,8 @@
                 <input type="file" id="setting-avatar-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-300 dark:border-borderdark rounded-xl p-1 bg-gray-50 dark:bg-blackbg">
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
-                <input type="text" id="setting-fullname" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad (yönetici listesinden gelir, değiştirilemez)</label>
+                <input type="text" id="setting-fullname" readonly class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none opacity-60 cursor-not-allowed">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
@@ -254,6 +257,8 @@
     let currentUserProfile = null;
     let allProfiles = [];
     let allEvaluations = [];
+    let rosterList = [];
+    let selectedRosterId = null;
 
     function initTheme() {
       const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -342,8 +347,64 @@
       return publicUrlData.publicUrl;
     }
 
+    // ===== KAYIT: YÖNETİCİ LİSTESİNDEN KİŞİ SEÇME =====
+    async function openRegister() {
+      showSection('register-section');
+      await loadRoster();
+    }
+
+    async function loadRoster() {
+      const { data, error } = await supabaseClient
+        .from('roster')
+        .select('id, full_name')
+        .is('claimed_by', null)
+        .order('full_name');
+
+      if (error) {
+        alert("Liste yüklenemedi: " + error.message);
+        return;
+      }
+
+      rosterList = data || [];
+      selectedRosterId = null;
+      document.getElementById('roster-search').value = '';
+      document.getElementById('roster-selected').innerText = "Seçilen: -";
+      renderRosterList();
+    }
+
+    function renderRosterList() {
+      const q = document.getElementById('roster-search').value.toLocaleLowerCase('tr-TR').trim();
+      const el = document.getElementById('roster-list');
+      const filtered = rosterList.filter(p => p.full_name.toLocaleLowerCase('tr-TR').includes(q));
+
+      if (filtered.length === 0) {
+        el.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center">Listede uygun kişi bulunamadı. Yöneticiyle iletişime geç.</div>';
+        return;
+      }
+
+      el.innerHTML = filtered.map(p => `
+        <div onclick="selectRoster('${p.id}')"
+          class="px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-borderdark/50 transition ${p.id === selectedRosterId ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 font-semibold' : ''}">
+          ${p.full_name}
+        </div>
+      `).join('');
+    }
+
+    function selectRoster(id) {
+      selectedRosterId = id;
+      const person = rosterList.find(p => p.id === id);
+      document.getElementById('roster-selected').innerText = "Seçilen: " + (person ? person.full_name : '-');
+      renderRosterList();
+    }
+
     async function handleRegister(e) {
       e.preventDefault();
+
+      if (!selectedRosterId) {
+        alert("Lütfen listeden kendi adını seç.");
+        return;
+      }
+
       const btn = document.getElementById('reg-submit-btn');
       btn.innerText = "Fotoğraf Yükleniyor...";
       btn.disabled = true;
@@ -351,7 +412,6 @@
       try {
         const email = document.getElementById('reg-email').value;
         const password = document.getElementById('reg-password').value;
-        const full_name = document.getElementById('reg-fullname').value;
         const username = document.getElementById('reg-username').value;
         const avatarFile = document.getElementById('reg-avatar-file').files[0];
 
@@ -362,13 +422,19 @@
 
         btn.innerText = "Hesap Oluşturuluyor...";
 
-        const { data, error } = await supabaseClient.auth.signUp({
+        const { error } = await supabaseClient.auth.signUp({
           email,
           password,
-          options: { data: { full_name, username, avatar_url } }
+          options: { data: { roster_id: selectedRosterId, username, avatar_url } }
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Database error')) {
+            await loadRoster();
+            throw new Error("Bu kişi başka biri tarafından seçilmiş olabilir. Liste yenilendi, tekrar dene.");
+          }
+          throw error;
+        }
 
         alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
         showSection('login-section');
@@ -410,12 +476,12 @@
       btn.disabled = true;
 
       try {
-        const full_name = document.getElementById('setting-fullname').value;
         const username = document.getElementById('setting-username').value;
         const bio = document.getElementById('setting-bio').value;
         const avatarFile = document.getElementById('setting-avatar-file').files[0];
 
-        let updateData = { full_name, username, bio };
+        // full_name artık güncellenmiyor (yönetici listesinden geliyor)
+        let updateData = { username, bio };
 
         if (avatarFile) {
           btn.innerText = "Fotoğraf Yükleniyor...";
