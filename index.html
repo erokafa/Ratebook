@@ -30,7 +30,7 @@
   </script>
 
   <!-- Üst Menü / Navbar -->
-  <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+  <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center sticky top-0 z-50 gap-3">
     <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center space-x-2">
       <span class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 tracking-wider hover:opacity-90 transition">
         RateBook
@@ -42,12 +42,30 @@
       <button onclick="showSection('register-section')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
     </div>
 
-    <div id="user-menu" class="hidden flex items-center space-x-3">
-      <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-sm font-medium">Ana Sayfa</button>
+    <!-- Giriş Yapmış Kullanıcı Üst Paneli -->
+    <div id="user-menu" class="hidden flex items-center space-x-2 sm:space-x-3 flex-1 justify-end">
+      
+      <!-- ÜST PANEL ARAMA ÇUBUĞU -->
+      <div class="relative max-w-xs w-full hidden sm:block">
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Kullanıcı ara..." 
+          class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500 transition">
+        <div id="search-results" class="hidden absolute top-10 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+        </div>
+      </div>
+
+      <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-xs font-medium">Ana Sayfa</button>
       <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-1.5 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
       <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300">⚙️ Ayarlar</button>
-      <span id="user-display-name" class="font-semibold text-sm hidden sm:inline"></span>
+      <span id="user-display-name" class="font-semibold text-xs hidden lg:inline text-gray-400"></span>
       <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-medium">Çıkış</button>
+    </div>
+
+    <!-- Mobil İçin Arama Çubuğu (Küçük Ekranlar) -->
+    <div id="mobile-search-container" class="hidden w-full sm:hidden relative mt-1">
+      <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="🔍 Kullanıcı ara..." 
+        class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+      <div id="mobile-search-results" class="hidden absolute top-9 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+      </div>
     </div>
   </nav>
 
@@ -101,14 +119,6 @@
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
       
-      <!-- ARAMA ÇUBUĞU -->
-      <div class="relative">
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Kullanıcı ara (Ad soyad veya kullanıcı adı)..." 
-          class="w-full bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-indigo-500 shadow-md">
-        <div id="search-results" class="hidden absolute top-14 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-40 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
-        </div>
-      </div>
-
       <!-- BÜYÜK "BU MU? BU MU?" SIRALAMA BUTONU -->
       <div class="bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-pink-900/40 p-6 rounded-3xl border border-indigo-500/30 text-center shadow-2xl relative overflow-hidden">
         <h2 class="text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">⚔️ Hızlı Sıralama: Bu mu? Bu mu?</h2>
@@ -144,7 +154,7 @@
       </div>
     </section>
 
-    <!-- KAPSAMLI PROFİL (KENDİ + DİĞER KULLANICILARIN PROFİLİ) -->
+    <!-- KAPSAMLI PROFİL -->
     <section id="profile-section" class="bg-white dark:bg-carddark p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
       <div id="profile-details">
         <p class="text-gray-500 text-sm">Profil yükleniyor...</p>
@@ -271,12 +281,14 @@
       if (isLoggedIn) {
         document.getElementById('auth-buttons').classList.add('hidden');
         document.getElementById('user-menu').classList.remove('hidden');
+        document.getElementById('mobile-search-container').classList.remove('hidden');
         const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
         document.getElementById('user-display-name').innerText = nameToShow;
         showSection('dashboard-section');
       } else {
         document.getElementById('auth-buttons').classList.remove('hidden');
         document.getElementById('user-menu').classList.add('hidden');
+        document.getElementById('mobile-search-container').classList.add('hidden');
         showSection('login-section');
       }
     }
@@ -354,10 +366,19 @@
       renderUserRatingCards(allProfiles, allEvaluations);
     }
 
-    /* ARAMA İŞLEVİ */
+    /* ARAMA İŞLEVLERİ */
     function handleSearch() {
       const query = document.getElementById('search-input').value.toLowerCase().trim();
-      const resultsEl = document.getElementById('search-results');
+      renderSearchResults(query, 'search-results');
+    }
+
+    function handleSearchMobile() {
+      const query = document.getElementById('mobile-search-input').value.toLowerCase().trim();
+      renderSearchResults(query, 'mobile-search-results');
+    }
+
+    function renderSearchResults(query, targetContainerId) {
+      const resultsEl = document.getElementById(targetContainerId);
 
       if (!query) {
         resultsEl.classList.add('hidden');
@@ -370,14 +391,14 @@
       );
 
       if (filtered.length === 0) {
-        resultsEl.innerHTML = '<div class="p-4 text-xs text-gray-500 text-center">Kullanıcı bulunamadı.</div>';
+        resultsEl.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center">Kullanıcı bulunamadı.</div>';
       } else {
         resultsEl.innerHTML = filtered.map(p => `
-          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
-            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover">
+          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-2.5 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
+            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
             <div>
-              <p class="font-semibold text-sm">${p.full_name}</p>
-              <p class="text-xs text-gray-400">@${p.username}</p>
+              <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${p.full_name}</p>
+              <p class="text-[10px] text-gray-400">@${p.username}</p>
             </div>
           </div>
         `).join('');
@@ -386,7 +407,7 @@
       resultsEl.classList.remove('hidden');
     }
 
-    /* KULLANICI PROFİLİNİ AÇMA (KENDİ VEYA BAŞKASI) */
+    /* KULLANICI PROFİLİNİ AÇMA */
     function openMyProfile() {
       viewUserProfile(currentUser.id);
     }
@@ -394,6 +415,8 @@
     async function viewUserProfile(userId) {
       document.getElementById('search-results').classList.add('hidden');
       document.getElementById('search-input').value = '';
+      document.getElementById('mobile-search-results').classList.add('hidden');
+      document.getElementById('mobile-search-input').value = '';
 
       const targetProfile = allProfiles.find(p => p.id === userId);
       if (!targetProfile) return;
@@ -408,7 +431,6 @@
 
       const isMe = userId === currentUser.id;
 
-      // Yorumları Çek
       const { data: comments } = await supabaseClient
         .from('comments')
         .select('*, author:profiles!author_id(*)')
@@ -440,7 +462,6 @@
           </div>
         </div>
 
-        <!-- YORUM ALANI -->
         <div class="pt-6 space-y-4">
           <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">💬 Yorumlar (${comments ? comments.length : 0})</h4>
           
