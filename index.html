@@ -89,8 +89,8 @@
           <input type="text" id="reg-username" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Fotoğrafı URL (Zorunlu)</label>
-          <input type="url" id="reg-avatar" required placeholder="https://images.unsplash.com/..." class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Fotoğrafı Seç (Galeri / Dosya)</label>
+          <input type="file" id="reg-avatar-file" accept="image/*" required class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-300 dark:border-borderdark rounded-xl p-1 bg-gray-50 dark:bg-blackbg">
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">E-posta</label>
@@ -100,7 +100,7 @@
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Şifre</label>
           <input type="password" id="reg-password" required minlength="6" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
         </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Hesap Oluştur</button>
+        <button type="submit" id="reg-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Hesap Oluştur</button>
       </form>
     </section>
 
@@ -183,8 +183,8 @@
             <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Profili Düzenle</h4>
             <form onsubmit="handleUpdateProfile(event)" class="space-y-4 max-w-md">
               <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Resmi URL (Zorunlu)</label>
-                <input type="url" id="setting-avatar" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Yeni Profil Fotoğrafı Yükle (Galeri/Dosya)</label>
+                <input type="file" id="setting-avatar-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-300 dark:border-borderdark rounded-xl p-1 bg-gray-50 dark:bg-blackbg">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
@@ -198,7 +198,7 @@
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Biyografi</label>
                 <textarea id="setting-bio" rows="2" placeholder="Kendinden bahset..." class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
               </div>
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Değişiklikleri Kaydet</button>
+              <button type="submit" id="setting-submit-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Değişiklikleri Kaydet</button>
             </form>
           </div>
 
@@ -271,7 +271,6 @@
         currentUserProfile = data;
         document.getElementById('setting-fullname').value = data.full_name || '';
         document.getElementById('setting-username').value = data.username || '';
-        document.getElementById('setting-avatar').value = data.avatar_url || '';
         document.getElementById('setting-bio').value = data.bio || '';
       }
     }
@@ -299,24 +298,58 @@
       }
     }
 
+    // SUPABASE STORAGE DOSYA YÜKLEME YARDIMCISI
+    async function uploadAvatarFile(file) {
+      if (!file) return null;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `public/${fileName}`;
+
+      const { data, error } = await supabaseClient.storage.from('avatars').upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: publicUrlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    }
+
     async function handleRegister(e) {
       e.preventDefault();
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
-      const full_name = document.getElementById('reg-fullname').value;
-      const username = document.getElementById('reg-username').value;
-      const avatar_url = document.getElementById('reg-avatar').value;
+      const btn = document.getElementById('reg-submit-btn');
+      btn.innerText = "Fotoğraf Yükleniyor...";
+      btn.disabled = true;
 
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name, username, avatar_url } }
-      });
+      try {
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const full_name = document.getElementById('reg-fullname').value;
+        const username = document.getElementById('reg-username').value;
+        const avatarFile = document.getElementById('reg-avatar-file').files[0];
 
-      if (error) alert("Hata: " + error.message);
-      else {
+        let avatar_url = 'https://via.placeholder.com/150';
+        if (avatarFile) {
+          avatar_url = await uploadAvatarFile(avatarFile);
+        }
+
+        btn.innerText = "Hesap Oluşturuluyor...";
+
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name, username, avatar_url } }
+        });
+
+        if (error) throw error;
+
         alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
         showSection('login-section');
+      } catch (err) {
+        alert("Hata: " + err.message);
+      } finally {
+        btn.innerText = "Hesap Oluştur";
+        btn.disabled = false;
       }
     }
 
@@ -345,19 +378,37 @@
 
     async function handleUpdateProfile(e) {
       e.preventDefault();
-      const full_name = document.getElementById('setting-fullname').value;
-      const username = document.getElementById('setting-username').value;
-      const avatar_url = document.getElementById('setting-avatar').value;
-      const bio = document.getElementById('setting-bio').value;
+      const btn = document.getElementById('setting-submit-btn');
+      btn.innerText = "Kaydediliyor...";
+      btn.disabled = true;
 
-      const { error } = await supabaseClient.from('profiles').update({ full_name, username, avatar_url, bio }).eq('id', currentUser.id);
+      try {
+        const full_name = document.getElementById('setting-fullname').value;
+        const username = document.getElementById('setting-username').value;
+        const bio = document.getElementById('setting-bio').value;
+        const avatarFile = document.getElementById('setting-avatar-file').files[0];
 
-      if (error) alert("Güncelleme başarısız: " + error.message);
-      else {
+        let updateData = { full_name, username, bio };
+
+        if (avatarFile) {
+          btn.innerText = "Fotoğraf Yükleniyor...";
+          const uploadedUrl = await uploadAvatarFile(avatarFile);
+          updateData.avatar_url = uploadedUrl;
+        }
+
+        const { error } = await supabaseClient.from('profiles').update(updateData).eq('id', currentUser.id);
+
+        if (error) throw error;
+
         alert("Profil başarıyla güncellendi!");
         await fetchCurrentUserProfile();
         updateUI(true);
         loadDashboardData();
+      } catch (err) {
+        alert("Güncelleme başarısız: " + err.message);
+      } finally {
+        btn.innerText = "Değişiklikleri Kaydet";
+        btn.disabled = false;
       }
     }
 
