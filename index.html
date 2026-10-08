@@ -33,7 +33,6 @@
 
   <!-- Üst Menü / Navbar -->
   <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-    <!-- Estetik Gradient Renkli RateBook Yazısı -->
     <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center space-x-2">
       <span class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 tracking-wider hover:opacity-90 transition">
         RateBook
@@ -57,7 +56,7 @@
   <!-- Ana İçerik Konteyneri -->
   <main class="max-w-4xl mx-auto p-6">
     
-    <!-- KAYIT OL PANELİ -->
+    <!-- KAYIT OL PANELİ (PROFİL FOTOĞRAFI ZORUNLU KILINDI) -->
     <section id="register-section" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-10 hidden shadow-xl">
       <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
       <form onsubmit="handleRegister(event)" class="space-y-4">
@@ -68,6 +67,10 @@
         <div>
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
           <input type="text" id="reg-username" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Fotoğrafı URL (Zorunlu)</label>
+          <input type="url" id="reg-avatar" required placeholder="https://images.unsplash.com/..." class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">E-posta</label>
@@ -99,6 +102,27 @@
 
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
+      
+      <!-- BÜYÜK "BU MU? BU MU?" SIRALAMA BUTONU -->
+      <div class="bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-pink-900/40 p-6 rounded-3xl border border-indigo-500/30 text-center shadow-2xl relative overflow-hidden">
+        <h2 class="text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">⚔️ Hızlı Sıralama: Bu mu? Bu mu?</h2>
+        <p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
+        <button onclick="startVersusMode()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg transform hover:scale-105 transition">
+          Sıralama Yapmaya Başla 🔥
+        </button>
+      </div>
+
+      <!-- VERSUS (BU MU BU MU) OYUN ALANI -->
+      <div id="versus-container" class="hidden bg-white dark:bg-carddark p-6 rounded-3xl border border-gray-200 dark:border-borderdark shadow-2xl text-center">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xs font-bold text-pink-500 uppercase tracking-widest">Karşılaştırma Modu</span>
+          <button onclick="closeVersusMode()" class="text-xs text-gray-500 hover:text-white">Kapat ✖</button>
+        </div>
+        <div id="versus-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        </div>
+      </div>
+
+      <!-- SIRALAMA TABLOSU -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
         <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">🏆 Sıralama</h2>
         <div id="leaderboard-list" class="space-y-3">
@@ -106,6 +130,7 @@
         </div>
       </div>
 
+      <!-- ÜYELERİ DEĞERLENDİR -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
         <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">⭐ Üyeleri Değerlendir</h2>
         <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
@@ -113,19 +138,16 @@
       </div>
     </section>
 
-    <!-- PROFİLİM SEKMESİ -->
-    <section id="profile-section" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-lg mx-auto shadow-xl hidden">
-      <h2 class="text-2xl font-bold mb-6 text-indigo-600 dark:text-indigo-400 border-b border-gray-200 dark:border-borderdark pb-3">Profilim</h2>
-      <div id="profile-details" class="space-y-4">
-        <p class="text-gray-500 text-sm">Profil bilgileri yükleniyor...</p>
+    <!-- INSTAGRAM TARZI KAPSAMLI PROFİL -->
+    <section id="profile-section" class="bg-white dark:bg-carddark p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
+      <div id="profile-details">
+        <p class="text-gray-500 text-sm">Profil yükleniyor...</p>
       </div>
     </section>
 
     <!-- INSTAGRAM TARZI AYARLAR SEKMESİ -->
     <section id="settings-section" class="bg-white dark:bg-carddark rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl overflow-hidden hidden">
       <div class="grid grid-cols-1 md:grid-cols-4 min-h-[450px]">
-        
-        <!-- Sol Dikey Menü -->
         <div class="border-r border-gray-200 dark:border-borderdark bg-gray-50/50 dark:bg-blackbg/50 p-4 space-y-1">
           <h3 class="text-lg font-bold px-3 py-2 text-indigo-600 dark:text-indigo-400 mb-2">Ayarlar</h3>
           <button onclick="switchSettingsTab('profile')" id="tab-btn-profile" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300">
@@ -134,21 +156,15 @@
           <button onclick="switchSettingsTab('theme')" id="tab-btn-theme" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition">
             🎨 Görünüm & Tema
           </button>
-          <button onclick="switchSettingsTab('security')" id="tab-btn-security" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition">
-            🔒 Güvenlik
-          </button>
         </div>
 
-        <!-- Sağ İçerik Alanı -->
         <div class="md:col-span-3 p-6">
-          
-          <!-- TAB 1: PROFİL DÜZENLE -->
           <div id="settings-tab-profile" class="space-y-6">
             <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Profili Düzenle</h4>
             <form onsubmit="handleUpdateProfile(event)" class="space-y-4 max-w-md">
               <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Resmi URL</label>
-                <input type="text" id="setting-avatar" placeholder="https://example.com/avatar.jpg" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Resmi URL (Zorunlu)</label>
+                <input type="url" id="setting-avatar" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
@@ -158,43 +174,27 @@
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
                 <input type="text" id="setting-username" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
               </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Biyografi</label>
+                <textarea id="setting-bio" rows="2" placeholder="Kendinden bahset..." class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
+              </div>
               <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Değişiklikleri Kaydet</button>
             </form>
           </div>
 
-          <!-- TAB 2: GÖRÜNÜM & TEMA (TEMA TUŞU BURAYA ALINDI) -->
           <div id="settings-tab-theme" class="space-y-6 hidden">
             <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Görünüm ve Tema</h4>
-            <div class="space-y-4 max-w-md">
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sitenin genel temasını buradan özelleştirebilirsin.</p>
-              
-              <div class="grid grid-cols-2 gap-4 pt-2">
-                <button onclick="setTheme('dark')" id="theme-card-dark" class="p-4 rounded-2xl border-2 border-indigo-500 bg-blackbg text-white text-center space-y-2 cursor-pointer transition">
-                  <div class="text-2xl">🌙</div>
-                  <div class="font-bold text-sm">Koyu Tema</div>
-                  <div class="text-[10px] text-gray-400">Siyah & Koyu tonlar</div>
-                </button>
-                <button onclick="setTheme('light')" id="theme-card-light" class="p-4 rounded-2xl border border-gray-300 bg-white text-gray-900 text-center space-y-2 cursor-pointer transition">
-                  <div class="text-2xl">☀️</div>
-                  <div class="font-bold text-sm">Açık Tema</div>
-                  <div class="text-[10px] text-gray-500">Ferah & Beyaz tonlar</div>
-                </button>
-              </div>
+            <div class="grid grid-cols-2 gap-4 max-w-md pt-2">
+              <button onclick="setTheme('dark')" id="theme-card-dark" class="p-4 rounded-2xl border-2 border-indigo-500 bg-blackbg text-white text-center space-y-2 cursor-pointer">
+                <div class="text-2xl">🌙</div>
+                <div class="font-bold text-sm">Koyu Tema</div>
+              </button>
+              <button onclick="setTheme('light')" id="theme-card-light" class="p-4 rounded-2xl border border-gray-300 bg-white text-gray-900 text-center space-y-2 cursor-pointer">
+                <div class="text-2xl">☀️</div>
+                <div class="font-bold text-sm">Açık Tema</div>
+              </button>
             </div>
           </div>
-
-          <!-- TAB 3: GÜVENLİK -->
-          <div id="settings-tab-security" class="space-y-6 hidden">
-            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Hesap Güvenliği</h4>
-            <div class="space-y-4 max-w-md">
-              <p class="text-sm text-gray-500 dark:text-gray-400">E-posta ve şifre güncellemelerin bu alandan yapılır.</p>
-              <div class="p-4 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
-                <p class="text-xs text-gray-400">Kayıtlı E-posta</p>
-                <p id="settings-email-display" class="font-semibold text-sm mt-0.5">-</p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
@@ -204,45 +204,30 @@
   <script>
     let currentUser = null;
     let currentUserProfile = null;
+    let allProfiles = [];
 
-    // Tema Ayarları
     function initTheme() {
       const savedTheme = localStorage.getItem('theme') || 'dark';
       setTheme(savedTheme);
     }
 
     function setTheme(mode) {
-      const darkCard = document.getElementById('theme-card-dark');
-      const lightCard = document.getElementById('theme-card-light');
-
       if (mode === 'dark') {
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
-        if(darkCard) {
-          darkCard.classList.add('border-indigo-500', 'border-2');
-          lightCard.classList.remove('border-indigo-500', 'border-2');
-        }
       } else {
         document.documentElement.classList.remove('dark');
         localStorage.setItem('theme', 'light');
-        if(lightCard) {
-          lightCard.classList.add('border-indigo-500', 'border-2');
-          darkCard.classList.remove('border-indigo-500', 'border-2');
-        }
       }
     }
 
-    // Instagram Tarzı Ayarlar Tab Geçişi
     function switchSettingsTab(tabName) {
-      ['profile', 'theme', 'security'].forEach(t => {
+      ['profile', 'theme'].forEach(t => {
         document.getElementById(`settings-tab-${t}`).classList.add('hidden');
-        const btn = document.getElementById(`tab-btn-${t}`);
-        btn.className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition";
+        document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition";
       });
-
       document.getElementById(`settings-tab-${tabName}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
-      activeBtn.className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300";
+      document.getElementById(`tab-btn-${tabName}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300";
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -266,7 +251,7 @@
         document.getElementById('setting-fullname').value = data.full_name || '';
         document.getElementById('setting-username').value = data.username || '';
         document.getElementById('setting-avatar').value = data.avatar_url || '';
-        document.getElementById('settings-email-display').innerText = currentUser.email;
+        document.getElementById('setting-bio').value = data.bio || '';
       }
     }
 
@@ -279,10 +264,8 @@
       if (isLoggedIn) {
         document.getElementById('auth-buttons').classList.add('hidden');
         document.getElementById('user-menu').classList.remove('hidden');
-        
         const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
         document.getElementById('user-display-name').innerText = nameToShow;
-        
         showSection('dashboard-section');
       } else {
         document.getElementById('auth-buttons').classList.remove('hidden');
@@ -297,11 +280,17 @@
       const password = document.getElementById('reg-password').value;
       const full_name = document.getElementById('reg-fullname').value;
       const username = document.getElementById('reg-username').value;
+      const avatar_url = document.getElementById('reg-avatar').value;
+
+      if(!avatar_url) {
+        alert("Lütfen bir profil fotoğrafı URL'si girin!");
+        return;
+      }
 
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
-        options: { data: { full_name, username } }
+        options: { data: { full_name, username, avatar_url } }
       });
 
       if (error) alert("Hata: " + error.message);
@@ -339,16 +328,13 @@
       const full_name = document.getElementById('setting-fullname').value;
       const username = document.getElementById('setting-username').value;
       const avatar_url = document.getElementById('setting-avatar').value;
+      const bio = document.getElementById('setting-bio').value;
 
-      const { error } = await supabaseClient.from('profiles').update({
-        full_name,
-        username,
-        avatar_url
-      }).eq('id', currentUser.id);
+      const { error } = await supabaseClient.from('profiles').update({ full_name, username, avatar_url, bio }).eq('id', currentUser.id);
 
       if (error) alert("Güncelleme başarısız: " + error.message);
       else {
-        alert("Profil ayarları başarıyla güncellendi!");
+        alert("Profil başarıyla güncellendi!");
         await fetchCurrentUserProfile();
         updateUI(true);
         loadDashboardData();
@@ -359,9 +345,68 @@
       const { data: profiles } = await supabaseClient.from('profiles').select('*');
       const { data: evalData } = await supabaseClient.from('evaluations').select('*');
 
+      allProfiles = profiles || [];
       renderLeaderboard(profiles, evalData);
       renderUserRatingCards(profiles, evalData);
       renderProfilePage(evalData);
+    }
+
+    /* BU MU BU MU (VERSUS MODU) */
+    function startVersusMode() {
+      const others = allProfiles.filter(p => p.id !== currentUser.id);
+      if (others.length < 2) {
+        alert("Karşılaştırma yapmak için en az 2 farklı üye gerekiyor.");
+        return;
+      }
+
+      // Rastgele 2 kullanıcı seç
+      const shuffled = [...others].sort(() => 0.5 - Math.random());
+      const userA = shuffled[0];
+      const userB = shuffled[1];
+
+      const container = document.getElementById('versus-container');
+      const cards = document.getElementById('versus-cards');
+
+      cards.innerHTML = `
+        <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border-2 border-transparent hover:border-pink-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+          <img src="${userA.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-purple-500">
+          <h4 class="font-bold text-lg group-hover:text-pink-500">${userA.full_name}</h4>
+          <p class="text-xs text-gray-500">@${userA.username}</p>
+          <button class="mt-4 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-4 py-2 rounded-xl">Bunu Seç ✨</button>
+        </div>
+
+        <div class="hidden md:block font-extrabold text-2xl text-pink-500">VS</div>
+
+        <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border-2 border-transparent hover:border-purple-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+          <img src="${userB.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <h4 class="font-bold text-lg group-hover:text-purple-500">${userB.full_name}</h4>
+          <p class="text-xs text-gray-500">@${userB.username}</p>
+          <button class="mt-4 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded-xl">Bunu Seç ✨</button>
+        </div>
+      `;
+
+      container.classList.remove('hidden');
+    }
+
+    async function chooseVersusWinner(winnerId, loserId) {
+      await supabaseClient.from('evaluations').upsert({
+        evaluator_id: currentUser.id,
+        target_id: winnerId,
+        score: 10
+      }, { onConflict: 'evaluator_id, target_id' });
+
+      await supabaseClient.from('evaluations').upsert({
+        evaluator_id: currentUser.id,
+        target_id: loserId,
+        score: 5
+      }, { onConflict: 'evaluator_id, target_id' });
+
+      loadDashboardData();
+      startVersusMode();
+    }
+
+    function closeVersusMode() {
+      document.getElementById('versus-container').classList.add('hidden');
     }
 
     function renderLeaderboard(profiles, evalData) {
@@ -385,7 +430,7 @@
         <div class="flex items-center justify-between bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark">
           <div class="flex items-center space-x-3">
             <span class="font-bold w-6 text-indigo-600 dark:text-indigo-400">#${index + 1}</span>
-            <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
+            <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
             <div>
               <p class="font-medium text-sm">${u.full_name}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">@${u.username}</p>
@@ -435,6 +480,7 @@
       }).join('');
     }
 
+    /* INSTAGRAM TARZI PROFİL DÜZENİ */
     function renderProfilePage(evalData) {
       const profileContainer = document.getElementById('profile-details');
       if (!currentUserProfile) return;
@@ -442,26 +488,44 @@
       const myEvals = (evalData || []).filter(e => e.target_id === currentUser.id);
       const avgScore = myEvals.length > 0 
         ? (myEvals.reduce((sum, e) => sum + Number(e.score), 0) / myEvals.length).toFixed(1)
-        : 'Puan Henüz Yok';
+        : '0.0';
 
       profileContainer.innerHTML = `
-        <div class="flex items-center space-x-4 mb-6">
-          <img src="${currentUserProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-16 h-16 rounded-full bg-gray-200 dark:bg-borderdark border-2 border-indigo-500 object-cover">
-          <div>
-            <h3 class="text-xl font-bold">${currentUserProfile.full_name}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">@${currentUserProfile.username}</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500">${currentUser.email}</p>
+        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
+          <div class="relative">
+            <img src="${currentUserProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
+          </div>
+          <div class="flex-1 text-center sm:text-left space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <h3 class="text-2xl font-bold">@${currentUserProfile.username}</h3>
+              <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
+                Profili Düzenle
+              </button>
+            </div>
+
+            <div class="flex justify-center sm:justify-start space-x-6 text-sm">
+              <div><span class="font-bold text-indigo-500">${myEvals.length}</span> <span class="text-gray-500">Oy Alındı</span></div>
+              <div><span class="font-bold text-indigo-500">${avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+            </div>
+
+            <div>
+              <p class="font-bold text-sm">${currentUserProfile.full_name}</p>
+              <p class="text-xs text-gray-400 mt-1">${currentUserProfile.bio || 'Henüz biyografi eklenmedi.'}</p>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark text-center">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ortalama Puanın</p>
-            <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">${avgScore}</p>
-          </div>
-          <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark text-center">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Aldığın Toplam Oy</p>
-            <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">${myEvals.length}</p>
+        <div class="pt-6">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">İstatistik Özeti</h4>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark text-center">
+              <p class="text-xs text-gray-400">Genel Skor</p>
+              <p class="text-3xl font-black text-indigo-500 mt-1">${avgScore}</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark text-center">
+              <p class="text-xs text-gray-400">Değerlendirme Sayısı</p>
+              <p class="text-3xl font-black text-pink-500 mt-1">${myEvals.length}</p>
+            </div>
           </div>
         </div>
       `;
