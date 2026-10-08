@@ -30,41 +30,45 @@
   </script>
 
   <!-- Üst Menü / Navbar -->
-  <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center sticky top-0 z-50 gap-3">
-    <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center space-x-2">
+  <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50 gap-4">
+    
+    <!-- Sol Taraf: Logo -->
+    <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center shrink-0">
       <span class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 tracking-wider hover:opacity-90 transition">
         RateBook
       </span>
     </div>
 
-    <div id="auth-buttons" class="space-x-2">
+    <!-- Giriş Yapılmamışsa Butonlar -->
+    <div id="auth-buttons" class="space-x-2 shrink-0">
       <button onclick="showSection('login-section')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium">Giriş Yap</button>
       <button onclick="showSection('register-section')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
     </div>
 
-    <!-- Giriş Yapmış Kullanıcı Üst Paneli -->
-    <div id="user-menu" class="hidden flex items-center space-x-2 sm:space-x-3 flex-1 justify-end">
-      
-      <!-- ÜST PANEL ARAMA ÇUBUĞU -->
-      <div class="relative max-w-xs w-full hidden sm:block">
+    <!-- Orta Taraf: Genişletilmiş ve Ortalanmış Arama Çubuğu (Sadece Giriş Yapınca Görünür) -->
+    <div id="nav-search-container" class="hidden flex-1 max-w-xl mx-4 hidden sm:block">
+      <div class="relative w-full">
         <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Kullanıcı ara..." 
-          class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500 transition">
-        <div id="search-results" class="hidden absolute top-10 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+          class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
+        <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
       </div>
+    </div>
 
-      <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-xs font-medium">Ana Sayfa</button>
-      <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-1.5 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
-      <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300">⚙️ Ayarlar</button>
+    <!-- Sağ Taraf: Sekmeler ve Profil / Ayarlar (Giriş Yapılınca Görünür) -->
+    <div id="user-menu" class="hidden flex items-center space-x-2 sm:space-x-3 shrink-0">
+      <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-xs font-medium px-2 py-1.5">Ana Sayfa</button>
+      <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
+      <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300">⚙️ Ayarlar</button>
       <span id="user-display-name" class="font-semibold text-xs hidden lg:inline text-gray-400"></span>
-      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-medium">Çıkış</button>
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-xl text-xs font-medium">Çıkış</button>
     </div>
 
     <!-- Mobil İçin Arama Çubuğu (Küçük Ekranlar) -->
     <div id="mobile-search-container" class="hidden w-full sm:hidden relative mt-1">
       <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="🔍 Kullanıcı ara..." 
-        class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
-      <div id="mobile-search-results" class="hidden absolute top-9 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+        class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-500">
+      <div id="mobile-search-results" class="hidden absolute top-10 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
       </div>
     </div>
   </nav>
@@ -280,6 +284,7 @@
     function updateUI(isLoggedIn) {
       if (isLoggedIn) {
         document.getElementById('auth-buttons').classList.add('hidden');
+        document.getElementById('nav-search-container').classList.remove('hidden');
         document.getElementById('user-menu').classList.remove('hidden');
         document.getElementById('mobile-search-container').classList.remove('hidden');
         const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
@@ -287,6 +292,7 @@
         showSection('dashboard-section');
       } else {
         document.getElementById('auth-buttons').classList.remove('hidden');
+        document.getElementById('nav-search-container').classList.add('hidden');
         document.getElementById('user-menu').classList.add('hidden');
         document.getElementById('mobile-search-container').classList.add('hidden');
         showSection('login-section');
@@ -394,11 +400,11 @@
         resultsEl.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center">Kullanıcı bulunamadı.</div>';
       } else {
         resultsEl.innerHTML = filtered.map(p => `
-          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-2.5 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
-            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
+          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
+            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover">
             <div>
               <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${p.full_name}</p>
-              <p class="text-[10px] text-gray-400">@${p.username}</p>
+              <p class="text-[11px] text-gray-400">@${p.username}</p>
             </div>
           </div>
         `).join('');
