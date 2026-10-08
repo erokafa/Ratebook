@@ -45,7 +45,7 @@
       <button onclick="showSection('register-section')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
     </div>
 
-    <!-- Orta Taraf: Ortalanmış Arama Çubuğu (Varsayılan olarak gizli - Sadece Giriş Yapınca Görünür) -->
+    <!-- Orta Taraf: Ortalanmış Arama Çubuğu -->
     <div id="nav-search-container" class="hidden flex-1 max-w-xl mx-4">
       <div class="relative w-full">
         <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Kullanıcı ara..." 
@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <!-- Sağ Taraf: Sekmeler ve Profil / Ayarlar (Giriş Yapılınca Görünür) -->
+    <!-- Sağ Taraf: Sekmeler ve Profil / Ayarlar -->
     <div id="user-menu" class="hidden flex items-center space-x-2 sm:space-x-3 shrink-0">
       <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-xs font-medium px-2 py-1.5">Ana Sayfa</button>
       <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
@@ -64,7 +64,7 @@
       <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-xl text-xs font-medium">Çıkış</button>
     </div>
 
-    <!-- Mobil İçin Arama Çubuğu (Varsayılan olarak gizli - Sadece Giriş Yapınca Görünür) -->
+    <!-- Mobil İçin Arama Çubuğu -->
     <div id="mobile-search-container" class="hidden w-full sm:hidden relative mt-1">
       <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="🔍 Kullanıcı ara..." 
         class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-500">
@@ -123,19 +123,19 @@
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
       
-      <!-- BÜYÜK "BU MU? BU MU?" SIRALAMA BUTONU -->
-      <div class="bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-pink-900/40 p-6 rounded-3xl border border-indigo-500/30 text-center shadow-2xl relative overflow-hidden">
-        <h2 class="text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">⚔️ Hızlı Sıralama: Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
-        <button onclick="startVersusMode()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg transform hover:scale-105 transition">
-          Sıralama Yapmaya Başla 🔥
+      <!-- SADELEŞTİRİLMİŞ BU MU? BU MU? KARTI -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
+        <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Bu mu? Bu mu?</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
+        <button onclick="startVersusMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
+          Sıralama Yapmaya Başla
         </button>
       </div>
 
       <!-- VERSUS (BU MU BU MU) OYUN ALANI -->
-      <div id="versus-container" class="hidden bg-white dark:bg-carddark p-6 rounded-3xl border border-gray-200 dark:border-borderdark shadow-2xl text-center">
+      <div id="versus-container" class="hidden bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl text-center">
         <div class="flex justify-between items-center mb-4">
-          <span class="text-xs font-bold text-pink-500 uppercase tracking-widest">Karşılaştırma Modu</span>
+          <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest">Bu mu? Bu mu?</span>
           <button onclick="closeVersusMode()" class="text-xs text-gray-500 hover:text-white">Kapat ✖</button>
         </div>
         <div id="versus-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -298,7 +298,6 @@
       }
     }
 
-    // SUPABASE STORAGE DOSYA YÜKLEME YARDIMCISI
     async function uploadAvatarFile(file) {
       if (!file) return null;
       const fileExt = file.name.split('.').pop();
@@ -423,7 +422,6 @@
       renderUserRatingCards(allProfiles, allEvaluations);
     }
 
-    /* ARAMA İŞLEVLERİ */
     function handleSearch() {
       const query = document.getElementById('search-input').value.toLowerCase().trim();
       renderSearchResults(query, 'search-results');
@@ -464,7 +462,6 @@
       resultsEl.classList.remove('hidden');
     }
 
-    /* KULLANICI PROFİLİNİ AÇMA */
     function openMyProfile() {
       viewUserProfile(currentUser.id);
     }
@@ -567,7 +564,6 @@
       }
     }
 
-    /* BU MU BU MU (VERSUS MODU) */
     function startVersusMode() {
       const others = allProfiles.filter(p => p.id !== currentUser.id);
       if (others.length < 2) {
@@ -583,20 +579,20 @@
       const cards = document.getElementById('versus-cards');
 
       cards.innerHTML = `
-        <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border-2 border-transparent hover:border-pink-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
-          <img src="${userA.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-purple-500">
-          <h4 class="font-bold text-lg group-hover:text-pink-500">${userA.full_name}</h4>
+        <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+          <img src="${userA.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userA.full_name}</h4>
           <p class="text-xs text-gray-500">@${userA.username}</p>
-          <button class="mt-4 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-4 py-2 rounded-xl">Bunu Seç ✨</button>
+          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
         </div>
 
-        <div class="hidden md:block font-extrabold text-2xl text-pink-500">VS</div>
+        <div class="hidden md:block font-extrabold text-2xl text-indigo-500">VS</div>
 
-        <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border-2 border-transparent hover:border-purple-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+        <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
           <img src="${userB.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
-          <h4 class="font-bold text-lg group-hover:text-purple-500">${userB.full_name}</h4>
+          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userB.full_name}</h4>
           <p class="text-xs text-gray-500">@${userB.username}</p>
-          <button class="mt-4 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded-xl">Bunu Seç ✨</button>
+          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
         </div>
       `;
 
