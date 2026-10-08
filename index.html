@@ -23,11 +23,9 @@
 </head>
 <body class="bg-gray-100 dark:bg-blackbg text-gray-900 dark:text-gray-100 min-h-screen font-sans transition-colors duration-200">
 
-  <!-- Supabase Bağlantısı -->
   <script>
     const SUPABASE_URL = "https://ttjnidnzafyhuoxhaojk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_GPeu1-_Nj02ab_sGfLdA3w_x23J_bqF";
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
@@ -46,7 +44,7 @@
 
     <div id="user-menu" class="hidden flex items-center space-x-3">
       <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-sm font-medium">Ana Sayfa</button>
-      <button onclick="showSection('profile-section')" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-1.5 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
+      <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-1.5 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300">Profilim</button>
       <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300">⚙️ Ayarlar</button>
       <span id="user-display-name" class="font-semibold text-sm hidden sm:inline"></span>
       <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-medium">Çıkış</button>
@@ -56,7 +54,7 @@
   <!-- Ana İçerik Konteyneri -->
   <main class="max-w-4xl mx-auto p-6">
     
-    <!-- KAYIT OL PANELİ (PROFİL FOTOĞRAFI ZORUNLU KILINDI) -->
+    <!-- KAYIT OL PANELİ -->
     <section id="register-section" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-10 hidden shadow-xl">
       <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
       <form onsubmit="handleRegister(event)" class="space-y-4">
@@ -103,6 +101,14 @@
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
       
+      <!-- ARAMA ÇUBUĞU -->
+      <div class="relative">
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Kullanıcı ara (Ad soyad veya kullanıcı adı)..." 
+          class="w-full bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-indigo-500 shadow-md">
+        <div id="search-results" class="hidden absolute top-14 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-40 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+        </div>
+      </div>
+
       <!-- BÜYÜK "BU MU? BU MU?" SIRALAMA BUTONU -->
       <div class="bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-pink-900/40 p-6 rounded-3xl border border-indigo-500/30 text-center shadow-2xl relative overflow-hidden">
         <h2 class="text-2xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">⚔️ Hızlı Sıralama: Bu mu? Bu mu?</h2>
@@ -138,14 +144,14 @@
       </div>
     </section>
 
-    <!-- INSTAGRAM TARZI KAPSAMLI PROFİL -->
+    <!-- KAPSAMLI PROFİL (KENDİ + DİĞER KULLANICILARIN PROFİLİ) -->
     <section id="profile-section" class="bg-white dark:bg-carddark p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
       <div id="profile-details">
         <p class="text-gray-500 text-sm">Profil yükleniyor...</p>
       </div>
     </section>
 
-    <!-- INSTAGRAM TARZI AYARLAR SEKMESİ -->
+    <!-- AYARLAR SEKMESİ -->
     <section id="settings-section" class="bg-white dark:bg-carddark rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl overflow-hidden hidden">
       <div class="grid grid-cols-1 md:grid-cols-4 min-h-[450px]">
         <div class="border-r border-gray-200 dark:border-borderdark bg-gray-50/50 dark:bg-blackbg/50 p-4 space-y-1">
@@ -205,6 +211,7 @@
     let currentUser = null;
     let currentUserProfile = null;
     let allProfiles = [];
+    let allEvaluations = [];
 
     function initTheme() {
       const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -282,11 +289,6 @@
       const username = document.getElementById('reg-username').value;
       const avatar_url = document.getElementById('reg-avatar').value;
 
-      if(!avatar_url) {
-        alert("Lütfen bir profil fotoğrafı URL'si girin!");
-        return;
-      }
-
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
@@ -346,9 +348,145 @@
       const { data: evalData } = await supabaseClient.from('evaluations').select('*');
 
       allProfiles = profiles || [];
-      renderLeaderboard(profiles, evalData);
-      renderUserRatingCards(profiles, evalData);
-      renderProfilePage(evalData);
+      allEvaluations = evalData || [];
+
+      renderLeaderboard(allProfiles, allEvaluations);
+      renderUserRatingCards(allProfiles, allEvaluations);
+    }
+
+    /* ARAMA İŞLEVİ */
+    function handleSearch() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      const resultsEl = document.getElementById('search-results');
+
+      if (!query) {
+        resultsEl.classList.add('hidden');
+        return;
+      }
+
+      const filtered = allProfiles.filter(p => 
+        (p.full_name && p.full_name.toLowerCase().includes(query)) || 
+        (p.username && p.username.toLowerCase().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        resultsEl.innerHTML = '<div class="p-4 text-xs text-gray-500 text-center">Kullanıcı bulunamadı.</div>';
+      } else {
+        resultsEl.innerHTML = filtered.map(p => `
+          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
+            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover">
+            <div>
+              <p class="font-semibold text-sm">${p.full_name}</p>
+              <p class="text-xs text-gray-400">@${p.username}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      resultsEl.classList.remove('hidden');
+    }
+
+    /* KULLANICI PROFİLİNİ AÇMA (KENDİ VEYA BAŞKASI) */
+    function openMyProfile() {
+      viewUserProfile(currentUser.id);
+    }
+
+    async function viewUserProfile(userId) {
+      document.getElementById('search-results').classList.add('hidden');
+      document.getElementById('search-input').value = '';
+
+      const targetProfile = allProfiles.find(p => p.id === userId);
+      if (!targetProfile) return;
+
+      showSection('profile-section');
+      const profileContainer = document.getElementById('profile-details');
+
+      const userEvals = allEvaluations.filter(e => e.target_id === userId);
+      const avgScore = userEvals.length > 0 
+        ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
+        : '0.0';
+
+      const isMe = userId === currentUser.id;
+
+      // Yorumları Çek
+      const { data: comments } = await supabaseClient
+        .from('comments')
+        .select('*, author:profiles!author_id(*)')
+        .eq('target_id', userId)
+        .order('created_at', { ascending: false });
+
+      profileContainer.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
+          <img src="${targetProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
+          <div class="flex-1 text-center sm:text-left space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <h3 class="text-2xl font-bold">@${targetProfile.username}</h3>
+              ${isMe ? `
+                <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
+                  Profili Düzenle
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="flex justify-center sm:justify-start space-x-6 text-sm">
+              <div><span class="font-bold text-indigo-500">${userEvals.length}</span> <span class="text-gray-500">Oy</span></div>
+              <div><span class="font-bold text-indigo-500">${avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+            </div>
+
+            <div>
+              <p class="font-bold text-sm">${targetProfile.full_name}</p>
+              <p class="text-xs text-gray-400 mt-1">${targetProfile.bio || 'Henüz biyografi eklenmedi.'}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- YORUM ALANI -->
+        <div class="pt-6 space-y-4">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">💬 Yorumlar (${comments ? comments.length : 0})</h4>
+          
+          <form onsubmit="handleAddComment(event, '${userId}')" class="flex space-x-2">
+            <input type="text" id="comment-input" required placeholder="Bu kişi hakkında bir yorum yaz..." 
+              class="flex-1 bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Gönder</button>
+          </form>
+
+          <div class="space-y-3 pt-2">
+            ${(!comments || comments.length === 0) ? '<p class="text-xs text-gray-500">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>' : ''}
+            ${(comments || []).map(c => `
+              <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
+                <img src="${c.author?.avatar_url || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${c.author?.full_name || 'Bilinmeyen'}</span>
+                    <span class="text-[10px] text-gray-500">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                  </div>
+                  <p class="text-xs text-gray-300 mt-1">${c.comment_text}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleAddComment(e, targetId) {
+      e.preventDefault();
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      const { error } = await supabaseClient.from('comments').insert({
+        target_id: targetId,
+        author_id: currentUser.id,
+        comment_text: text
+      });
+
+      if (error) alert("Yorum gönderilemedi: " + error.message);
+      else {
+        input.value = '';
+        viewUserProfile(targetId);
+      }
     }
 
     /* BU MU BU MU (VERSUS MODU) */
@@ -359,7 +497,6 @@
         return;
       }
 
-      // Rastgele 2 kullanıcı seç
       const shuffled = [...others].sort(() => 0.5 - Math.random());
       const userA = shuffled[0];
       const userB = shuffled[1];
@@ -427,12 +564,12 @@
       userScores.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
 
       listEl.innerHTML = userScores.map((u, index) => `
-        <div class="flex items-center justify-between bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark">
+        <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
           <div class="flex items-center space-x-3">
             <span class="font-bold w-6 text-indigo-600 dark:text-indigo-400">#${index + 1}</span>
             <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
             <div>
-              <p class="font-medium text-sm">${u.full_name}</p>
+              <p class="font-medium text-sm hover:underline">${u.full_name}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">@${u.username}</p>
             </div>
           </div>
@@ -461,10 +598,10 @@
 
         return `
           <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
-            <div class="flex items-center space-x-3 mb-3">
+            <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
               <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
               <div>
-                <p class="font-medium text-sm">${u.full_name}</p>
+                <p class="font-medium text-sm group-hover:underline">${u.full_name}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">@${u.username}</p>
               </div>
             </div>
@@ -478,57 +615,6 @@
           </div>
         `;
       }).join('');
-    }
-
-    /* INSTAGRAM TARZI PROFİL DÜZENİ */
-    function renderProfilePage(evalData) {
-      const profileContainer = document.getElementById('profile-details');
-      if (!currentUserProfile) return;
-
-      const myEvals = (evalData || []).filter(e => e.target_id === currentUser.id);
-      const avgScore = myEvals.length > 0 
-        ? (myEvals.reduce((sum, e) => sum + Number(e.score), 0) / myEvals.length).toFixed(1)
-        : '0.0';
-
-      profileContainer.innerHTML = `
-        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
-          <div class="relative">
-            <img src="${currentUserProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
-          </div>
-          <div class="flex-1 text-center sm:text-left space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <h3 class="text-2xl font-bold">@${currentUserProfile.username}</h3>
-              <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
-                Profili Düzenle
-              </button>
-            </div>
-
-            <div class="flex justify-center sm:justify-start space-x-6 text-sm">
-              <div><span class="font-bold text-indigo-500">${myEvals.length}</span> <span class="text-gray-500">Oy Alındı</span></div>
-              <div><span class="font-bold text-indigo-500">${avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
-            </div>
-
-            <div>
-              <p class="font-bold text-sm">${currentUserProfile.full_name}</p>
-              <p class="text-xs text-gray-400 mt-1">${currentUserProfile.bio || 'Henüz biyografi eklenmedi.'}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-6">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">İstatistik Özeti</h4>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark text-center">
-              <p class="text-xs text-gray-400">Genel Skor</p>
-              <p class="text-3xl font-black text-indigo-500 mt-1">${avgScore}</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark text-center">
-              <p class="text-xs text-gray-400">Değerlendirme Sayısı</p>
-              <p class="text-3xl font-black text-pink-500 mt-1">${myEvals.length}</p>
-            </div>
-          </div>
-        </div>
-      `;
     }
 
     async function submitRating(targetId) {
