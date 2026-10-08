@@ -3,383 +3,743 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sosyal Oylama & Karşılaştırma</title>
+  <title>RateBook</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            blackbg: '#0F172A',
-            borderdark: '#334155'
+            blackbg: '#050505',
+            carddark: '#121212',
+            borderdark: '#262626'
           }
         }
       }
     }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-gray-100 dark:bg-blackbg text-gray-900 dark:text-gray-100 min-h-screen font-sans transition-colors duration-200">
 
-  <!-- ÜST MENÜ (NAVBAR) -->
-  <header class="border-b border-borderdark bg-slate-800/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-pink-500 bg-clip-text text-transparent cursor-pointer" onclick="showSection('vs-section')">
-        VoteApp
-      </h1>
-      <div class="flex items-center gap-4 text-sm">
-        <button onclick="showSection('vs-section')" class="hover:text-indigo-400 font-medium">Bu mu? Bu mu?</button>
-        <button onclick="showSection('rankings-section')" class="hover:text-indigo-400 font-medium">Sıralama</button>
-        <div id="nav-actions" class="flex gap-2">
-          <!-- Giriş / Çıkış Butonları Dinamik Gelecek -->
+  <script>
+    const SUPABASE_URL = "https://ttjnidnzafyhuoxhaojk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_GPeu1-_Nj02ab_sGfLdA3w_x23J_bqF";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+
+  <!-- Üst Menü / Navbar -->
+  <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50 gap-4">
+    
+    <!-- Sol Taraf: Logo -->
+    <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center shrink-0">
+      <span class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 tracking-wider hover:opacity-90 transition">
+        RateBook
+      </span>
+    </div>
+
+    <!-- Giriş Yapılmamışsa Butonlar -->
+    <div id="auth-buttons" class="space-x-2 shrink-0">
+      <button onclick="showSection('login-section')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium">Giriş Yap</button>
+      <button onclick="showSection('register-section')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-sm font-medium">Kayıt Ol</button>
+    </div>
+
+    <!-- Ortalanmış Arama Çubuğu -->
+    <div id="nav-search-container" class="hidden flex-1 max-w-xl mx-4">
+      <div class="relative w-full flex items-center">
+        <svg class="w-4 h-4 absolute left-3.5 text-gray-400 pointer-events-none stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..." 
+          class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
+        <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
       </div>
     </div>
-  </header>
 
-  <!-- ANA İÇERİK -->
-  <main class="flex-1 max-w-4xl w-full mx-auto p-4">
+    <!-- Sağ Taraf: Sekmeler ve Profil / Ayarlar -->
+    <div id="user-menu" class="hidden flex items-center space-x-2 sm:space-x-3 shrink-0">
+      <button onclick="showSection('dashboard-section')" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 text-xs font-medium px-2 py-1.5 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Ana Sayfa
+      </button>
+      <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        Profilim
+      </button>
+      <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Ayarlar
+      </button>
+      <span id="user-display-name" class="font-semibold text-xs hidden lg:inline text-gray-400"></span>
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-xl text-xs font-medium">Çıkış</button>
+    </div>
 
-    <!-- 1. SEKSİYON: BU MU? BU MU? (KARŞILAŞTIRMA OYUNU) -->
-    <section id="vs-section" class="space-y-6 text-center py-6">
-      <div>
-        <h2 class="text-2xl font-bold">Hangisi Daha Karizmatik / Popüler?</h2>
-        <p class="text-xs text-slate-400 mt-1">Seçim yapmak için karta tıklayın</p>
+    <!-- Mobil Arama Çubuğu -->
+    <div id="mobile-search-container" class="hidden w-full sm:hidden relative mt-1">
+      <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="Kullanıcı ara..." 
+        class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-500">
+      <div id="mobile-search-results" class="hidden absolute top-10 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+      </div>
+    </div>
+  </nav>
+
+  <!-- Ana İçerik Konteyneri -->
+  <main class="max-w-4xl mx-auto p-6">
+    
+    <!-- KAYIT OL PANELİ -->
+    <section id="register-section" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-10 hidden shadow-xl">
+      <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
+      <form onsubmit="handleRegister(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
+          <input type="text" id="reg-fullname" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
+          <input type="text" id="reg-username" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Profil Fotoğrafı Seç (Galeri / Dosya)</label>
+          <input type="file" id="reg-avatar-file" accept="image/*" required class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-300 dark:border-borderdark rounded-xl p-1 bg-gray-50 dark:bg-blackbg">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">E-posta</label>
+          <input type="email" id="reg-email" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Şifre</label>
+          <input type="password" id="reg-password" required minlength="6" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <button type="submit" id="reg-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Hesap Oluştur</button>
+      </form>
+    </section>
+
+    <!-- GİRİŞ YAP PANELİ -->
+    <section id="login-section" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-10 shadow-xl">
+      <h2 class="text-2xl font-bold mb-4 text-center">Giriş Yap</h2>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">E-posta</label>
+          <input type="email" id="login-email" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Şifre</label>
+          <input type="password" id="login-password" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Giriş</button>
+      </form>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard-section" class="space-y-8 hidden">
+      
+      <!-- BU MU? BU MU? KARTI -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
+        <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Bu mu? Bu mu?</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
+        <button onclick="startVersusMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
+          Sıralama Yapmaya Başla
+        </button>
       </div>
 
-      <div id="vs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-2xl mx-auto">
-        <p class="text-slate-400 text-sm col-span-full">Adaylar yükleniyor...</p>
+      <!-- VERSUS (BU MU BU MU) OYUN ALANI -->
+      <div id="versus-container" class="hidden bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl text-center">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest">Bu mu? Bu mu?</span>
+          <button onclick="closeVersusMode()" class="text-xs text-gray-500 hover:text-white flex items-center gap-1">
+            Kapat 
+            <svg class="w-3.5 h-3.5 stroke-current inline" fill="none" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div id="versus-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        </div>
+      </div>
+
+      <!-- SIRALAMA TABLOSU -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/>
+          </svg>
+          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Sıralama</h2>
+        </div>
+        <div id="leaderboard-list" class="space-y-3">
+          <p class="text-gray-500 text-sm">Yükleniyor...</p>
+        </div>
+      </div>
+
+      <!-- ÜYELERİ DEĞERLENDİR -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Üyeleri Değerlendir</h2>
+        </div>
+        <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
+        </div>
       </div>
     </section>
 
-    <!-- 2. SEKSİYON: SIRALAMA LİSTESİ -->
-    <section id="rankings-section" class="space-y-6 hidden">
-      <div class="flex justify-between items-center border-b border-borderdark pb-3">
-        <h2 class="text-2xl font-bold">Genel Sıralama</h2>
-        <span class="text-xs text-slate-400">Elo Puanına Göre Listelenir</span>
-      </div>
-
-      <div id="rankings-list" class="space-y-3">
-        <p class="text-slate-400 text-sm">Sıralama yükleniyor...</p>
+    <!-- KAPSAMLI PROFİL -->
+    <section id="profile-section" class="bg-white dark:bg-carddark p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
+      <div id="profile-details">
+        <p class="text-gray-500 text-sm">Profil yükleniyor...</p>
       </div>
     </section>
 
-    <!-- 3. SEKSİYON: GİRİŞ YAP -->
-    <section id="login-section" class="max-w-md mx-auto hidden pt-10">
-      <div class="bg-slate-800 border border-borderdark rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 class="text-xl font-bold text-center">Giriş Yap</h2>
-        <form onsubmit="handleLogin(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">E-posta</label>
-            <input type="email" id="login-email" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Şifre</label>
-            <input type="password" id="login-password" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <button type="submit" id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Giriş Yap</button>
-        </form>
-      </div>
-    </section>
+    <!-- AYARLAR SEKMESİ -->
+    <section id="settings-section" class="bg-white dark:bg-carddark rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl overflow-hidden hidden">
+      <div class="grid grid-cols-1 md:grid-cols-4 min-h-[450px]">
+        <div class="border-r border-gray-200 dark:border-borderdark bg-gray-50/50 dark:bg-blackbg/50 p-4 space-y-1">
+          <h3 class="text-lg font-bold px-3 py-2 text-indigo-600 dark:text-indigo-400 mb-2">Ayarlar</h3>
+          <button onclick="switchSettingsTab('profile')" id="tab-btn-profile" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Profili Düzenle
+          </button>
+          <button onclick="switchSettingsTab('theme')" id="tab-btn-theme" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.364-6.364l-1.414 1.414M6.343 17.657l-1.414 1.414m12.728 0l-1.414-1.414M6.343 6.343L4.929 4.929"/></svg>
+            Görünüm & Tema
+          </button>
+        </div>
 
-    <!-- 4. SEKSİYON: KAYIT OL & HESAPSIZ PROFİL SEÇ -->
-    <section id="register-section" class="max-w-md mx-auto hidden pt-6">
-      <div class="bg-slate-800 border border-borderdark rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 class="text-xl font-bold text-center">Kayıt Ol & Profilinizi Seçin</h2>
-        <p class="text-xs text-slate-400 text-center">Eğer zaten oylamada isminiz varsa listeden kendinizi seçip hesabınızı bağlayabilirsiniz.</p>
-        
-        <form onsubmit="handleRegister(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Listeden Kendinizi Seçin</label>
-            <select id="reg-profile-select" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-100">
-              <option value="">Profil yükleniyor...</option>
-            </select>
+        <div class="md:col-span-3 p-6">
+          <div id="settings-tab-profile" class="space-y-6">
+            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Profili Düzenle</h4>
+            <form onsubmit="handleUpdateProfile(event)" class="space-y-4 max-w-md">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Yeni Profil Fotoğrafı Yükle (Galeri/Dosya)</label>
+                <input type="file" id="setting-avatar-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-300 dark:border-borderdark rounded-xl p-1 bg-gray-50 dark:bg-blackbg">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ad Soyad</label>
+                <input type="text" id="setting-fullname" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
+                <input type="text" id="setting-username" required class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Biyografi</label>
+                <textarea id="setting-bio" rows="2" placeholder="Kendinden bahset..." class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
+              </div>
+              <button type="submit" id="setting-submit-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Değişiklikleri Kaydet</button>
+            </form>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">E-posta Adresiniz</label>
-            <input type="email" id="reg-email" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Şifre Oluşturun</label>
-            <input type="password" id="reg-password" required minlength="6" class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <button type="submit" id="reg-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-medium">Hesabı Eşleştir ve Kaydol</button>
-        </form>
-      </div>
-    </section>
 
-    <!-- 5. SEKSİYON: YENİ HESAPSIZ KİŞİ (ADAY) EKLEME PANELİ (HERKES İÇİN / YÖNETİCİ) -->
-    <section id="add-candidate-section" class="max-w-md mx-auto hidden pt-6">
-      <div class="bg-slate-800 border border-borderdark rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 class="text-xl font-bold text-center">Oylamaya Yeni Kişi Ekle</h2>
-        <p class="text-xs text-slate-400 text-center">Hesabı olmayan birini oylamaya sunmak için buradan ekleyebilirsiniz.</p>
-        
-        <form onsubmit="handleAddCandidate(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Ad Soyad</label>
-            <input type="text" id="cand-fullname" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="settings-tab-theme" class="space-y-6 hidden">
+            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Görünüm ve Tema</h4>
+            <div class="grid grid-cols-2 gap-4 max-w-md pt-2">
+              <button onclick="setTheme('dark')" id="theme-card-dark" class="p-4 rounded-2xl border-2 border-indigo-500 bg-blackbg text-white text-center space-y-2 cursor-pointer flex flex-col items-center">
+                <svg class="w-6 h-6 stroke-current mb-1" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+                <div class="font-bold text-sm">Koyu Tema</div>
+              </button>
+              <button onclick="setTheme('light')" id="theme-card-light" class="p-4 rounded-2xl border border-gray-300 bg-white text-gray-900 text-center space-y-2 cursor-pointer flex flex-col items-center">
+                <svg class="w-6 h-6 stroke-current mb-1" fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <div class="font-bold text-sm">Açık Tema</div>
+              </button>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Kullanıcı Adı (@kullaniciadi)</label>
-            <input type="text" id="cand-username" required class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Fotoğraf URL (İsteğe Bağlı)</label>
-            <input type="url" id="cand-avatar" placeholder="https://..." class="w-full bg-blackbg border border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
-          </div>
-          <button type="submit" id="cand-submit-btn" class="w-full bg-pink-600 hover:bg-pink-500 text-white py-2.5 rounded-xl font-medium">Adayı Oylamaya Ekle</button>
-        </form>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- JAVASCRIPT KODLARI -->
   <script>
-    // Supabase Bağlantı Bilgileri
-    const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_URL.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let currentUser = null;
-    let currentPair = [];
+    let currentUserProfile = null;
+    let allProfiles = [];
+    let allEvaluations = [];
 
-    // Başlangıç
-    window.addEventListener('DOMContentLoaded', async () => {
-      await checkAuth();
-      loadVSPair();
-    });
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      setTheme(savedTheme);
+    }
 
-    // Oturum Kontrolü
-    async function checkAuth() {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      const navActions = document.getElementById('nav-actions');
-
-      if (session) {
-        currentUser = session.user;
-        navActions.innerHTML = `
-          <button onclick="showSection('add-candidate-section')" class="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-xs font-medium">+ Kişi Ekle</button>
-          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg border border-borderdark hover:bg-slate-700 text-red-400 text-xs">Çıkış</button>
-        `;
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
       } else {
-        currentUser = null;
-        navActions.innerHTML = `
-          <button onclick="showSection('add-candidate-section')" class="px-3 py-1.5 rounded-lg bg-pink-600/20 text-pink-400 border border-pink-500/30 text-xs font-medium">+ Kişi Ekle</button>
-          <button onclick="showSection('login-section')" class="px-3 py-1.5 rounded-lg border border-borderdark hover:bg-slate-700 text-xs">Giriş</button>
-          <button onclick="showSection('register-section')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium">Kayıt Ol</button>
-        `;
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
       }
     }
 
-    // Ekran Değiştirici
+    function switchSettingsTab(tabName) {
+      ['profile', 'theme'].forEach(t => {
+        document.getElementById(`settings-tab-${t}`).classList.add('hidden');
+        document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2";
+      });
+      document.getElementById(`settings-tab-${tabName}`).classList.remove('hidden');
+      document.getElementById(`tab-btn-${tabName}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 flex items-center gap-2";
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        await fetchCurrentUserProfile();
+        updateUI(true);
+        loadDashboardData();
+      } else {
+        updateUI(false);
+      }
+    });
+
+    async function fetchCurrentUserProfile() {
+      if (!currentUser) return;
+      const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+      if (data) {
+        currentUserProfile = data;
+        document.getElementById('setting-fullname').value = data.full_name || '';
+        document.getElementById('setting-username').value = data.username || '';
+        document.getElementById('setting-bio').value = data.bio || '';
+      }
+    }
+
     function showSection(id) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
-
-      if (id === 'register-section') loadUnclaimedProfiles();
-      if (id === 'rankings-section') loadRankings();
-      if (id === 'vs-section') loadVSPair();
     }
 
-    // BU MU? BU MU? ÇİFTİNİ YÜKLE
-    async function loadVSPair() {
-      const container = document.getElementById('vs-container');
-      
-      // En az 2 profil çek
-      const { data: profiles, error } = await supabaseClient
-        .from('profiles')
-        .select('*');
+    function updateUI(isLoggedIn) {
+      if (isLoggedIn) {
+        document.getElementById('auth-buttons').classList.add('hidden');
+        document.getElementById('nav-search-container').classList.remove('hidden');
+        document.getElementById('user-menu').classList.remove('hidden');
+        document.getElementById('mobile-search-container').classList.remove('hidden');
+        const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
+        document.getElementById('user-display-name').innerText = nameToShow;
+        showSection('dashboard-section');
+      } else {
+        document.getElementById('auth-buttons').classList.remove('hidden');
+        document.getElementById('nav-search-container').classList.add('hidden');
+        document.getElementById('user-menu').classList.add('hidden');
+        document.getElementById('mobile-search-container').classList.add('hidden');
+        showSection('login-section');
+      }
+    }
 
-      if (error || !profiles || profiles.length < 2) {
-        container.innerHTML = `<p class="text-slate-400 text-sm col-span-full">Karşılaştırılacak yeterli kişi yok (En az 2 profil gerekli).</p>`;
-        return;
+    async function uploadAvatarFile(file) {
+      if (!file) return null;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `public/${fileName}`;
+
+      const { data, error } = await supabaseClient.storage.from('avatars').upload(filePath, file);
+
+      if (error) {
+        throw error;
       }
 
-      // Rastgele 2 kişiyi seç
-      const shuffled = profiles.sort(() => 0.5 - Math.random());
-      currentPair = [shuffled[0], shuffled[1]];
-
-      container.innerHTML = `
-        <div onclick="castVote('${currentPair[0].id}', '${currentPair[1].id}')" class="bg-slate-800 border border-borderdark hover:border-indigo-500 rounded-2xl p-6 cursor-pointer transition transform hover:-translate-y-1 shadow-lg flex flex-col items-center space-y-4">
-          <img src="${currentPair[0].avatar_url || 'https://via.placeholder.com/150'}" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-500/30">
-          <div>
-            <h3 class="font-bold text-lg">${currentPair[0].full_name}</h3>
-            <p class="text-xs text-slate-400">@${currentPair[0].username}</p>
-          </div>
-          <span class="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold">${currentPair[0].elo_rating || 1200} Puan</span>
-        </div>
-
-        <div onclick="castVote('${currentPair[1].id}', '${currentPair[0].id}')" class="bg-slate-800 border border-borderdark hover:border-pink-500 rounded-2xl p-6 cursor-pointer transition transform hover:-translate-y-1 shadow-lg flex flex-col items-center space-y-4">
-          <img src="${currentPair[1].avatar_url || 'https://via.placeholder.com/150'}" class="w-32 h-32 rounded-full object-cover border-4 border-pink-500/30">
-          <div>
-            <h3 class="font-bold text-lg">${currentPair[1].full_name}</h3>
-            <p class="text-xs text-slate-400">@${currentPair[1].username}</p>
-          </div>
-          <span class="bg-pink-600/20 text-pink-400 px-3 py-1 rounded-full text-xs font-bold">${currentPair[1].elo_rating || 1200} Puan</span>
-        </div>
-      `;
+      const { data: publicUrlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
     }
 
-    // OY VERME (ELO ALGORİTMASI HESAPLAMA)
-    async function castVote(winnerId, loserId) {
-      const winner = currentPair.find(p => p.id === winnerId);
-      const loser = currentPair.find(p => p.id === loserId);
-
-      const K = 32;
-      const Ra = winner.elo_rating || 1200;
-      const Rb = loser.elo_rating || 1200;
-
-      const Ea = 1 / (1 + Math.pow(10, (Rb - Ra) / 400));
-      const Eb = 1 / (1 + Math.pow(10, (Ra - Rb) / 400));
-
-      const newWinnerElo = Math.round(Ra + K * (1 - Ea));
-      const newLoserElo = Math.round(Rb + K * (0 - Eb));
-
-      // Veritabanında güncelle
-      await supabaseClient.from('profiles').update({ elo_rating: newWinnerElo }).eq('id', winnerId);
-      await supabaseClient.from('profiles').update({ elo_rating: newLoserElo }).eq('id', loserId);
-
-      // Yeni Karşılaştırma Getir
-      loadVSPair();
-    }
-
-    // SIRALAMAYI ÇEK
-    async function loadRankings() {
-      const container = document.getElementById('rankings-list');
-      const { data: profiles, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .order('elo_rating', { ascending: false });
-
-      if (error || !profiles || profiles.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-sm">Sıralama verisi alınamadı.</p>`;
-        return;
-      }
-
-      container.innerHTML = profiles.map((p, index) => `
-        <div class="bg-slate-800 border border-borderdark rounded-xl p-3 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-sm text-slate-400 w-6">#${index + 1}</span>
-            <img src="${p.avatar_url || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded-full object-cover">
-            <div>
-              <h4 class="font-bold text-sm">${p.full_name}</h4>
-              <p class="text-xs text-slate-400">@${p.username}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs px-2 py-0.5 rounded ${p.user_id ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
-              ${p.user_id ? 'Kayıtlı' : 'Hesapsız Aday'}
-            </span>
-            <span class="font-bold text-indigo-400 text-sm">${p.elo_rating || 1200} Puan</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // SAHİPSİZ PROFİLLERİ AÇILIR LİSTEYE DOLDUR
-    async function loadUnclaimedProfiles() {
-      const selectEl = document.getElementById('reg-profile-select');
-      selectEl.innerHTML = '<option value="">Yükleniyor...</option>';
-
-      const { data: profiles } = await supabaseClient
-        .from('profiles')
-        .select('id, full_name, username')
-        .is('user_id', null);
-
-      if (!profiles || profiles.length === 0) {
-        selectEl.innerHTML = '<option value="">Eşleştirilecek sahipsiz profil bulunamadı</option>';
-        return;
-      }
-
-      selectEl.innerHTML = '<option value="">Kendinizi listeden seçin...</option>' + 
-        profiles.map(p => `<option value="${p.id}">${p.full_name} (@${p.username})</option>`).join('');
-    }
-
-    // KAYIT OLUŞTURMA & HESAP EŞLEŞTİRME
     async function handleRegister(e) {
       e.preventDefault();
       const btn = document.getElementById('reg-submit-btn');
-      const selectedProfileId = document.getElementById('reg-profile-select').value;
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
-
-      if (!selectedProfileId) {
-        alert("Lütfen listeden kendinizi seçin!");
-        return;
-      }
-
-      btn.innerText = "Kayıt Yapılıyor...";
+      btn.innerText = "Fotoğraf Yükleniyor...";
       btn.disabled = true;
 
       try {
-        const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
-        if (authError) throw authError;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const full_name = document.getElementById('reg-fullname').value;
+        const username = document.getElementById('reg-username').value;
+        const avatarFile = document.getElementById('reg-avatar-file').files[0];
 
-        const { error: profileError } = await supabaseClient
-          .from('profiles')
-          .update({ user_id: authData.user.id })
-          .eq('id', selectedProfileId);
+        let avatar_url = 'https://via.placeholder.com/150';
+        if (avatarFile) {
+          avatar_url = await uploadAvatarFile(avatarFile);
+        }
 
-        if (profileError) throw profileError;
+        btn.innerText = "Hesap Oluşturuluyor...";
 
-        alert("Başarılı! Profiliniz hesabınızla bağlandı. Şimdi giriş yapabilirsiniz.");
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name, username, avatar_url } }
+        });
+
+        if (error) throw error;
+
+        alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
         showSection('login-section');
       } catch (err) {
         alert("Hata: " + err.message);
       } finally {
-        btn.innerText = "Hesabı Eşleştir ve Kaydol";
+        btn.innerText = "Hesap Oluştur";
         btn.disabled = false;
       }
     }
 
-    // HESAPSIZ KİŞİ (ADAY) EKLEME
-    async function handleAddCandidate(e) {
-      e.preventDefault();
-      const fullName = document.getElementById('cand-fullname').value;
-      const username = document.getElementById('cand-username').value;
-      const avatarUrl = document.getElementById('cand-avatar').value || 'https://via.placeholder.com/150';
-
-      const { error } = await supabaseClient.from('profiles').insert({
-        full_name: fullName,
-        username: username,
-        avatar_url: avatarUrl,
-        elo_rating: 1200,
-        user_id: null // Hesapsız aday olduğunu belirtir
-      });
-
-      if (error) {
-        alert("Ekleme Hatası: " + error.message);
-      } else {
-        alert("Kişi oylamaya başarıyla eklendi!");
-        document.getElementById('cand-fullname').value = '';
-        document.getElementById('cand-username').value = '';
-        document.getElementById('cand-avatar').value = '';
-        showSection('vs-section');
-      }
-    }
-
-    // GİRİŞ
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        alert("Giriş Başarısız: " + error.message);
-      } else {
-        await checkAuth();
-        showSection('vs-section');
+      if (error) alert("Giriş Başarısız: " + error.message);
+      else {
+        currentUser = data.user;
+        await fetchCurrentUserProfile();
+        updateUI(true);
+        loadDashboardData();
       }
     }
 
-    // ÇIKIŞ
-    async function handleLogout() {
+    async function logout() {
       await supabaseClient.auth.signOut();
-      await checkAuth();
-      showSection('vs-section');
+      currentUser = null;
+      currentUserProfile = null;
+      updateUI(false);
+    }
+
+    async function handleUpdateProfile(e) {
+      e.preventDefault();
+      const btn = document.getElementById('setting-submit-btn');
+      btn.innerText = "Kaydediliyor...";
+      btn.disabled = true;
+
+      try {
+        const full_name = document.getElementById('setting-fullname').value;
+        const username = document.getElementById('setting-username').value;
+        const bio = document.getElementById('setting-bio').value;
+        const avatarFile = document.getElementById('setting-avatar-file').files[0];
+
+        let updateData = { full_name, username, bio };
+
+        if (avatarFile) {
+          btn.innerText = "Fotoğraf Yükleniyor...";
+          const uploadedUrl = await uploadAvatarFile(avatarFile);
+          updateData.avatar_url = uploadedUrl;
+        }
+
+        const { error } = await supabaseClient.from('profiles').update(updateData).eq('id', currentUser.id);
+
+        if (error) throw error;
+
+        alert("Profil başarıyla güncellendi!");
+        await fetchCurrentUserProfile();
+        updateUI(true);
+        loadDashboardData();
+      } catch (err) {
+        alert("Güncelleme başarısız: " + err.message);
+      } finally {
+        btn.innerText = "Değişiklikleri Kaydet";
+        btn.disabled = false;
+      }
+    }
+
+    async function loadDashboardData() {
+      const { data: profiles } = await supabaseClient.from('profiles').select('*');
+      const { data: evalData } = await supabaseClient.from('evaluations').select('*');
+
+      allProfiles = profiles || [];
+      allEvaluations = evalData || [];
+
+      renderLeaderboard(allProfiles, allEvaluations);
+      renderUserRatingCards(allProfiles, allEvaluations);
+    }
+
+    function handleSearch() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      renderSearchResults(query, 'search-results');
+    }
+
+    function handleSearchMobile() {
+      const query = document.getElementById('mobile-search-input').value.toLowerCase().trim();
+      renderSearchResults(query, 'mobile-search-results');
+    }
+
+    function renderSearchResults(query, targetContainerId) {
+      const resultsEl = document.getElementById(targetContainerId);
+
+      if (!query) {
+        resultsEl.classList.add('hidden');
+        return;
+      }
+
+      const filtered = allProfiles.filter(p => 
+        (p.full_name && p.full_name.toLowerCase().includes(query)) || 
+        (p.username && p.username.toLowerCase().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        resultsEl.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center">Kullanıcı bulunamadı.</div>';
+      } else {
+        resultsEl.innerHTML = filtered.map(p => `
+          <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
+            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover">
+            <div>
+              <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${p.full_name}</p>
+              <p class="text-[11px] text-gray-400">@${p.username}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      resultsEl.classList.remove('hidden');
+    }
+
+    function openMyProfile() {
+      viewUserProfile(currentUser.id);
+    }
+
+    async function viewUserProfile(userId) {
+      document.getElementById('search-results').classList.add('hidden');
+      document.getElementById('search-input').value = '';
+      document.getElementById('mobile-search-results').classList.add('hidden');
+      document.getElementById('mobile-search-input').value = '';
+
+      const targetProfile = allProfiles.find(p => p.id === userId);
+      if (!targetProfile) return;
+
+      showSection('profile-section');
+      const profileContainer = document.getElementById('profile-details');
+
+      const userEvals = allEvaluations.filter(e => e.target_id === userId);
+      const avgScore = userEvals.length > 0 
+        ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
+        : '0.0';
+
+      const isMe = userId === currentUser.id;
+
+      const { data: comments } = await supabaseClient
+        .from('comments')
+        .select('*, author:profiles!author_id(*)')
+        .eq('target_id', userId)
+        .order('created_at', { ascending: false });
+
+      profileContainer.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
+          <img src="${targetProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
+          <div class="flex-1 text-center sm:text-left space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <h3 class="text-2xl font-bold">@${targetProfile.username}</h3>
+              ${isMe ? `
+                <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
+                  Profili Düzenle
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="flex justify-center sm:justify-start space-x-6 text-sm">
+              <div><span class="font-bold text-indigo-500">${userEvals.length}</span> <span class="text-gray-500">Oy</span></div>
+              <div><span class="font-bold text-indigo-500">${avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+            </div>
+
+            <div>
+              <p class="font-bold text-sm">${targetProfile.full_name}</p>
+              <p class="text-xs text-gray-400 mt-1">${targetProfile.bio || 'Henüz biyografi eklenmedi.'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 space-y-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
+            <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${comments ? comments.length : 0})</h4>
+          </div>
+          
+          <form onsubmit="handleAddComment(event, '${userId}')" class="flex space-x-2">
+            <input type="text" id="comment-input" required placeholder="Bu kişi hakkında bir yorum yaz..." 
+              class="flex-1 bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Gönder</button>
+          </form>
+
+          <div class="space-y-3 pt-2">
+            ${(!comments || comments.length === 0) ? '<p class="text-xs text-gray-500">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>' : ''}
+            ${(comments || []).map(c => `
+              <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
+                <img src="${c.author?.avatar_url || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${c.author?.full_name || 'Bilinmeyen'}</span>
+                    <span class="text-[10px] text-gray-500">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
+                  </div>
+                  <p class="text-xs text-gray-300 mt-1">${c.comment_text}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleAddComment(e, targetId) {
+      e.preventDefault();
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      const { error } = await supabaseClient.from('comments').insert({
+        target_id: targetId,
+        author_id: currentUser.id,
+        comment_text: text
+      });
+
+      if (error) alert("Yorum gönderilemedi: " + error.message);
+      else {
+        input.value = '';
+        viewUserProfile(targetId);
+      }
+    }
+
+    function startVersusMode() {
+      const others = allProfiles.filter(p => p.id !== currentUser.id);
+      if (others.length < 2) {
+        alert("Karşılaştırma yapmak için en az 2 farklı üye gerekiyor.");
+        return;
+      }
+
+      const shuffled = [...others].sort(() => 0.5 - Math.random());
+      const userA = shuffled[0];
+      const userB = shuffled[1];
+
+      const container = document.getElementById('versus-container');
+      const cards = document.getElementById('versus-cards');
+
+      cards.innerHTML = `
+        <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+          <img src="${userA.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userA.full_name}</h4>
+          <p class="text-xs text-gray-500">@${userA.username}</p>
+          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
+        </div>
+
+        <div class="hidden md:block font-extrabold text-2xl text-indigo-500">VS</div>
+
+        <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
+          <img src="${userB.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userB.full_name}</h4>
+          <p class="text-xs text-gray-500">@${userB.username}</p>
+          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
+        </div>
+      `;
+
+      container.classList.remove('hidden');
+    }
+
+    async function chooseVersusWinner(winnerId, loserId) {
+      await supabaseClient.from('evaluations').upsert({
+        evaluator_id: currentUser.id,
+        target_id: winnerId,
+        score: 10
+      }, { onConflict: 'evaluator_id, target_id' });
+
+      await supabaseClient.from('evaluations').upsert({
+        evaluator_id: currentUser.id,
+        target_id: loserId,
+        score: 5
+      }, { onConflict: 'evaluator_id, target_id' });
+
+      loadDashboardData();
+      startVersusMode();
+    }
+
+    function closeVersusMode() {
+      document.getElementById('versus-container').classList.add('hidden');
+    }
+
+    function renderLeaderboard(profiles, evalData) {
+      const listEl = document.getElementById('leaderboard-list');
+      if (!profiles || profiles.length === 0) {
+        listEl.innerHTML = '<p class="text-gray-500 text-sm">Henüz kayıtlı üye yok.</p>';
+        return;
+      }
+
+      const userScores = profiles.map(profile => {
+        const userEvals = (evalData || []).filter(e => e.target_id === profile.id);
+        const avgScore = userEvals.length > 0 
+          ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
+          : 'Puan Yok';
+        return { ...profile, avgScore, evalCount: userEvals.length };
+      });
+
+      userScores.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
+
+      listEl.innerHTML = userScores.map((u, index) => `
+        <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
+          <div class="flex items-center space-x-3">
+            <span class="font-bold w-6 text-indigo-600 dark:text-indigo-400">#${index + 1}</span>
+            <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
+            <div>
+              <p class="font-medium text-sm hover:underline">${u.full_name}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">@${u.username}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
+              ${u.avgScore} / 10
+            </span>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${u.evalCount} Oy</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderUserRatingCards(profiles, evalData) {
+      const container = document.getElementById('users-to-rate');
+      const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
+
+      if (otherUsers.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
+        return;
+      }
+
+      container.innerHTML = otherUsers.map(u => {
+        const myEval = (evalData || []).find(e => e.evaluator_id === currentUser.id && e.target_id === u.id);
+        const myScore = myEval ? myEval.score : '';
+
+        return `
+          <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
+            <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
+              <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
+              <div>
+                <p class="font-medium text-sm group-hover:underline">${u.full_name}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">@${u.username}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 mt-2">
+              <input type="number" min="1" max="10" placeholder="1-10" id="score-${u.id}" value="${myScore}"
+                class="w-20 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-indigo-500">
+              <button onclick="submitRating('${u.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-xs font-medium">
+                ${myEval ? 'Güncelle' : 'Puan Ver'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function submitRating(targetId) {
+      const score = document.getElementById(`score-${targetId}`).value;
+      if (!score || score < 1 || score > 10) {
+        alert("Lütfen 1 ile 10 arasında bir puan girin.");
+        return;
+      }
+
+      const { error } = await supabaseClient.from('evaluations').upsert({
+        evaluator_id: currentUser.id,
+        target_id: targetId,
+        score: Number(score)
+      }, { onConflict: 'evaluator_id, target_id' });
+
+      if (error) alert("Puan kaydedilemedi: " + error.message);
+      else {
+        alert("Puanınız kaydedildi!");
+        loadDashboardData();
+      }
     }
   </script>
 </body>
