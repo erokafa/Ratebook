@@ -15,7 +15,8 @@
     const SUPABASE_URL = "https://ttjnidnzafyhuoxhaojk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_GPeu1-_Nj02ab_sGfLdA3w_x23J_bqF";
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Değişken adı çakışmasını önlemek için supabaseClient yapıldı
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
   <!-- Üst Menü / Navbar -->
@@ -74,10 +75,8 @@
       </form>
     </section>
 
-    <!-- DASHBOARD (GİRİŞ YAPILINCA AÇILAN EKRAN) -->
+    <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
-      
-      <!-- GENEL LİDERLİK TABLOSU -->
       <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
         <h2 class="text-xl font-bold text-indigo-400 mb-4">🏆 Genel Liderlik Tablosu</h2>
         <p class="text-xs text-slate-400 mb-4">Tüm üyelerin ortalama puanına göre genel sıralaması.</p>
@@ -86,14 +85,11 @@
         </div>
       </div>
 
-      <!-- DEĞERLENDİRME VE KİŞİSEL SIRALAMA EKRANI -->
       <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
         <h2 class="text-xl font-bold text-indigo-400 mb-4">⭐ Üyeleri Değerlendir ve Sırala</h2>
         <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
-          <!-- Üye kartları buraya yüklenecek -->
         </div>
       </div>
-
     </section>
 
   </main>
@@ -101,9 +97,8 @@
   <script>
     let currentUser = null;
 
-    // Sayfa Yüklendiğinde
     window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         currentUser = session.user;
         updateUI(true);
@@ -131,7 +126,6 @@
       }
     }
 
-    // Kayıt İşlemi
     async function handleRegister(e) {
       e.preventDefault();
       const email = document.getElementById('reg-email').value;
@@ -139,7 +133,7 @@
       const full_name = document.getElementById('reg-fullname').value;
       const username = document.getElementById('reg-username').value;
 
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options: { data: { full_name, username } }
@@ -152,13 +146,12 @@
       }
     }
 
-    // Giriş İşlemi
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) alert("Giriş Başarısız: " + error.message);
       else {
@@ -168,25 +161,20 @@
       }
     }
 
-    // Çıkış İşlemi
     async function logout() {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       currentUser = null;
       updateUI(false);
     }
 
-    // Dashboard Verilerini Yükle
     async function loadDashboardData() {
-      // 1. Tüm Profilleri Getir
-      const { data: profiles } = await supabase.from('profiles').select('*');
-      // 2. Değerlendirmeleri Getir
-      const { data: evalData } = await supabase.from('evaluations').select('*');
+      const { data: profiles } = await supabaseClient.from('profiles').select('*');
+      const { data: evalData } = await supabaseClient.from('evaluations').select('*');
 
       renderLeaderboard(profiles, evalData);
       renderUserRatingCards(profiles, evalData);
     }
 
-    // Genel Liderlik Tablosunu Oluştur
     function renderLeaderboard(profiles, evalData) {
       const listEl = document.getElementById('leaderboard-list');
       if (!profiles || profiles.length === 0) {
@@ -194,16 +182,14 @@
         return;
       }
 
-      // Skor Hesaplama
       const userScores = profiles.map(profile => {
-        const userEvals = evalData.filter(e => e.target_id === profile.id);
+        const userEvals = (evalData || []).filter(e => e.target_id === profile.id);
         const avgScore = userEvals.length > 0 
           ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
           : 'Puan Yok';
         return { ...profile, avgScore, evalCount: userEvals.length };
       });
 
-      // Sıralama (En yüksek puan üstte)
       userScores.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
 
       listEl.innerHTML = userScores.map((u, index) => `
@@ -226,10 +212,9 @@
       `).join('');
     }
 
-    // Üye Değerlendirme Kartlarını Oluştur
     function renderUserRatingCards(profiles, evalData) {
       const container = document.getElementById('users-to-rate');
-      const otherUsers = profiles.filter(p => p.id !== currentUser.id);
+      const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
 
       if (otherUsers.length === 0) {
         container.innerHTML = '<p class="text-slate-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
@@ -237,7 +222,7 @@
       }
 
       container.innerHTML = otherUsers.map(u => {
-        const myEval = evalData.find(e => e.evaluator_id === currentUser.id && e.target_id === u.id);
+        const myEval = (evalData || []).find(e => e.evaluator_id === currentUser.id && e.target_id === u.id);
         const myScore = myEval ? myEval.score : '';
 
         return `
@@ -261,7 +246,6 @@
       }).join('');
     }
 
-    // Puan Gönderme İşlemi
     async function submitRating(targetId) {
       const score = document.getElementById(`score-${targetId}`).value;
       if (!score || score < 1 || score > 10) {
@@ -269,7 +253,7 @@
         return;
       }
 
-      const { error } = await supabase.from('evaluations').upsert({
+      const { error } = await supabaseClient.from('evaluations').upsert({
         evaluator_id: currentUser.id,
         target_id: targetId,
         score: Number(score)
