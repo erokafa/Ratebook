@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grup Değerlendirme & Sıralama Platformu</title>
+  <title>RateBook</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -15,20 +15,25 @@
     const SUPABASE_URL = "https://ttjnidnzafyhuoxhaojk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_GPeu1-_Nj02ab_sGfLdA3w_x23J_bqF";
 
-    // Değişken adı çakışmasını önlemek için supabaseClient yapıldı
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
   <!-- Üst Menü / Navbar -->
   <nav class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-indigo-400">RankMaster</h1>
+    <!-- 1. SİTE İSMİ RATEBOOK YAPILDI -->
+    <h1 onclick="if(currentUser) showSection('dashboard-section')" class="text-xl font-bold text-indigo-400 cursor-pointer">RateBook</h1>
+    
     <div id="auth-buttons" class="space-x-3">
       <button onclick="showSection('login-section')" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm font-medium">Giriş Yap</button>
       <button onclick="showSection('register-section')" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-medium">Kayıt Ol</button>
     </div>
-    <div id="user-menu" class="hidden flex items-center space-x-4">
-      <span id="user-display-name" class="text-slate-300 font-medium"></span>
-      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded-lg text-xs font-medium">Çıkış Yap</button>
+
+    <!-- 3. & 4. SAĞ ÜSTTE İSİM GÖRÜNMESİ VE PROFİLİM BUTONU -->
+    <div id="user-menu" class="hidden flex items-center space-x-3">
+      <button onclick="showSection('dashboard-section')" class="text-slate-300 hover:text-white text-sm font-medium">Ana Sayfa</button>
+      <button onclick="showSection('profile-section')" class="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-300">Profilim</button>
+      <span id="user-display-name" class="text-slate-200 font-semibold text-sm"></span>
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded-lg text-xs font-medium">Çıkış</button>
     </div>
   </nav>
 
@@ -77,18 +82,26 @@
 
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
+      <!-- 2. "GENEL LİDERLİK TABLOSU" YAZISI "SIRALAMA" YAPILDI -->
       <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-        <h2 class="text-xl font-bold text-indigo-400 mb-4">🏆 Genel Liderlik Tablosu</h2>
-        <p class="text-xs text-slate-400 mb-4">Tüm üyelerin ortalama puanına göre genel sıralaması.</p>
+        <h2 class="text-xl font-bold text-indigo-400 mb-4">🏆 Sıralama</h2>
         <div id="leaderboard-list" class="space-y-3">
           <p class="text-slate-500 text-sm">Yükleniyor...</p>
         </div>
       </div>
 
       <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-        <h2 class="text-xl font-bold text-indigo-400 mb-4">⭐ Üyeleri Değerlendir ve Sırala</h2>
+        <h2 class="text-xl font-bold text-indigo-400 mb-4">⭐ Üyeleri Değerlendir</h2>
         <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
         </div>
+      </div>
+    </section>
+
+    <!-- 4. KENDİ PROFİLİM SEKMESİ -->
+    <section id="profile-section" class="bg-slate-800 p-6 rounded-xl border border-slate-700 max-w-lg mx-auto hidden">
+      <h2 class="text-2xl font-bold mb-6 text-indigo-400 border-b border-slate-700 pb-3">Profilim</h2>
+      <div id="profile-details" class="space-y-4">
+        <p class="text-slate-500 text-sm">Profil bilgileri yükleniyor...</p>
       </div>
     </section>
 
@@ -96,17 +109,28 @@
 
   <script>
     let currentUser = null;
+    let currentUserProfile = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         currentUser = session.user;
+        await fetchCurrentUserProfile();
         updateUI(true);
         loadDashboardData();
       } else {
         updateUI(false);
       }
     });
+
+    // Kullanıcının Profil Bilgilerini Veritabanından Çek
+    async function fetchCurrentUserProfile() {
+      if (!currentUser) return;
+      const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+      if (data) {
+        currentUserProfile = data;
+      }
+    }
 
     function showSection(id) {
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
@@ -117,7 +141,11 @@
       if (isLoggedIn) {
         document.getElementById('auth-buttons').classList.add('hidden');
         document.getElementById('user-menu').classList.remove('hidden');
-        document.getElementById('user-display-name').innerText = currentUser.email;
+        
+        // Sağ üstte e-posta yerine Ad Soyad gösterme
+        const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
+        document.getElementById('user-display-name').innerText = nameToShow;
+        
         showSection('dashboard-section');
       } else {
         document.getElementById('auth-buttons').classList.remove('hidden');
@@ -151,11 +179,12 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.signInWithPassword({ email, password });
 
       if (error) alert("Giriş Başarısız: " + error.message);
       else {
         currentUser = data.user;
+        await fetchCurrentUserProfile();
         updateUI(true);
         loadDashboardData();
       }
@@ -164,6 +193,7 @@
     async function logout() {
       await supabaseClient.auth.signOut();
       currentUser = null;
+      currentUserProfile = null;
       updateUI(false);
     }
 
@@ -173,6 +203,7 @@
 
       renderLeaderboard(profiles, evalData);
       renderUserRatingCards(profiles, evalData);
+      renderProfilePage(evalData);
     }
 
     function renderLeaderboard(profiles, evalData) {
@@ -244,6 +275,39 @@
           </div>
         `;
       }).join('');
+    }
+
+    // Profil İçeriğini Oluştur
+    function renderProfilePage(evalData) {
+      const profileContainer = document.getElementById('profile-details');
+      if (!currentUserProfile) return;
+
+      const myEvals = (evalData || []).filter(e => e.target_id === currentUser.id);
+      const avgScore = myEvals.length > 0 
+        ? (myEvals.reduce((sum, e) => sum + Number(e.score), 0) / myEvals.length).toFixed(1)
+        : 'Puan Henüz Yok';
+
+      profileContainer.innerHTML = `
+        <div class="flex items-center space-x-4 mb-6">
+          <img src="${currentUserProfile.avatar_url}" class="w-16 h-16 rounded-full bg-slate-700 border-2 border-indigo-500">
+          <div>
+            <h3 class="text-xl font-bold">${currentUserProfile.full_name}</h3>
+            <p class="text-sm text-slate-400">@${currentUserProfile.username}</p>
+            <p class="text-xs text-slate-500">${currentUser.email}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
+            <p class="text-xs text-slate-400 mb-1">Ortalama Puanın</p>
+            <p class="text-2xl font-bold text-indigo-400">${avgScore}</p>
+          </div>
+          <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
+            <p class="text-xs text-slate-400 mb-1">Aldığın Toplam Oy</p>
+            <p class="text-2xl font-bold text-indigo-400">${myEvals.length}</p>
+          </div>
+        </div>
+      `;
     }
 
     async function submitRating(targetId) {
