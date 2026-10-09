@@ -36,7 +36,7 @@
 
   <!-- Üst Menü / Navbar -->
   <nav class="bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark px-4 sm:px-8 py-3 sm:py-3.5 flex flex-wrap items-center justify-between sticky top-0 z-50 gap-x-4 gap-y-2">
-    
+
     <!-- Sol Taraf: Logo -->
     <div onclick="if(currentUser) showSection('dashboard-section')" class="cursor-pointer flex items-center shrink-0">
       <span class="text-xl sm:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 tracking-wider hover:opacity-90 transition">
@@ -57,7 +57,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..." 
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -84,7 +84,7 @@
 
     <!-- Mobil Arama Çubuğu -->
     <div id="mobile-search-container" class="hidden w-full sm:hidden relative mt-1">
-      <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="Kullanıcı ara..." 
+      <input type="text" id="mobile-search-input" oninput="handleSearchMobile()" placeholder="Kullanıcı ara..."
         class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-500">
       <div id="mobile-search-results" class="hidden absolute top-10 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
       </div>
@@ -93,7 +93,7 @@
 
   <!-- Ana İçerik Konteyneri -->
   <main class="max-w-4xl mx-auto p-4 sm:p-6">
-    
+
     <!-- KAYIT OL PANELİ -->
     <section id="register-section" class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-4 sm:my-10 hidden shadow-xl">
       <h2 class="text-2xl font-bold mb-4 text-center">Kayıt Ol</h2>
@@ -143,11 +143,11 @@
 
     <!-- DASHBOARD -->
     <section id="dashboard-section" class="space-y-8 hidden">
-      
+
       <!-- BU MU? BU MU? KARTI -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
         <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir! (İki kişi için de yorum yazman gerekir.)</p>
         <button onclick="startVersusMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
           Sıralama Yapmaya Başla
         </button>
@@ -158,7 +158,7 @@
         <div class="flex justify-between items-center mb-4">
           <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest">Bu mu? Bu mu?</span>
           <button onclick="closeVersusMode()" class="text-xs text-gray-500 hover:text-white flex items-center gap-1">
-            Kapat 
+            Kapat
             <svg class="w-3.5 h-3.5 stroke-current inline" fill="none" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -181,12 +181,13 @@
 
       <!-- ÜYELERİ DEĞERLENDİR -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
-        <div class="flex items-center gap-2 mb-4">
+        <div class="flex items-center gap-2 mb-2">
           <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
           <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Üyeleri Değerlendir</h2>
         </div>
+        <p id="rating-progress" class="text-xs text-gray-500 dark:text-gray-400 mb-4"></p>
         <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
         </div>
       </div>
@@ -265,6 +266,11 @@
     let rosterList = [];
     let selectedRosterId = null;
 
+    // ===== YARDIMCI FONKSİYONLAR =====
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
     function defaultAvatar(name) {
       const initials = (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toLocaleUpperCase('tr-TR').replace(/[&<>]/g, '');
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150"><rect width="150" height="150" fill="#4f46e5"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" fill="#ffffff">${initials}</text></svg>`;
@@ -272,14 +278,24 @@
     }
 
     function avatarOf(p) {
-      if (p && p.avatar_url && !p.avatar_url.includes('via.placeholder.com')) return p.avatar_url;
+      if (p && p.avatar_url && !p.avatar_url.includes('via.placeholder.com')) return escapeHtml(p.avatar_url);
       return defaultAvatar(p ? p.full_name : '?');
     }
 
     function handleOf(p) {
-      return p.unclaimed ? 'Henüz üye değil' : '@' + p.username;
+      return p.unclaimed ? 'Henüz üye değil' : '@' + escapeHtml(p.username);
     }
 
+    // Kullanıcı kendi dışındaki herkesi puanladı mı?
+    function ratingStats() {
+      const others = allProfiles.filter(p => p.id !== currentUser.id);
+      const rated = new Set(allEvaluations.filter(e => e.evaluator_id === currentUser.id).map(e => e.target_id));
+      const done = others.filter(p => rated.has(p.id)).length;
+      return { total: others.length, done, all: done === others.length };
+    }
+    function hasRatedAll() { return ratingStats().all; }
+
+    // ===== TEMA =====
     function initTheme() {
       const savedTheme = localStorage.getItem('theme') || 'dark';
       setTheme(savedTheme);
@@ -357,11 +373,8 @@
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `public/${fileName}`;
 
-      const { data, error } = await supabaseClient.storage.from('avatars').upload(filePath, file);
-
-      if (error) {
-        throw error;
-      }
+      const { error } = await supabaseClient.storage.from('avatars').upload(filePath, file);
+      if (error) throw error;
 
       const { data: publicUrlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
       return publicUrlData.publicUrl;
@@ -405,7 +418,7 @@
       el.innerHTML = filtered.map(p => `
         <div onclick="selectRoster('${p.id}')"
           class="px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-borderdark/50 transition ${p.id === selectedRosterId ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 font-semibold' : ''}">
-          ${p.full_name}
+          ${escapeHtml(p.full_name)}
         </div>
       `).join('');
     }
@@ -486,6 +499,8 @@
       await supabaseClient.auth.signOut();
       currentUser = null;
       currentUserProfile = null;
+      allProfiles = [];
+      allEvaluations = [];
       updateUI(false);
     }
 
@@ -510,7 +525,6 @@
         }
 
         const { error } = await supabaseClient.from('profiles').update(updateData).eq('id', currentUser.id);
-
         if (error) throw error;
 
         alert("Profil başarıyla güncellendi!");
@@ -550,6 +564,7 @@
       renderUserRatingCards(allProfiles, allEvaluations);
     }
 
+    // ===== ARAMA =====
     function handleSearch() {
       const query = document.getElementById('search-input').value.toLowerCase().trim();
       renderSearchResults(query, 'search-results');
@@ -568,8 +583,8 @@
         return;
       }
 
-      const filtered = allProfiles.filter(p => 
-        (p.full_name && p.full_name.toLowerCase().includes(query)) || 
+      const filtered = allProfiles.filter(p =>
+        (p.full_name && p.full_name.toLowerCase().includes(query)) ||
         (p.username && p.username.toLowerCase().includes(query))
       );
 
@@ -580,7 +595,7 @@
           <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
             <img src="${avatarOf(p)}" class="w-9 h-9 rounded-full object-cover">
             <div>
-              <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${p.full_name}</p>
+              <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${escapeHtml(p.full_name)}</p>
               <p class="text-[11px] text-gray-400">${handleOf(p)}</p>
             </div>
           </div>
@@ -590,6 +605,7 @@
       resultsEl.classList.remove('hidden');
     }
 
+    // ===== PROFİL =====
     function openMyProfile() {
       viewUserProfile(currentUser.id);
     }
@@ -606,25 +622,32 @@
       showSection('profile-section');
       const profileContainer = document.getElementById('profile-details');
 
+      const isMe = userId === currentUser.id;
+      const locked = isMe && !hasRatedAll();
+      const { total, done } = ratingStats();
+
       const userEvals = allEvaluations.filter(e => e.target_id === userId);
-      const avgScore = userEvals.length > 0 
+      const avgScore = userEvals.length > 0
         ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
         : '0.0';
 
-      const isMe = userId === currentUser.id;
-
-      const { data: comments } = await supabaseClient
-        .from('comments')
-        .select('*, author:profiles!author_id(*)')
-        .eq('target_id', userId)
-        .order('created_at', { ascending: false });
+      // Kilitliyken yorumlar hiç çekilmez (RLS de zaten engeller)
+      let comments = [];
+      if (!locked) {
+        const { data } = await supabaseClient
+          .from('comments')
+          .select('*, author:profiles!author_id(*)')
+          .eq('target_id', userId)
+          .order('created_at', { ascending: false });
+        comments = data || [];
+      }
 
       profileContainer.innerHTML = `
         <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
           <img src="${avatarOf(targetProfile)}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
           <div class="flex-1 text-center sm:text-left space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <h3 class="text-2xl font-bold break-all">${targetProfile.unclaimed ? targetProfile.full_name : '@' + targetProfile.username}</h3>
+              <h3 class="text-2xl font-bold break-all">${targetProfile.unclaimed ? escapeHtml(targetProfile.full_name) : '@' + escapeHtml(targetProfile.username)}</h3>
               ${isMe ? `
                 <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
                   Profili Düzenle
@@ -633,13 +656,13 @@
             </div>
 
             <div class="flex justify-center sm:justify-start space-x-6 text-sm">
-              <div><span class="font-bold text-indigo-500">${userEvals.length}</span> <span class="text-gray-500">Oy</span></div>
-              <div><span class="font-bold text-indigo-500">${avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : userEvals.length}</span> <span class="text-gray-500">Oy</span></div>
+              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
             </div>
 
             <div>
-              <p class="font-bold text-sm">${targetProfile.full_name}</p>
-              <p class="text-xs text-gray-400 mt-1 break-words">${targetProfile.unclaimed ? 'Bu kişi henüz siteye kayıt olmadı, ama puanlanabilir ve yorum yapılabilir.' : (targetProfile.bio || 'Henüz biyografi eklenmedi.')}</p>
+              <p class="font-bold text-sm">${escapeHtml(targetProfile.full_name)}</p>
+              <p class="text-xs text-gray-400 mt-1 break-words">${targetProfile.unclaimed ? 'Bu kişi henüz siteye kayıt olmadı, ama puanlanabilir ve yorum yapılabilir.' : escapeHtml(targetProfile.bio || 'Henüz biyografi eklenmedi.')}</p>
             </div>
           </div>
         </div>
@@ -647,26 +670,29 @@
         <div class="pt-6 space-y-4">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
-            <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${comments ? comments.length : 0})</h4>
+            <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${locked ? '🔒' : comments.length})</h4>
           </div>
-          
+
+          ${isMe ? '' : `
           <form onsubmit="handleAddComment(event, '${userId}')" class="flex space-x-2">
-            <input type="text" id="comment-input" required placeholder="Bu kişi hakkında bir yorum yaz..." 
+            <input type="text" id="comment-input" required placeholder="Bu kişi hakkında bir yorum yaz..."
               class="flex-1 min-w-0 bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
             <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Gönder</button>
-          </form>
+          </form>`}
 
           <div class="space-y-3 pt-2">
-            ${(!comments || comments.length === 0) ? '<p class="text-xs text-gray-500">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>' : ''}
-            ${(comments || []).map(c => `
+            ${locked
+              ? `<p class="text-xs text-gray-500">🔒 Sana yapılan yorumları görmek için herkesi puanlamalısın (${done}/${total}).</p>`
+              : (comments.length === 0 ? `<p class="text-xs text-gray-500">Henüz yorum yapılmamış.${isMe ? '' : ' İlk yorumu sen yap!'}</p>` : '')}
+            ${comments.map(c => `
               <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
                 <img src="${avatarOf(c.author)}" class="w-8 h-8 shrink-0 rounded-full object-cover">
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${c.author?.full_name || 'Bilinmeyen'}</span>
+                    <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${escapeHtml(c.author?.full_name || 'Bilinmeyen')}</span>
                     <span class="text-[10px] text-gray-500">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
                   </div>
-                  <p class="text-xs text-gray-300 mt-1 break-words">${c.comment_text}</p>
+                  <p class="text-xs text-gray-300 mt-1 break-words">${escapeHtml(c.comment_text)}</p>
                 </div>
               </div>
             `).join('')}
@@ -695,6 +721,7 @@
       }
     }
 
+    // ===== BU MU? BU MU? =====
     function startVersusMode() {
       const others = allProfiles.filter(p => p.id !== currentUser.id);
       if (others.length < 2) {
@@ -709,41 +736,50 @@
       const container = document.getElementById('versus-container');
       const cards = document.getElementById('versus-cards');
 
-      cards.innerHTML = `
-        <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
-          <img src="${avatarOf(userA)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
-          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userA.full_name}</h4>
-          <p class="text-xs text-gray-500">${handleOf(userA)}</p>
-          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
-        </div>
+      const vsCard = (u, other) => `
+        <div class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center">
+          <img src="${avatarOf(u)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <h4 class="font-bold text-lg">${escapeHtml(u.full_name)}</h4>
+          <p class="text-xs text-gray-500 mb-3">${handleOf(u)}</p>
+          <textarea id="vs-comment-${u.id}" rows="2" placeholder="Yorum (zorunlu)..."
+            class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
+          <button onclick="chooseVersusWinner('${u.id}', '${other.id}')" class="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
+        </div>`;
 
-        <div class="font-extrabold text-xl md:text-2xl text-indigo-500">VS</div>
-
-        <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
-          <img src="${avatarOf(userB)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
-          <h4 class="font-bold text-lg group-hover:text-indigo-500">${userB.full_name}</h4>
-          <p class="text-xs text-gray-500">${handleOf(userB)}</p>
-          <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
-        </div>
-      `;
+      cards.innerHTML = vsCard(userA, userB)
+        + '<div class="font-extrabold text-xl md:text-2xl text-indigo-500">VS</div>'
+        + vsCard(userB, userA);
 
       container.classList.remove('hidden');
     }
 
     async function chooseVersusWinner(winnerId, loserId) {
-      await supabaseClient.from('evaluations').upsert({
-        evaluator_id: currentUser.id,
-        target_id: winnerId,
-        score: 10
-      }, { onConflict: 'evaluator_id, target_id' });
+      const wText = document.getElementById(`vs-comment-${winnerId}`).value.trim();
+      const lText = document.getElementById(`vs-comment-${loserId}`).value.trim();
+      if (!wText || !lText) {
+        alert("İki kişi için de yorum yazmak zorunlu.");
+        return;
+      }
 
-      await supabaseClient.from('evaluations').upsert({
-        evaluator_id: currentUser.id,
-        target_id: loserId,
-        score: 5
-      }, { onConflict: 'evaluator_id, target_id' });
+      const wasAll = hasRatedAll();
 
-      loadDashboardData();
+      // Önce yorumlar, sonra puanlar: yorumsuz puan kaydedilemesin
+      const { error: cErr } = await supabaseClient.from('comments').insert([
+        { target_id: winnerId, author_id: currentUser.id, comment_text: wText },
+        { target_id: loserId,  author_id: currentUser.id, comment_text: lText }
+      ]);
+      if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
+
+      const { error } = await supabaseClient.from('evaluations').upsert([
+        { evaluator_id: currentUser.id, target_id: winnerId, score: 10 },
+        { evaluator_id: currentUser.id, target_id: loserId,  score: 5 }
+      ], { onConflict: 'evaluator_id, target_id' });
+      if (error) { alert("Puan kaydedilemedi: " + error.message); return; }
+
+      await loadDashboardData();
+      if (!wasAll && hasRatedAll()) {
+        alert("Herkesi puanladın! Artık sana verilen puanları ve yorumları görebilirsin.");
+      }
       startVersusMode();
     }
 
@@ -751,6 +787,7 @@
       document.getElementById('versus-container').classList.add('hidden');
     }
 
+    // ===== SIRALAMA =====
     function renderLeaderboard(profiles, evalData) {
       const listEl = document.getElementById('leaderboard-list');
       if (!profiles || profiles.length === 0) {
@@ -758,39 +795,51 @@
         return;
       }
 
+      const locked = !hasRatedAll();
       const userScores = profiles.map(profile => {
         const userEvals = (evalData || []).filter(e => e.target_id === profile.id);
-        const avgScore = userEvals.length > 0 
+        const avgScore = userEvals.length > 0
           ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
           : 'Puan Yok';
         return { ...profile, avgScore, evalCount: userEvals.length };
       });
 
-      userScores.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
+      // Kilitliyken kendi puanı ve sıralaması gösterilmez
+      const meRow = locked ? userScores.find(u => u.id === currentUser.id) : null;
+      const ranked = locked ? userScores.filter(u => u.id !== currentUser.id) : userScores;
+      ranked.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
 
-      listEl.innerHTML = userScores.map((u, index) => `
+      const row = (u, rank, hide) => `
         <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
           <div class="flex items-center space-x-3 min-w-0">
-            <span class="font-bold w-7 shrink-0 text-indigo-600 dark:text-indigo-400">#${index + 1}</span>
+            <span class="font-bold w-7 shrink-0 text-indigo-600 dark:text-indigo-400">${rank}</span>
             <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
             <div class="min-w-0">
-              <p class="font-medium text-sm hover:underline truncate">${u.full_name}</p>
+              <p class="font-medium text-sm hover:underline truncate">${escapeHtml(u.full_name)}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
             </div>
           </div>
           <div class="text-right shrink-0">
             <span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
-              ${u.avgScore} / 10
+              ${hide ? '🔒' : u.avgScore + ' / 10'}
             </span>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${u.evalCount} Oy</p>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${hide ? 'Gizli' : u.evalCount + ' Oy'}</p>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+
+      listEl.innerHTML = ranked.map((u, i) => row(u, '#' + (i + 1), false)).join('')
+        + (meRow ? row(meRow, '—', true) : '');
     }
 
+    // ===== ÜYELERİ DEĞERLENDİR =====
     function renderUserRatingCards(profiles, evalData) {
       const container = document.getElementById('users-to-rate');
       const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
+      const { total, done, all } = ratingStats();
+
+      document.getElementById('rating-progress').innerText = all
+        ? 'Herkesi puanladın! Sana verilen puanları ve yorumları görebilirsin.'
+        : `Sana verilen puanları ve yorumları görmek için herkesi puanlamalısın (${done}/${total}). Puan verirken yorum yazmak zorunludur.`;
 
       if (otherUsers.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
@@ -806,10 +855,12 @@
             <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
               <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
               <div>
-                <p class="font-medium text-sm group-hover:underline">${u.full_name}</p>
+                <p class="font-medium text-sm group-hover:underline">${escapeHtml(u.full_name)}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
               </div>
             </div>
+            <textarea id="comment-${u.id}" rows="2" placeholder="Yorum (zorunlu)..."
+              class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
             <div class="flex items-center space-x-2 mt-2">
               <input type="number" min="1" max="10" placeholder="1-10" id="score-${u.id}" value="${myScore}"
                 class="w-20 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-indigo-500">
@@ -823,23 +874,36 @@
     }
 
     async function submitRating(targetId) {
-      const score = document.getElementById(`score-${targetId}`).value;
-      if (!score || score < 1 || score > 10) {
+      const score = Number(document.getElementById(`score-${targetId}`).value);
+      const text = document.getElementById(`comment-${targetId}`).value.trim();
+
+      if (!Number.isInteger(score) || score < 1 || score > 10) {
         alert("Lütfen 1 ile 10 arasında bir puan girin.");
         return;
       }
-
-      const { error } = await supabaseClient.from('evaluations').upsert({
-        evaluator_id: currentUser.id,
-        target_id: targetId,
-        score: Number(score)
-      }, { onConflict: 'evaluator_id, target_id' });
-
-      if (error) alert("Puan kaydedilemedi: " + error.message);
-      else {
-        alert("Puanınız kaydedildi!");
-        loadDashboardData();
+      if (!text) {
+        alert("Puan verirken yorum yazmak zorunludur.");
+        return;
       }
+
+      const wasAll = hasRatedAll();
+
+      // Önce yorum, sonra puan: yorumsuz puan kaydedilemesin
+      const { error: cErr } = await supabaseClient.from('comments').insert({
+        target_id: targetId, author_id: currentUser.id, comment_text: text
+      });
+      if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
+
+      const { error } = await supabaseClient.from('evaluations').upsert(
+        { evaluator_id: currentUser.id, target_id: targetId, score },
+        { onConflict: 'evaluator_id, target_id' }
+      );
+      if (error) { alert("Puan kaydedilemedi: " + error.message); return; }
+
+      await loadDashboardData();
+      alert(!wasAll && hasRatedAll()
+        ? "Herkesi puanladın! Artık sana verilen puanları ve yorumları görebilirsin."
+        : "Puanın ve yorumun kaydedildi!");
     }
   </script>
 </body>
