@@ -70,7 +70,11 @@
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
         <span class="hidden sm:inline">Ana Sayfa</span>
       </button>
-      <button onclick="openMyProfile()" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
+      <button onclick="showSection('rate-section')" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span class="hidden sm:inline">Değerlendir</span>
+      </button>
+      <button onclick="openMyProfile()" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         <span class="hidden sm:inline">Profilim</span>
       </button>
@@ -141,7 +145,7 @@
       </form>
     </section>
 
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD (ANA SAYFA) -->
     <section id="dashboard-section" class="space-y-8 hidden">
 
       <!-- BU MU? BU MU? KARTI -->
@@ -166,6 +170,20 @@
         </div>
       </div>
 
+      <!-- KİŞİLERİ DEĞERLENDİR YÖNLENDİRME KARTI -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg flex flex-col items-center justify-center space-y-3">
+        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-full text-indigo-500">
+          <svg class="w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Kişileri Değerlendir</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 max-w-md">Üyeleri tek tek görüntüleyip onlara 1-10 arası puan verebilir ve yorum bırakabilirsin.</p>
+        <button onclick="showSection('rate-section')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
+          Değerlendirme Sayfasına Git
+        </button>
+      </div>
+
       <!-- SIRALAMA TABLOSU -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
         <div class="flex items-center gap-2 mb-4">
@@ -178,8 +196,10 @@
           <p class="text-gray-500 text-sm">Yükleniyor...</p>
         </div>
       </div>
+    </section>
 
-      <!-- ÜYELERİ DEĞERLENDİR -->
+    <!-- AYRI SEKSİYON: ÜYELERİ DEĞERLENDİR SAYFASI -->
+    <section id="rate-section" class="space-y-6 hidden">
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
         <div class="flex items-center gap-2 mb-2">
           <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
@@ -775,7 +795,7 @@
 
       await loadDashboardData();
       if (!wasAll && hasRatedAll()) {
-        alert("Kilidini açtın! Artık sana verilen puanları ve yorumları görebilirsin.");
+        alert("Kilidi açtın! Artık sana verilen puanları ve yorumları görebilirsin.");
       }
       startVersusMode();
     }
