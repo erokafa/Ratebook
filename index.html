@@ -151,7 +151,7 @@
       <!-- BU MU? BU MU? KARTI -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
         <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap! (Bu seçimler profil ortalama puanlarını etkilemez.)</p>
         <button onclick="startVersusMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
           Sıralama Yapmaya Başla
         </button>
@@ -739,7 +739,7 @@
       }
     }
 
-    // ===== BU MU? BU MU? =====
+    // ===== BU MU? BU MU? (BAĞIMSIZ SECIM) =====
     function startVersusMode() {
       const others = allProfiles.filter(p => p.id !== currentUser.id);
       if (others.length < 2) {
@@ -775,28 +775,17 @@
       const wText = document.getElementById(`vs-comment-${winnerId}`).value.trim();
       const lText = document.getElementById(`vs-comment-${loserId}`).value.trim();
 
-      const wasAll = hasRatedAll();
-
-      // Yorum yazılmışsa gönder
+      // İsteğe bağlı yazılmış yorumlar varsa kaydedilir (Puanlar EKLENMEZ, evaluations güncellenmez)
       const commentsToInsert = [];
       if (wText) commentsToInsert.push({ target_id: winnerId, author_id: currentUser.id, comment_text: wText });
       if (lText) commentsToInsert.push({ target_id: loserId, author_id: currentUser.id, comment_text: lText });
 
       if (commentsToInsert.length > 0) {
         const { error: cErr } = await supabaseClient.from('comments').insert(commentsToInsert);
-        if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
+        if (cErr) { console.error("Yorum gönderilemedi: ", cErr.message); }
       }
 
-      const { error } = await supabaseClient.from('evaluations').upsert([
-        { evaluator_id: currentUser.id, target_id: winnerId, score: 10 },
-        { evaluator_id: currentUser.id, target_id: loserId,  score: 5 }
-      ], { onConflict: 'evaluator_id, target_id' });
-      if (error) { alert("Puan kaydedilemedi: " + error.message); return; }
-
-      await loadDashboardData();
-      if (!wasAll && hasRatedAll()) {
-        alert("Kilidi açtın! Artık sana verilen puanları ve yorumları görebilirsin.");
-      }
+      // Bir sonraki eşleşmeyi yükle
       startVersusMode();
     }
 
