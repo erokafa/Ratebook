@@ -71,10 +71,10 @@
         <span class="hidden sm:inline">Ana Sayfa</span>
       </button>
 
-      <!-- TURNUVA SEKMESİ -->
-      <button onclick="initTournamentPage()" class="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 px-3 py-2 rounded-xl text-xs font-medium text-purple-600 dark:text-purple-300 flex items-center gap-1.5">
-        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/></svg>
-        <span class="hidden sm:inline">Turnuva (VS)</span>
+      <!-- SIRALA SEKMESİ -->
+      <button onclick="initSortPage()" class="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 px-3 py-2 rounded-xl text-xs font-medium text-purple-600 dark:text-purple-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+        <span class="hidden sm:inline">Sırala</span>
       </button>
 
       <button onclick="showSection('rate-section')" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
@@ -157,10 +157,10 @@
 
       <!-- BU MU? BU MU? YÖNLENDİRME KARTI -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
-        <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">Bu mu? Bu mu? (Turnuva Arenası)</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">Eleme usulü turnuvada kişileri karşılaştır, finale kadar seç ve kendi 1. şampiyonunu belirle!</p>
-        <button onclick="initTournamentPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
-          Turnuva Başlat
+        <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">Bu mu? Bu mu?</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">Sıralama oyunları, eleme turnuvası, Tier List ve Top 3 kürsü modları ile eğlen!</p>
+        <button onclick="initSortPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
+          Sıralama Oyunlarına Git
         </button>
       </div>
 
@@ -192,23 +192,102 @@
       </div>
     </section>
 
-    <!-- BAĞIMSIZ TURNUVA SAYFASI -->
-    <section id="tournament-section" class="space-y-6 hidden">
+    <!-- SIRALA (KİŞİSEL SIRALAMA OYUNLARI) SAYFASI -->
+    <section id="sort-section" class="space-y-6 hidden">
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-gray-200 dark:border-borderdark pb-4">
           <div>
             <h2 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
-              Bu mu? Bu mu? Turnuvası
+              Sıralama Oyunları
             </h2>
-            <p id="tournament-status-text" class="text-xs text-gray-400 mt-1">Eşleşmeler hazırlanıyor...</p>
+            <p class="text-xs text-gray-400 mt-1">Buradaki seçimler ve eğlenceli sıralamalar profil ortalama puanlarını etkilemez.</p>
           </div>
-          <button onclick="resetAndStartTournament()" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs px-3 py-2 rounded-xl font-medium transition">
-            Yeni Turnuva Başlat
+        </div>
+
+        <!-- OYUN MODU SEÇİM SEKMELERİ -->
+        <div class="flex border-b border-gray-200 dark:border-borderdark gap-2 mb-6 overflow-x-auto pb-1">
+          <button onclick="switchSortGame('vs')" id="game-tab-vs" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-purple-600 text-white shrink-0">
+            🥊 Bu mu? Bu mu? (Turnuva)
+          </button>
+          <button onclick="switchSortGame('top3')" id="game-tab-top3" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0">
+            🏆 En İyiler (Top 3)
+          </button>
+          <button onclick="switchSortGame('tier')" id="game-tab-tier" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0">
+            📊 Tier List (Sınıflandır)
           </button>
         </div>
 
-        <!-- TURNUVA MAÇ KARTLARI VEYA ŞAMPİYON EKRANI -->
-        <div id="tournament-container"></div>
+        <!-- OYUN ALANI 1: VS ELEME TURNUVASI -->
+        <div id="sort-game-vs" class="space-y-4">
+          <div class="flex justify-between items-center bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark">
+            <span id="tournament-status-text" class="text-xs font-semibold text-purple-400">Turnuva yükleniyor...</span>
+            <button onclick="resetAndStartTournament()" class="text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+              Yeni Turnuva
+            </button>
+          </div>
+          <div id="tournament-container" class="pt-2"></div>
+        </div>
+
+        <!-- OYUN ALANI 2: TOP 3 KÜRSÜ SEÇİMİ -->
+        <div id="sort-game-top3" class="hidden space-y-6">
+          <p class="text-xs text-gray-400 text-center">Top 3 listen için kişileri seç:</p>
+          <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto text-center">
+            <!-- 2. GÜMÜŞ -->
+            <div class="flex flex-col items-center">
+              <span class="text-2xl font-black text-gray-300 mb-1">🥈 2.</span>
+              <div id="podium-2" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl p-3 min-h-[120px] flex flex-col items-center justify-center">
+                <span class="text-xs text-gray-500">Seçilmedi</span>
+              </div>
+            </div>
+            <!-- 1. ALTIN -->
+            <div class="flex flex-col items-center -mt-3">
+              <span class="text-3xl font-black text-yellow-400 mb-1">👑 1.</span>
+              <div id="podium-1" class="w-full bg-gray-50 dark:bg-blackbg border-2 border-yellow-500/50 rounded-xl p-3 min-h-[130px] flex flex-col items-center justify-center shadow-lg shadow-yellow-500/10">
+                <span class="text-xs text-gray-500">Seçilmedi</span>
+              </div>
+            </div>
+            <!-- 3. BRONZ -->
+            <div class="flex flex-col items-center">
+              <span class="text-2xl font-black text-amber-600 mb-1">🥉 3.</span>
+              <div id="podium-3" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl p-3 min-h-[120px] flex flex-col items-center justify-center">
+                <span class="text-xs text-gray-500">Seçilmedi</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-200 dark:border-borderdark pt-4">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Kişi Seç:</h4>
+            <div id="top3-select-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- OYUN ALANI 3: TIER LIST (S - D) -->
+        <div id="sort-game-tier" class="hidden space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 bg-red-950/40 border border-red-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-red-400 text-sm w-8 shrink-0 text-center">S</span>
+              <div id="tier-S" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-orange-950/40 border border-orange-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-orange-400 text-sm w-8 shrink-0 text-center">A</span>
+              <div id="tier-A" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-yellow-950/40 border border-yellow-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-yellow-400 text-sm w-8 shrink-0 text-center">B</span>
+              <div id="tier-B" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-green-950/40 border border-green-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-green-400 text-sm w-8 shrink-0 text-center">C</span>
+              <div id="tier-C" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-200 dark:border-borderdark pt-4">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sıralanacak Kişi:</h4>
+            <div id="tier-active-card"></div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -305,6 +384,12 @@
     let currentRoundParticipants = [];
     let nextRoundParticipants = [];
     let currentMatchIndex = 0;
+
+    // TOP 3 KÜRSÜ DEĞİŞKENLERİ
+    let podium = { 1: null, 2: null, 3: null };
+
+    // TIER LIST DEĞİŞKENLERİ
+    let tierQueue = [];
 
     // ===== YARDIMCI FONKSİYONLAR =====
     function escapeHtml(s) {
@@ -759,16 +844,27 @@
       }
     }
 
-    // ===== TURNUVA SİSTEMİ (ELEME USULÜ VERSUS) =====
-    function initTournamentPage() {
-      showSection('tournament-section');
-      if (currentRoundParticipants.length === 0) {
-        resetAndStartTournament();
-      } else {
-        renderCurrentMatch();
-      }
+    // ===== SIRALA SAYFASI VE SIRALAMA OYUNLARI =====
+    function initSortPage() {
+      showSection('sort-section');
+      switchSortGame('vs');
     }
 
+    function switchSortGame(gameType) {
+      ['vs', 'top3', 'tier'].forEach(g => {
+        document.getElementById(`sort-game-${g}`).classList.add('hidden');
+        document.getElementById(`game-tab-${g}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0";
+      });
+
+      document.getElementById(`sort-game-${gameType}`).classList.remove('hidden');
+      document.getElementById(`game-tab-${gameType}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-purple-600 text-white shrink-0";
+
+      if (gameType === 'vs' && currentRoundParticipants.length === 0) resetAndStartTournament();
+      if (gameType === 'top3') renderTop3Game();
+      if (gameType === 'tier') renderTierGame();
+    }
+
+    // --- OYUN 1: ELEME TURNUVASI (VS) ---
     function resetAndStartTournament() {
       const candidates = allProfiles.filter(p => p.id !== currentUser.id);
       if (candidates.length < 2) {
@@ -776,10 +872,8 @@
         return;
       }
 
-      // Karıştır
       const shuffled = [...candidates].sort(() => 0.5 - Math.random());
 
-      // 2'nin kuvveti kadar kişi seç (2, 4, 8, 16 vs.)
       let count = 2;
       while (count * 2 <= shuffled.length && count < 16) {
         count *= 2;
@@ -805,18 +899,17 @@
       const container = document.getElementById('tournament-container');
       const statusText = document.getElementById('tournament-status-text');
 
-      // Şampiyon Belli Oldu mu?
       if (currentRoundParticipants.length === 1) {
         const champion = currentRoundParticipants[0];
         statusText.innerText = "Turnuva Tamamlandı!";
         container.innerHTML = `
-          <div class="text-center py-10 space-y-4 bg-gradient-to-b from-purple-900/20 to-transparent p-8 rounded-3xl border border-purple-500/30">
+          <div class="text-center py-8 space-y-4 bg-gradient-to-b from-purple-900/20 to-transparent p-6 rounded-3xl border border-purple-500/30">
             <div class="text-5xl animate-bounce">👑</div>
             <h3 class="text-xs uppercase font-extrabold tracking-widest text-purple-400">Turnuva Şampiyonu</h3>
-            <img src="${avatarOf(champion)}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-yellow-500 shadow-2xl">
+            <img src="${avatarOf(champion)}" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-yellow-500 shadow-2xl">
             <h2 class="text-2xl font-black text-white">${escapeHtml(champion.full_name)}</h2>
             <p class="text-xs text-gray-400">${handleOf(champion)}</p>
-            <div class="pt-4">
+            <div class="pt-2">
               <button onclick="resetAndStartTournament()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">
                 Yeniden Turnuva Oyna
               </button>
@@ -826,7 +919,6 @@
         return;
       }
 
-      // Tur bitti, bir sonraki tura geç
       if (currentMatchIndex >= currentRoundParticipants.length) {
         currentRoundParticipants = [...nextRoundParticipants];
         nextRoundParticipants = [];
@@ -846,23 +938,23 @@
       const userB = currentRoundParticipants[currentMatchIndex + 1];
 
       const vsCard = (u, other) => `
-        <div class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center space-y-3 hover:border-purple-500 transition">
-          <img src="${avatarOf(u)}" class="w-24 h-24 rounded-full mx-auto object-cover border-2 border-purple-500 shadow-lg">
+        <div class="bg-gray-50 dark:bg-blackbg p-5 rounded-2xl border border-gray-200 dark:border-borderdark text-center space-y-3 hover:border-purple-500 transition">
+          <img src="${avatarOf(u)}" class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-purple-500 shadow-lg">
           <div>
-            <h4 class="font-bold text-base text-gray-900 dark:text-gray-100">${escapeHtml(u.full_name)}</h4>
-            <p class="text-xs text-gray-500">${handleOf(u)}</p>
+            <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100">${escapeHtml(u.full_name)}</h4>
+            <p class="text-[11px] text-gray-500">${handleOf(u)}</p>
           </div>
           <textarea id="vs-comment-${u.id}" rows="2" placeholder="Yorum (isteğe bağlı)..."
             class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-purple-500"></textarea>
-          <button onclick="selectMatchWinner('${u.id}', '${other.id}')" class="w-full bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-md">
-            Bunu Seç & Üst Tura Taşı
+          <button onclick="selectMatchWinner('${u.id}', '${other.id}')" class="w-full bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2 rounded-xl transition shadow-md">
+            Bunu Seç
           </button>
         </div>`;
 
       container.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-6 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
           ${vsCard(userA, userB)}
-          <div class="font-extrabold text-2xl text-purple-500 tracking-widest my-2 md:my-0">VS</div>
+          <div class="font-extrabold text-xl text-purple-500 tracking-widest text-center">VS</div>
           ${vsCard(userB, userA)}
         </div>
       `;
@@ -873,7 +965,6 @@
       const wText = document.getElementById(`vs-comment-${winnerId}`)?.value.trim();
       const lText = document.getElementById(`vs-comment-${loserId}`)?.value.trim();
 
-      // İsteğe bağlı yazılmış yorumları kaydet
       const commentsToInsert = [];
       if (wText) commentsToInsert.push({ target_id: winnerId, author_id: currentUser.id, comment_text: wText });
       if (lText) commentsToInsert.push({ target_id: loserId, author_id: currentUser.id, comment_text: lText });
@@ -882,11 +973,103 @@
         await supabaseClient.from('comments').insert(commentsToInsert);
       }
 
-      // Kazananı bir üst tura ekle
       nextRoundParticipants.push(winner);
       currentMatchIndex += 2;
-
       renderCurrentMatch();
+    }
+
+    // --- OYUN 2: TOP 3 KÜRSÜ SEÇİMİ ---
+    function renderTop3Game() {
+      [1, 2, 3].forEach(rank => {
+        const p = podium[rank];
+        const el = document.getElementById(`podium-${rank}`);
+        if (p) {
+          el.innerHTML = `
+            <img src="${avatarOf(p)}" class="w-12 h-12 rounded-full object-cover mb-1 border-2 border-purple-500">
+            <span class="font-bold text-xs truncate max-w-[100px]">${escapeHtml(p.full_name)}</span>
+            <button onclick="removeFromPodium(${rank})" class="text-[10px] text-red-400 hover:underline mt-1">Kaldır</button>
+          `;
+        } else {
+          el.innerHTML = `<span class="text-xs text-gray-500">Seçilmedi</span>`;
+        }
+      });
+
+      const listEl = document.getElementById('top3-select-list');
+      const selectedIds = Object.values(podium).filter(Boolean).map(x => x.id);
+      const available = allProfiles.filter(p => p.id !== currentUser.id && !selectedIds.includes(p.id));
+
+      listEl.innerHTML = available.map(p => `
+        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="flex items-center gap-2 min-w-0">
+            <img src="${avatarOf(p)}" class="w-7 h-7 rounded-full object-cover">
+            <span class="text-xs font-medium truncate">${escapeHtml(p.full_name)}</span>
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <button onclick="addToPodium('${p.id}', 1)" class="px-1.5 py-0.5 text-[10px] bg-yellow-500/20 text-yellow-300 rounded hover:bg-yellow-500 hover:text-black">1.</button>
+            <button onclick="addToPodium('${p.id}', 2)" class="px-1.5 py-0.5 text-[10px] bg-gray-500/20 text-gray-300 rounded hover:bg-gray-400 hover:text-black">2.</button>
+            <button onclick="addToPodium('${p.id}', 3)" class="px-1.5 py-0.5 text-[10px] bg-amber-600/20 text-amber-400 rounded hover:bg-amber-600 hover:text-black">3.</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToPodium(userId, rank) {
+      const person = allProfiles.find(p => p.id === userId);
+      podium[rank] = person;
+      renderTop3Game();
+    }
+
+    function removeFromPodium(rank) {
+      podium[rank] = null;
+      renderTop3Game();
+    }
+
+    // --- OYUN 3: TIER LIST ---
+    function renderTierGame() {
+      if (tierQueue.length === 0) {
+        tierQueue = allProfiles.filter(p => p.id !== currentUser.id).sort(() => 0.5 - Math.random());
+      }
+
+      const activeEl = document.getElementById('tier-active-card');
+      if (tierQueue.length === 0) {
+        activeEl.innerHTML = `<p class="text-xs text-gray-500">Tüm üyeleri sınıflandırdın!</p>`;
+        return;
+      }
+
+      const currentPerson = tierQueue[0];
+      activeEl.innerHTML = `
+        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark max-w-md">
+          <div class="flex items-center gap-3">
+            <img src="${avatarOf(currentPerson)}" class="w-10 h-10 rounded-full object-cover border">
+            <div>
+              <p class="font-bold text-xs">${escapeHtml(currentPerson.full_name)}</p>
+              <p class="text-[10px] text-gray-400">${handleOf(currentPerson)}</p>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="assignTier('S')" class="px-2.5 py-1 text-xs font-bold bg-red-600 text-white rounded-lg hover:opacity-80">S</button>
+            <button onclick="assignTier('A')" class="px-2.5 py-1 text-xs font-bold bg-orange-600 text-white rounded-lg hover:opacity-80">A</button>
+            <button onclick="assignTier('B')" class="px-2.5 py-1 text-xs font-bold bg-yellow-600 text-white rounded-lg hover:opacity-80">B</button>
+            <button onclick="assignTier('C')" class="px-2.5 py-1 text-xs font-bold bg-green-600 text-white rounded-lg hover:opacity-80">C</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function assignTier(tier) {
+      if (tierQueue.length === 0) return;
+      const person = tierQueue.shift();
+      const container = document.getElementById(`tier-${tier}`);
+
+      const badge = document.createElement('div');
+      badge.className = "flex items-center gap-1.5 bg-gray-800 px-2 py-1 rounded-lg border border-gray-700 shrink-0";
+      badge.innerHTML = `
+        <img src="${avatarOf(person)}" class="w-5 h-5 rounded-full object-cover">
+        <span class="text-[11px] font-medium">${escapeHtml(person.full_name)}</span>
+      `;
+      container.appendChild(badge);
+
+      renderTierGame();
     }
 
     // ===== SIRALAMA =====
