@@ -151,7 +151,7 @@
       <!-- BU MU? BU MU? KARTI -->
       <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
         <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir! (İki kişi için de yorum yazman gerekir.)</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">İki kişi arasında seçim yap, tercihinle sıralamayı anında şekillendir!</p>
         <button onclick="startVersusMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
           Sıralama Yapmaya Başla
         </button>
@@ -759,7 +759,7 @@
           <img src="${avatarOf(u)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
           <h4 class="font-bold text-lg">${escapeHtml(u.full_name)}</h4>
           <p class="text-xs text-gray-500 mb-3">${handleOf(u)}</p>
-          <textarea id="vs-comment-${u.id}" rows="2" placeholder="Yorum (zorunlu)..."
+          <textarea id="vs-comment-${u.id}" rows="2" placeholder="Yorum (isteğe bağlı)..."
             class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
           <button onclick="chooseVersusWinner('${u.id}', '${other.id}')" class="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
         </div>`;
@@ -774,18 +774,18 @@
     async function chooseVersusWinner(winnerId, loserId) {
       const wText = document.getElementById(`vs-comment-${winnerId}`).value.trim();
       const lText = document.getElementById(`vs-comment-${loserId}`).value.trim();
-      if (!wText || !lText) {
-        alert("İki kişi için de yorum yazmak zorunlu.");
-        return;
-      }
 
       const wasAll = hasRatedAll();
 
-      const { error: cErr } = await supabaseClient.from('comments').insert([
-        { target_id: winnerId, author_id: currentUser.id, comment_text: wText },
-        { target_id: loserId,  author_id: currentUser.id, comment_text: lText }
-      ]);
-      if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
+      // Yorum yazılmışsa gönder
+      const commentsToInsert = [];
+      if (wText) commentsToInsert.push({ target_id: winnerId, author_id: currentUser.id, comment_text: wText });
+      if (lText) commentsToInsert.push({ target_id: loserId, author_id: currentUser.id, comment_text: lText });
+
+      if (commentsToInsert.length > 0) {
+        const { error: cErr } = await supabaseClient.from('comments').insert(commentsToInsert);
+        if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
+      }
 
       const { error } = await supabaseClient.from('evaluations').upsert([
         { evaluator_id: currentUser.id, target_id: winnerId, score: 10 },
