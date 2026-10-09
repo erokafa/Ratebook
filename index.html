@@ -286,12 +286,12 @@
       return p.unclaimed ? 'Henüz üye değil' : '@' + escapeHtml(p.username);
     }
 
-    // Kullanıcı kendi dışındaki herkesi puanladı mı?
+    // Kullanıcı en az 1 kişiyi puanladı mı?
     function ratingStats() {
       const others = allProfiles.filter(p => p.id !== currentUser.id);
       const rated = new Set(allEvaluations.filter(e => e.evaluator_id === currentUser.id).map(e => e.target_id));
       const done = others.filter(p => rated.has(p.id)).length;
-      return { total: others.length, done, all: done === others.length };
+      return { total: others.length, done, all: done >= 1 };
     }
     function hasRatedAll() { return ratingStats().all; }
 
@@ -515,7 +515,6 @@
         const bio = document.getElementById('setting-bio').value;
         const avatarFile = document.getElementById('setting-avatar-file').files[0];
 
-        // full_name artık güncellenmiyor (yönetici listesinden geliyor)
         let updateData = { username, bio };
 
         if (avatarFile) {
@@ -624,14 +623,13 @@
 
       const isMe = userId === currentUser.id;
       const locked = isMe && !hasRatedAll();
-      const { total, done } = ratingStats();
+      const { done } = ratingStats();
 
       const userEvals = allEvaluations.filter(e => e.target_id === userId);
       const avgScore = userEvals.length > 0
         ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
         : '0.0';
 
-      // Kilitliyken yorumlar hiç çekilmez (RLS de zaten engeller)
       let comments = [];
       if (!locked) {
         const { data } = await supabaseClient
@@ -682,7 +680,7 @@
 
           <div class="space-y-3 pt-2">
             ${locked
-              ? `<p class="text-xs text-gray-500">🔒 Sana yapılan yorumları görmek için herkesi puanlamalısın (${done}/${total}).</p>`
+              ? `<p class="text-xs text-gray-500">🔒 Sana yapılan yorumları görmek için en az 1 kişiyi puanlamalısın (${done}/1).</p>`
               : (comments.length === 0 ? `<p class="text-xs text-gray-500">Henüz yorum yapılmamış.${isMe ? '' : ' İlk yorumu sen yap!'}</p>` : '')}
             ${comments.map(c => `
               <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
@@ -763,7 +761,6 @@
 
       const wasAll = hasRatedAll();
 
-      // Önce yorumlar, sonra puanlar: yorumsuz puan kaydedilemesin
       const { error: cErr } = await supabaseClient.from('comments').insert([
         { target_id: winnerId, author_id: currentUser.id, comment_text: wText },
         { target_id: loserId,  author_id: currentUser.id, comment_text: lText }
@@ -778,7 +775,7 @@
 
       await loadDashboardData();
       if (!wasAll && hasRatedAll()) {
-        alert("Herkesi puanladın! Artık sana verilen puanları ve yorumları görebilirsin.");
+        alert("Kilidini açtın! Artık sana verilen puanları ve yorumları görebilirsin.");
       }
       startVersusMode();
     }
@@ -804,7 +801,6 @@
         return { ...profile, avgScore, evalCount: userEvals.length };
       });
 
-      // Kilitliyken kendi puanı ve sıralaması gösterilmez
       const meRow = locked ? userScores.find(u => u.id === currentUser.id) : null;
       const ranked = locked ? userScores.filter(u => u.id !== currentUser.id) : userScores;
       ranked.sort((a, b) => (b.avgScore === 'Puan Yok' ? -1 : b.avgScore - a.avgScore));
@@ -835,11 +831,11 @@
     function renderUserRatingCards(profiles, evalData) {
       const container = document.getElementById('users-to-rate');
       const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
-      const { total, done, all } = ratingStats();
+      const { done, all } = ratingStats();
 
       document.getElementById('rating-progress').innerText = all
-        ? 'Herkesi puanladın! Sana verilen puanları ve yorumları görebilirsin.'
-        : `Sana verilen puanları ve yorumları görmek için herkesi puanlamalısın (${done}/${total}). Puan verirken yorum yazmak zorunludur.`;
+        ? 'Kilidini açtın! Sana verilen puanları ve yorumları görebilirsin.'
+        : `Sana verilen puanları ve yorumları görmek için en az 1 kişiyi puanlamalısın (${done}/1). Puan verirken yorum yazmak zorunludur.`;
 
       if (otherUsers.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
@@ -888,7 +884,6 @@
 
       const wasAll = hasRatedAll();
 
-      // Önce yorum, sonra puan: yorumsuz puan kaydedilemesin
       const { error: cErr } = await supabaseClient.from('comments').insert({
         target_id: targetId, author_id: currentUser.id, comment_text: text
       });
@@ -902,7 +897,7 @@
 
       await loadDashboardData();
       alert(!wasAll && hasRatedAll()
-        ? "Herkesi puanladın! Artık sana verilen puanları ve yorumları görebilirsin."
+        ? "Kilidi açtın! Artık sana verilen puanları ve yorumları görebilirsin."
         : "Puanın ve yorumun kaydedildi!");
     }
   </script>
