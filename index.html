@@ -1,3 +1,18 @@
+İstediğin düzeltme ve eklemeler yapıldı!
+
+### Yapılan Değişiklikler:
+
+1. **D ve E Tier'ları Eklendi:** Sınıflandırma alanına **D (Mavi)** ve **E (Mor)** seviyeleri eklendi.
+2. **Tekrarlı Ekleme Engellendi:** Bir kullanıcı sınıflandırıldığında (S, A, B, C, D veya E seçildiğinde), listeden tamamen düşer ve aynı kişi bir daha karşına çıkmaz.
+3. **Kalan Kişi Sayıcı:** Aktif kartın üst kısmına toplam kaç kişiden kaçıncıyı sınıflandırdığını gösteren sayaç eklendi.
+
+---
+
+### Güncellenmiş `index.html` Kodu
+
+Kodun tamamını kopyalayıp `index.html` dosyanızla değiştirebilirsiniz:
+
+```html
 <!DOCTYPE html>
 <html lang="tr" class="dark">
 <head>
@@ -261,8 +276,16 @@
           </div>
         </div>
 
-        <!-- OYUN ALANI 3: TIER LIST (S - D) -->
+        <!-- OYUN ALANI 3: TIER LIST (S - E) -->
         <div id="sort-game-tier" class="hidden space-y-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs text-gray-400">Üyeleri kategorilere ayır:</span>
+            <button onclick="resetTierGame()" class="text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white px-3 py-1 rounded-lg transition font-medium">
+              Sıfırla
+            </button>
+          </div>
+
+          <!-- TIER SIRALARI (S, A, B, C, D, E) -->
           <div class="space-y-2">
             <div class="flex items-center gap-2 bg-red-950/40 border border-red-800/40 p-2.5 rounded-xl">
               <span class="font-extrabold text-red-400 text-sm w-8 shrink-0 text-center">S</span>
@@ -280,10 +303,18 @@
               <span class="font-extrabold text-green-400 text-sm w-8 shrink-0 text-center">C</span>
               <div id="tier-C" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
+            <div class="flex items-center gap-2 bg-blue-950/40 border border-blue-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-blue-400 text-sm w-8 shrink-0 text-center">D</span>
+              <div id="tier-D" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-purple-950/40 border border-purple-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-purple-400 text-sm w-8 shrink-0 text-center">E</span>
+              <div id="tier-E" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
+            </div>
           </div>
 
           <div class="border-t border-gray-200 dark:border-borderdark pt-4">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sıralanacak Kişi:</h4>
+            <h4 id="tier-progress-text" class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sıralanacak Kişi:</h4>
             <div id="tier-active-card"></div>
           </div>
         </div>
@@ -390,6 +421,7 @@
 
     // TIER LIST DEĞİŞKENLERİ
     let tierQueue = [];
+    let totalTierPeopleCount = 0;
 
     // ===== YARDIMCI FONKSİYONLAR =====
     function escapeHtml(s) {
@@ -861,7 +893,7 @@
 
       if (gameType === 'vs' && currentRoundParticipants.length === 0) resetAndStartTournament();
       if (gameType === 'top3') renderTop3Game();
-      if (gameType === 'tier') renderTierGame();
+      if (gameType === 'tier' && tierQueue.length === 0) resetTierGame();
     }
 
     // --- OYUN 1: ELEME TURNUVASI (VS) ---
@@ -1025,32 +1057,54 @@
     }
 
     // --- OYUN 3: TIER LIST ---
-    function renderTierGame() {
-      if (tierQueue.length === 0) {
-        tierQueue = allProfiles.filter(p => p.id !== currentUser.id).sort(() => 0.5 - Math.random());
-      }
+    function resetTierGame() {
+      ['S', 'A', 'B', 'C', 'D', 'E'].forEach(t => {
+        const el = document.getElementById(`tier-${t}`);
+        if (el) el.innerHTML = '';
+      });
+      const candidates = allProfiles.filter(p => p.id !== currentUser.id);
+      tierQueue = [...candidates].sort(() => 0.5 - Math.random());
+      totalTierPeopleCount = tierQueue.length;
+      renderTierGame();
+    }
 
+    function renderTierGame() {
       const activeEl = document.getElementById('tier-active-card');
+      const progressEl = document.getElementById('tier-progress-text');
+
       if (tierQueue.length === 0) {
-        activeEl.innerHTML = `<p class="text-xs text-gray-500">Tüm üyeleri sınıflandırdın!</p>`;
+        if (progressEl) progressEl.innerText = "Sınıflandırma Tamamlandı!";
+        activeEl.innerHTML = `
+          <div class="text-center p-6 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
+            <p class="text-xs font-bold text-green-400 mb-2">🎉 Tüm üyeleri başarıyla sınıflandırdın!</p>
+            <button onclick="resetTierGame()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition font-medium">
+              Yeniden Başlat
+            </button>
+          </div>
+        `;
         return;
       }
 
+      const currentIndex = totalTierPeopleCount - tierQueue.length + 1;
+      if (progressEl) progressEl.innerText = `Sıralanacak Kişi (${currentIndex} / ${totalTierPeopleCount}):`;
+
       const currentPerson = tierQueue[0];
       activeEl.innerHTML = `
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark max-w-md">
+        <div class="flex flex-col sm:flex-row items-center justify-between p-3.5 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark max-w-lg mx-auto gap-3">
           <div class="flex items-center gap-3">
-            <img src="${avatarOf(currentPerson)}" class="w-10 h-10 rounded-full object-cover border">
+            <img src="${avatarOf(currentPerson)}" class="w-10 h-10 rounded-full object-cover border border-purple-500/40">
             <div>
               <p class="font-bold text-xs">${escapeHtml(currentPerson.full_name)}</p>
               <p class="text-[10px] text-gray-400">${handleOf(currentPerson)}</p>
             </div>
           </div>
-          <div class="flex gap-1">
-            <button onclick="assignTier('S')" class="px-2.5 py-1 text-xs font-bold bg-red-600 text-white rounded-lg hover:opacity-80">S</button>
-            <button onclick="assignTier('A')" class="px-2.5 py-1 text-xs font-bold bg-orange-600 text-white rounded-lg hover:opacity-80">A</button>
-            <button onclick="assignTier('B')" class="px-2.5 py-1 text-xs font-bold bg-yellow-600 text-white rounded-lg hover:opacity-80">B</button>
-            <button onclick="assignTier('C')" class="px-2.5 py-1 text-xs font-bold bg-green-600 text-white rounded-lg hover:opacity-80">C</button>
+          <div class="flex gap-1.5 flex-wrap justify-center">
+            <button onclick="assignTier('S')" class="px-2.5 py-1 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">S</button>
+            <button onclick="assignTier('A')" class="px-2.5 py-1 text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white rounded-lg transition">A</button>
+            <button onclick="assignTier('B')" class="px-2.5 py-1 text-xs font-bold bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition">B</button>
+            <button onclick="assignTier('C')" class="px-2.5 py-1 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">C</button>
+            <button onclick="assignTier('D')" class="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition">D</button>
+            <button onclick="assignTier('E')" class="px-2.5 py-1 text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition">E</button>
           </div>
         </div>
       `;
@@ -1191,3 +1245,5 @@
   </script>
 </body>
 </html>
+
+```
