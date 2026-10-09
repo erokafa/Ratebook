@@ -265,6 +265,21 @@
     let rosterList = [];
     let selectedRosterId = null;
 
+    function defaultAvatar(name) {
+      const initials = (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toLocaleUpperCase('tr-TR').replace(/[&<>]/g, '');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150"><rect width="150" height="150" fill="#4f46e5"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" fill="#ffffff">${initials}</text></svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function avatarOf(p) {
+      if (p && p.avatar_url && !p.avatar_url.includes('via.placeholder.com')) return p.avatar_url;
+      return defaultAvatar(p ? p.full_name : '?');
+    }
+
+    function handleOf(p) {
+      return p.unclaimed ? 'Henüz üye değil' : '@' + p.username;
+    }
+
     function initTheme() {
       const savedTheme = localStorage.getItem('theme') || 'dark';
       setTheme(savedTheme);
@@ -514,7 +529,21 @@
       const { data: profiles } = await supabaseClient.from('profiles').select('*');
       const { data: evalData } = await supabaseClient.from('evaluations').select('*');
 
-      allProfiles = profiles || [];
+      const { data: unclaimed } = await supabaseClient
+        .from('roster')
+        .select('id, full_name')
+        .is('claimed_by', null);
+
+      const unclaimedPeople = (unclaimed || []).map(r => ({
+        id: r.id,
+        full_name: r.full_name,
+        username: null,
+        avatar_url: null,
+        bio: null,
+        unclaimed: true
+      }));
+
+      allProfiles = [...(profiles || []), ...unclaimedPeople];
       allEvaluations = evalData || [];
 
       renderLeaderboard(allProfiles, allEvaluations);
@@ -549,10 +578,10 @@
       } else {
         resultsEl.innerHTML = filtered.map(p => `
           <div onclick="viewUserProfile('${p.id}')" class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 cursor-pointer transition">
-            <img src="${p.avatar_url || 'https://via.placeholder.com/150'}" class="w-9 h-9 rounded-full object-cover">
+            <img src="${avatarOf(p)}" class="w-9 h-9 rounded-full object-cover">
             <div>
               <p class="font-semibold text-xs text-gray-900 dark:text-gray-100">${p.full_name}</p>
-              <p class="text-[11px] text-gray-400">@${p.username}</p>
+              <p class="text-[11px] text-gray-400">${handleOf(p)}</p>
             </div>
           </div>
         `).join('');
@@ -592,10 +621,10 @@
 
       profileContainer.innerHTML = `
         <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
-          <img src="${targetProfile.avatar_url || 'https://via.placeholder.com/150'}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
+          <img src="${avatarOf(targetProfile)}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
           <div class="flex-1 text-center sm:text-left space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <h3 class="text-2xl font-bold break-all">@${targetProfile.username}</h3>
+              <h3 class="text-2xl font-bold break-all">${targetProfile.unclaimed ? targetProfile.full_name : '@' + targetProfile.username}</h3>
               ${isMe ? `
                 <button onclick="showSection('settings-section')" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 text-xs font-semibold px-4 py-1.5 rounded-xl">
                   Profili Düzenle
@@ -610,7 +639,7 @@
 
             <div>
               <p class="font-bold text-sm">${targetProfile.full_name}</p>
-              <p class="text-xs text-gray-400 mt-1 break-words">${targetProfile.bio || 'Henüz biyografi eklenmedi.'}</p>
+              <p class="text-xs text-gray-400 mt-1 break-words">${targetProfile.unclaimed ? 'Bu kişi henüz siteye kayıt olmadı, ama puanlanabilir ve yorum yapılabilir.' : (targetProfile.bio || 'Henüz biyografi eklenmedi.')}</p>
             </div>
           </div>
         </div>
@@ -631,7 +660,7 @@
             ${(!comments || comments.length === 0) ? '<p class="text-xs text-gray-500">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>' : ''}
             ${(comments || []).map(c => `
               <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
-                <img src="${c.author?.avatar_url || 'https://via.placeholder.com/150'}" class="w-8 h-8 shrink-0 rounded-full object-cover">
+                <img src="${avatarOf(c.author)}" class="w-8 h-8 shrink-0 rounded-full object-cover">
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-center">
                     <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${c.author?.full_name || 'Bilinmeyen'}</span>
@@ -682,18 +711,18 @@
 
       cards.innerHTML = `
         <div onclick="chooseVersusWinner('${userA.id}', '${userB.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
-          <img src="${userA.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <img src="${avatarOf(userA)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
           <h4 class="font-bold text-lg group-hover:text-indigo-500">${userA.full_name}</h4>
-          <p class="text-xs text-gray-500">@${userA.username}</p>
+          <p class="text-xs text-gray-500">${handleOf(userA)}</p>
           <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
         </div>
 
         <div class="font-extrabold text-xl md:text-2xl text-indigo-500">VS</div>
 
         <div onclick="chooseVersusWinner('${userB.id}', '${userA.id}')" class="bg-gray-50 dark:bg-blackbg p-6 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transform hover:-translate-y-1 transition text-center group">
-          <img src="${userB.avatar_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
+          <img src="${avatarOf(userB)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-indigo-500">
           <h4 class="font-bold text-lg group-hover:text-indigo-500">${userB.full_name}</h4>
-          <p class="text-xs text-gray-500">@${userB.username}</p>
+          <p class="text-xs text-gray-500">${handleOf(userB)}</p>
           <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl">Bunu Seç</button>
         </div>
       `;
@@ -743,10 +772,10 @@
         <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
           <div class="flex items-center space-x-3 min-w-0">
             <span class="font-bold w-7 shrink-0 text-indigo-600 dark:text-indigo-400">#${index + 1}</span>
-            <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
+            <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
             <div class="min-w-0">
               <p class="font-medium text-sm hover:underline truncate">${u.full_name}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">@${u.username}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
             </div>
           </div>
           <div class="text-right shrink-0">
@@ -775,10 +804,10 @@
         return `
           <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
             <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
-              <img src="${u.avatar_url || 'https://via.placeholder.com/150'}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
+              <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
               <div>
                 <p class="font-medium text-sm group-hover:underline">${u.full_name}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">@${u.username}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
               </div>
             </div>
             <div class="flex items-center space-x-2 mt-2">
