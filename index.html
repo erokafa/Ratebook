@@ -404,41 +404,168 @@
 
     <!-- MODERATÖR PANELİ -->
     <section id="mod-section" class="space-y-6 hidden">
-      <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-5">
-        <div>
-          <h2 class="text-xl font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2">
-            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Moderatör Paneli
-          </h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Buraya eklediğin kişiler kayıt ekranında seçilebilir ve kayıt olmasalar bile puanlanıp yorumlanabilir.</p>
-        </div>
-
-        <form onsubmit="handleModAddOne(event)" class="flex gap-2">
-          <input type="text" id="mod-add-name" required placeholder="Ad Soyad ekle..."
-            class="flex-1 min-w-0 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
-          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium shrink-0">Ekle</button>
-        </form>
-
-        <details class="bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl p-3">
-          <summary class="text-xs font-semibold text-gray-600 dark:text-gray-300 cursor-pointer">Toplu ekle (her satıra bir isim)</summary>
-          <textarea id="mod-add-bulk" rows="6" placeholder="Ahmet Yılmaz&#10;Ayşe Demir&#10;Mehmet Kaya"
-            class="w-full mt-3 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500"></textarea>
-          <button type="button" onclick="handleModAddBulk()" class="mt-2 bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-medium">Hepsini Ekle</button>
-        </details>
+      <div>
+        <h2 class="text-xl font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+          <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Moderatör Paneli
+        </h2>
       </div>
 
-      <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Kişi Listesi</h3>
-          <p id="mod-counts" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        <button id="mod-tab-btn-people" onclick="switchModTab('people')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kişiler</button>
+        <button id="mod-tab-btn-members" onclick="switchModTab('members')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Üyeler</button>
+        <button id="mod-tab-btn-comments" onclick="switchModTab('comments')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Yorumlar</button>
+        <button id="mod-tab-btn-rules" onclick="switchModTab('rules')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kurallar</button>
+        <button id="mod-tab-btn-admins" onclick="switchModTab('admins')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Moderatörler</button>
+      </div>
+
+      <!-- KİŞİLER -->
+      <div id="mod-pane-people" class="space-y-6">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-5">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Buraya eklediğin kişiler kayıt ekranında seçilebilir ve kayıt olmasalar bile puanlanıp yorumlanabilir.</p>
+
+          <form onsubmit="handleModAddOne(event)" class="flex gap-2">
+            <input type="text" id="mod-add-name" required placeholder="Ad Soyad ekle..."
+              class="flex-1 min-w-0 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+            <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium shrink-0">Ekle</button>
+          </form>
+
+          <details class="bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-xl p-3">
+            <summary class="text-xs font-semibold text-gray-600 dark:text-gray-300 cursor-pointer">Toplu ekle (her satıra bir isim)</summary>
+            <textarea id="mod-add-bulk" rows="6" placeholder="Ahmet Yılmaz&#10;Ayşe Demir&#10;Mehmet Kaya"
+              class="w-full mt-3 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500"></textarea>
+            <button type="button" onclick="handleModAddBulk()" class="mt-2 bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-medium">Hepsini Ekle</button>
+          </details>
         </div>
-        <input type="text" id="mod-search" oninput="renderModRoster()" placeholder="Listede ara..."
-          class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
-        <div id="mod-roster-list" class="space-y-2 max-h-[28rem] overflow-y-auto"></div>
+
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Kişi Listesi</h3>
+            <p id="mod-counts" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
+          </div>
+          <input type="text" id="mod-search" oninput="renderModRoster()" placeholder="Listede ara..."
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="mod-roster-list" class="space-y-2 max-h-[28rem] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- ÜYELER -->
+      <div id="mod-pane-members" class="hidden">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Üyeler</h3>
+            <button onclick="loadModMembers()" class="text-xs bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition font-medium">Yenile</button>
+          </div>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+            Engellenen üye giriş yapamaz, listelerden kaybolur ve verdiği puan ve yorumlar gizlenir. Hiçbir şey silinmez, engeli kaldırınca her şey geri gelir.
+            Puan sıfırlama geri alınamaz. Tüm işlemler kayıt altına alınır. Sıradan üyelere işlem yapabilirsin; moderatörlere sadece yönetici işlem yapabilir.
+          </p>
+          <input type="text" id="mod-member-search" oninput="renderModMembers()" placeholder="Üyede ara..."
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="mod-members-list" class="space-y-2 max-h-[32rem] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- YORUMLAR -->
+      <div id="mod-pane-comments" class="hidden">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Yorumlar</h3>
+            <button onclick="loadModComments()" class="text-xs bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition font-medium">Yenile</button>
+          </div>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">En yeni 500 yorum. Yazarlar gösterilmez. Kilidini açana kadar kendine yapılan yorumları göremezsin.</p>
+          <input type="text" id="mod-comment-search" oninput="renderModComments()" placeholder="Yorumda veya kişide ara..."
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="mod-comments-list" class="space-y-2 max-h-[32rem] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- KURALLAR -->
+      <div id="mod-pane-rules" class="hidden">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-6">
+          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Kurallar</h3>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold">Gizli puan ve yorumların kilidi</label>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Kişi, kendisine verilen puanları ve yorumları görebilmek için önce başkalarını puanlamalı. 0 yazarsan kilit tamamen kapanır.</p>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <input type="number" id="rule-min" min="0" max="999"
+                  class="w-24 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2 text-sm text-center focus:outline-none focus:border-indigo-500 disabled:opacity-40">
+                <span class="text-xs text-gray-500">kişiyi puanlasın</span>
+              </div>
+              <label class="flex items-center gap-2 text-xs cursor-pointer">
+                <input type="checkbox" id="rule-all" onchange="syncRuleInputs()" class="w-4 h-4 accent-indigo-600">
+                Herkesi puanlaması zorunlu olsun
+              </label>
+            </div>
+          </div>
+
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="rule-comment" class="w-4 h-4 mt-0.5 accent-indigo-600">
+            <span>
+              <span class="block text-sm font-semibold">Puan verirken yorum zorunlu</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400">Yorum yazılmadan puan kaydedilmez.</span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="rule-anon" class="w-4 h-4 mt-0.5 accent-indigo-600">
+            <span>
+              <span class="block text-sm font-semibold">Yorumlar anonim olsun</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400">Açıkken yorumu kimin yazdığı sitede hiç kimseye, moderatörlere bile gösterilmez. Kapalıyken yazarın adı ve fotoğrafı görünür.</span>
+            </span>
+          </label>
+
+          <button onclick="saveModRules()" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Kuralları Kaydet</button>
+        </div>
+      </div>
+
+      <!-- MODERATÖRLER (sadece yönetici) -->
+      <div id="mod-pane-admins" class="hidden space-y-6">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Moderatörler</h3>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Moderatörler kişi ekleyip silebilir, yorumları silebilir ve kuralları değiştirebilir. Yöneticiler siteden kaldırılamaz, onlar SQL ile yönetilir.</p>
+          <div id="admin-mod-list" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Moderatör Ekle</h3>
+          <input type="text" id="admin-search" oninput="renderAdminCandidates()" placeholder="Üye ara..."
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          <div id="admin-candidates" class="space-y-2 max-h-80 overflow-y-auto"></div>
+        </div>
       </div>
     </section>
 
   </main>
+
+  <!-- ÜYE PROFİLİ DÜZENLEME PENCERESİ (moderatör) -->
+  <div id="member-edit-modal" class="hidden fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4"
+       onclick="if (event.target === this) closeMemberEdit()">
+    <div class="bg-white dark:bg-carddark w-full max-w-md rounded-2xl border border-gray-200 dark:border-borderdark p-5 sm:p-6 space-y-4 shadow-2xl">
+      <h3 id="member-edit-title" class="text-lg font-bold text-amber-600 dark:text-amber-400 break-words">Profili Düzenle</h3>
+      <form onsubmit="saveMemberEdit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kullanıcı Adı</label>
+          <input type="text" id="member-edit-username" required maxlength="30"
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Biyografi</label>
+          <textarea id="member-edit-bio" rows="3" maxlength="300"
+            class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl p-2.5 text-sm focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer">
+          <input type="checkbox" id="member-edit-avatar" class="accent-amber-600"> Profil fotoğrafını sıfırla
+        </label>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="closeMemberEdit()" class="px-4 py-2 rounded-xl text-xs font-medium bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-700 transition">Vazgeç</button>
+          <button type="submit" id="member-edit-save" class="px-4 py-2 rounded-xl text-xs font-medium bg-amber-600 hover:bg-amber-500 text-white transition">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script>
     let currentUser = null;
@@ -449,6 +576,12 @@
     let selectedRosterId = null;
     let isModerator = false;
     let modRoster = [];
+    let modComments = [];
+    let isAdmin = false;
+    let modAdmins = [];
+    let scoreMap = new Map();   // kişi id -> { avg, count }  (sunucudan gelir)
+    let unlockInfo = { unlocked: false, done: 0, required: 1 };
+    let appSettings = { min_ratings_to_unlock: 1, require_comment: true, anonymous_comments: true };
 
     // TURNUVA DEĞİŞKENLERİ
     let tournamentRound = 1;
@@ -483,14 +616,75 @@
       return p.unclaimed ? 'Henüz üye değil' : '@' + escapeHtml(p.username);
     }
 
-    // Kullanıcı en az 1 kişiyi puanladı mı?
+    // Kilit durumu SUNUCUDAN gelir (my_unlock_status). Tarayıcı sadece gösterir,
+    // kilitli veriyi sunucu zaten göndermez.
     function ratingStats() {
-      const others = allProfiles.filter(p => p.id !== currentUser.id);
-      const rated = new Set(allEvaluations.filter(e => e.evaluator_id === currentUser.id).map(e => e.target_id));
-      const done = others.filter(p => rated.has(p.id)).length;
-      return { total: others.length, done, all: done >= 1 };
+      return { total: unlockInfo.required, done: unlockInfo.done, all: unlockInfo.unlocked };
     }
-    function hasRatedAll() { return ratingStats().all; }
+    function hasRatedAll() { return unlockInfo.unlocked; }
+
+    function lockMessage() {
+      const { done, required } = unlockInfo;
+      return appSettings.min_ratings_to_unlock < 0
+        ? `Sana verilen puanları ve yorumları görmek için herkesi puanlamalısın (${done}/${required}).`
+        : `Sana verilen puanları ve yorumları görmek için en az ${required} kişiyi puanlamalısın (${done}/${required}).`;
+    }
+
+    function friendlyError(err) {
+      const m = String(err?.message || err || '');
+      const map = {
+        COMMENT_REQUIRED: 'Puan verirken yorum yazmak zorunludur.',
+        EMPTY_COMMENT: 'Yorum boş olamaz.',
+        COMMENT_TOO_LONG: 'Yorum en fazla 500 karakter olabilir.',
+        BAD_SCORE: 'Lütfen 1 ile 10 arasında bir puan girin.',
+        SELF: 'Kendine puan veya yorum veremezsin.',
+        NO_TARGET: 'Bu kişi artık listede değil. Sayfayı yenile.',
+        NOT_ALLOWED: 'Bu işlem için yetkin yok.',
+        NOT_AUTH: 'Oturumun kapanmış, tekrar giriş yap.',
+        NO_USER: 'Bu üye bulunamadı.',
+        CANNOT_REMOVE: 'Yönetici siteden kaldırılamaz.',
+        BLOCKED: 'Hesabın engellenmiş.',
+        OWN_ACCOUNT: 'Bu işlemi kendi hesabına uygulayamazsın.',
+        USERNAME_TAKEN: 'Bu kullanıcı adı başka bir üyede var.',
+        BAD_USERNAME: 'Kullanıcı adı 2 ile 30 karakter arasında olmalı.',
+        BIO_TOO_LONG: 'Biyografi en fazla 300 karakter olabilir.'
+      };
+      for (const k of Object.keys(map)) if (m.includes(k)) return map[k];
+      return m;
+    }
+
+    // Kurallar, kilit durumu ve ortalama puanlar sunucudan çekilir
+    async function loadRules() {
+      const [settingsRes, statusRes, scoresRes] = await Promise.all([
+        supabaseClient.from('app_settings').select('key, value'),
+        supabaseClient.rpc('my_unlock_status'),
+        supabaseClient.rpc('get_scores')
+      ]);
+
+      if (String(statusRes.error?.message || '').includes('BLOCKED')) {
+        alert('Hesabın engellenmiş. Yönetici ile iletişime geç.');
+        await logout();
+        return false;
+      }
+
+      if (!settingsRes.error && settingsRes.data) {
+        const m = Object.fromEntries(settingsRes.data.map(r => [r.key, r.value]));
+        const min = parseInt(m.min_ratings_to_unlock, 10);
+        appSettings = {
+          min_ratings_to_unlock: Number.isFinite(min) ? min : 1,
+          require_comment: m.require_comment !== 'false',
+          anonymous_comments: m.anonymous_comments !== 'false'
+        };
+      }
+      if (!statusRes.error && statusRes.data) unlockInfo = statusRes.data;
+      scoreMap = new Map(((!scoresRes.error && scoresRes.data) || []).map(r =>
+        [r.person_id, { avg: Number(r.avg_score), count: Number(r.vote_count) }]));
+
+      if (statusRes.error || scoresRes.error) {
+        console.error('Kurallar yüklenemedi. Gizlilik SQL dosyası Supabase\'de çalıştırıldı mı?', statusRes.error || scoresRes.error);
+      }
+      return true;
+    }
 
     // ===== TEMA =====
     function initTheme() {
@@ -685,7 +879,7 @@
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-      if (error) alert("Giriş Başarısız: " + error.message);
+      if (error) alert(/banned/i.test(error.message) ? "Hesabın engellenmiş. Yönetici ile iletişime geç." : "Giriş Başarısız: " + error.message);
       else {
         currentUser = data.user;
         await fetchCurrentUserProfile();
@@ -701,7 +895,9 @@
       allProfiles = [];
       allEvaluations = [];
       isModerator = false;
+      isAdmin = false;
       modRoster = [];
+      modAdmins = [];
       updateUI(false);
     }
 
@@ -741,7 +937,10 @@
 
     async function loadDashboardData() {
       const { data: profiles } = await supabaseClient.from('profiles').select('*');
-      const { data: evalData } = await supabaseClient.from('evaluations').select('*');
+      // Sadece KENDİ verdiğim puanlar (ortalamalar get_scores ile gelir)
+      const { data: evalData } = await supabaseClient
+        .from('evaluations').select('evaluator_id, target_id, score').eq('evaluator_id', currentUser.id);
+      if ((await loadRules()) === false) return;
 
       const { data: unclaimed } = await supabaseClient
         .from('roster')
@@ -826,18 +1025,13 @@
       const locked = isMe && !hasRatedAll();
       const { done } = ratingStats();
 
-      const userEvals = allEvaluations.filter(e => e.target_id === userId);
-      const avgScore = userEvals.length > 0
-        ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
-        : '0.0';
+      const sc = scoreMap.get(userId);
+      const voteCount = sc ? sc.count : 0;
+      const avgScore = sc ? sc.avg.toFixed(1) : '0.0';
 
       let comments = [];
       if (!locked) {
-        const { data } = await supabaseClient
-          .from('comments')
-          .select('*, author:profiles!author_id(*)')
-          .eq('target_id', userId)
-          .order('created_at', { ascending: false });
+        const { data } = await supabaseClient.rpc('get_comments', { p_target: userId });
         comments = data || [];
       }
 
@@ -855,7 +1049,7 @@
             </div>
 
             <div class="flex justify-center sm:justify-start space-x-6 text-sm">
-              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : userEvals.length}</span> <span class="text-gray-500">Oy</span></div>
+              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : voteCount}</span> <span class="text-gray-500">Oy</span></div>
               <div><span class="font-bold text-indigo-500">${locked ? '🔒' : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
             </div>
 
@@ -881,14 +1075,16 @@
 
           <div class="space-y-3 pt-2">
             ${locked
-              ? `<p class="text-xs text-gray-500">🔒 Sana yapılan yorumları görmek için en az 1 kişiyi puanlamalısın (${done}/1).</p>`
+              ? `<p class="text-xs text-gray-500">🔒 ${lockMessage()}</p>`
               : (comments.length === 0 ? `<p class="text-xs text-gray-500">Henüz yorum yapılmamış.${isMe ? '' : ' İlk yorumu sen yap!'}</p>` : '')}
             ${comments.map(c => `
               <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
-                <img src="${avatarOf(c.author)}" class="w-8 h-8 shrink-0 rounded-full object-cover">
+                <img src="${c.author_id ? avatarOf({ avatar_url: c.author_avatar, full_name: c.author_name }) : defaultAvatar('?')}" class="w-8 h-8 shrink-0 rounded-full object-cover">
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-center">
-                    <span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author?.id}')">${escapeHtml(c.author?.full_name || 'Bilinmeyen')}</span>
+                    ${c.author_id
+                      ? `<span class="font-bold text-xs cursor-pointer hover:underline" onclick="viewUserProfile('${c.author_id}')">${escapeHtml(c.author_name || 'Bilinmeyen')}</span>`
+                      : `<span class="font-bold text-xs text-gray-400">Anonim</span>`}
                     <span class="text-[10px] text-gray-500">${new Date(c.created_at).toLocaleDateString('tr-TR')}</span>
                   </div>
                   <p class="text-xs text-gray-300 mt-1 break-words">${escapeHtml(c.comment_text)}</p>
@@ -907,13 +1103,9 @@
 
       if (!text) return;
 
-      const { error } = await supabaseClient.from('comments').insert({
-        target_id: targetId,
-        author_id: currentUser.id,
-        comment_text: text
-      });
+      const { error } = await supabaseClient.rpc('add_comment', { p_target: targetId, p_text: text });
 
-      if (error) alert("Yorum gönderilemedi: " + error.message);
+      if (error) alert("Yorum gönderilemedi: " + friendlyError(error));
       else {
         input.value = '';
         viewUserProfile(targetId);
@@ -1047,8 +1239,9 @@
       if (wText) commentsToInsert.push({ target_id: winnerId, author_id: currentUser.id, comment_text: wText });
       if (lText) commentsToInsert.push({ target_id: loserId, author_id: currentUser.id, comment_text: lText });
 
-      if (commentsToInsert.length > 0) {
-        await supabaseClient.from('comments').insert(commentsToInsert);
+      for (const c of commentsToInsert) {
+        const { error } = await supabaseClient.rpc('add_comment', { p_target: c.target_id, p_text: c.comment_text });
+        if (error) alert('Yorum gönderilemedi: ' + friendlyError(error));
       }
 
       nextRoundParticipants.push(winner);
@@ -1180,12 +1373,17 @@
     async function checkModerator() {
       const { data, error } = await supabaseClient.rpc('is_moderator');
       isModerator = !error && data === true;
+      isAdmin = false;
+      if (isModerator) {
+        const res = await supabaseClient.rpc('is_admin');
+        isAdmin = !res.error && res.data === true;
+      }
     }
 
     function openModPanel() {
       if (!isModerator) return;
       showSection('mod-section');
-      loadModRoster();
+      switchModTab('people');
     }
 
     async function loadModRoster() {
@@ -1217,8 +1415,9 @@
               <p class="text-[11px] ${claimed ? 'text-green-500' : 'text-amber-500'}">${claimed ? 'Üye (kayıt olmuş)' : 'Henüz alınmamış'}</p>
             </div>
             ${claimed ? '' : `
-              <div class="flex gap-1.5 shrink-0">
+              <div class="flex flex-wrap justify-end gap-1.5 shrink-0">
                 <button onclick="modRenameRoster('${p.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700 transition">Düzenle</button>
+                <button onclick="modResetRatings('${p.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700 transition">Puanları Sıfırla</button>
                 <button onclick="modDeleteRoster('${p.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600/90 hover:bg-red-500 text-white transition">Sil</button>
               </div>`}
           </div>`;
@@ -1312,6 +1511,281 @@
       await loadDashboardData();
     }
 
+    // --- Moderatör: üyeler (engelle, profil düzenle, puanları sıfırla) ---
+    let modMembers = [];
+    let editingMemberId = null;
+
+    async function loadModMembers() {
+      const { data, error } = await supabaseClient.rpc('mod_list_members');
+      if (error) { alert('Üyeler yüklenemedi: ' + friendlyError(error)); return; }
+      modMembers = data || [];
+      renderModMembers();
+    }
+
+    // Arayüzde sadece gösterim içindir; asıl kuralı sunucu uygular
+    function canActOnMember(m) {
+      if (m.id === currentUser.id || m.role === 'admin') return false;
+      return m.role === 'member' || isAdmin;
+    }
+
+    function renderModMembers() {
+      const q = nameKey(document.getElementById('mod-member-search').value);
+      const el = document.getElementById('mod-members-list');
+      const list = modMembers.filter(m => nameKey(m.full_name).includes(q) || nameKey(m.username).includes(q));
+
+      if (list.length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Üye bulunamadı.</p>';
+        return;
+      }
+
+      const btn = "px-3 py-1.5 text-xs font-medium rounded-lg transition";
+      el.innerHTML = list.map(m => {
+        const role = m.role === 'admin' ? ' · Yönetici' : m.role === 'moderator' ? ' · Moderatör' : '';
+        const votes = m.votes_received === null || m.votes_received === undefined ? 'oy gizli' : `${m.votes_received} oy`;
+        const id = escapeHtml(m.id);
+        return `
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark ${m.is_blocked ? 'opacity-70' : ''}">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="${avatarOf(m)}" class="w-9 h-9 shrink-0 rounded-full object-cover">
+              <div class="min-w-0">
+                <p class="text-sm font-medium truncate">${escapeHtml(m.full_name)}${m.id === currentUser.id ? ' (sen)' : ''}</p>
+                <p class="text-[11px] text-gray-500 truncate">@${escapeHtml(m.username || '')}${role} · ${votes}</p>
+                ${m.is_blocked ? '<p class="text-[11px] font-semibold text-red-500">Engelli</p>' : ''}
+              </div>
+            </div>
+            ${canActOnMember(m) ? `
+              <div class="flex flex-wrap justify-end gap-1.5">
+                <button onclick="openMemberEdit('${id}')" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Düzenle</button>
+                <button onclick="modResetRatings('${id}')" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Puanları Sıfırla</button>
+                <button onclick="modToggleBlock('${id}')" class="${btn} ${m.is_blocked ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600/90 hover:bg-red-500'} text-white">${m.is_blocked ? 'Engeli Kaldır' : 'Engelle'}</button>
+              </div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    async function modToggleBlock(id) {
+      const m = modMembers.find(x => x.id === id);
+      if (!m) return;
+      const block = !m.is_blocked;
+      const msg = block
+        ? `${m.full_name} engellensin mi?\n\nGiriş yapamaz, listelerden kaybolur ve verdiği puan ve yorumlar gizlenir. Hiçbir şey silinmez; engeli kaldırınca her şey geri gelir.`
+        : `${m.full_name} için engel kaldırılsın mı?`;
+      if (!confirm(msg)) return;
+
+      const { error } = await supabaseClient.rpc('mod_set_block', { p_user: id, p_blocked: block });
+      if (error) alert('İşlem başarısız: ' + friendlyError(error));
+      await loadModMembers();
+      await loadDashboardData();
+    }
+
+    async function modResetRatings(id) {
+      const m = modMembers.find(x => x.id === id);
+      const r = modRoster.find(x => x.id === id);
+      const name = m ? m.full_name : (r ? r.full_name : 'Bu kişi');
+      const count = m && m.votes_received !== null && m.votes_received !== undefined ? ` (${m.votes_received} puan)` : '';
+      if (!confirm(`${name} kişisine verilmiş tüm puanlar silinsin mi${count}?\n\nBu işlem geri alınamaz. Yorumlar silinmez.`)) return;
+
+      const { data, error } = await supabaseClient.rpc('mod_reset_ratings', { p_target: id });
+      if (error) { alert('Sıfırlanamadı: ' + friendlyError(error)); return; }
+      alert(`${data ?? 0} puan silindi.`);
+      await Promise.all([loadModMembers(), loadModRoster(), loadDashboardData()]);
+    }
+
+    function openMemberEdit(id) {
+      const m = modMembers.find(x => x.id === id);
+      if (!m) return;
+      editingMemberId = id;
+      document.getElementById('member-edit-title').innerText = `${m.full_name} — Profili Düzenle`;
+      document.getElementById('member-edit-username').value = m.username || '';
+      document.getElementById('member-edit-bio').value = m.bio || '';
+      document.getElementById('member-edit-avatar').checked = false;
+      document.getElementById('member-edit-modal').classList.remove('hidden');
+    }
+
+    function closeMemberEdit() {
+      editingMemberId = null;
+      document.getElementById('member-edit-modal').classList.add('hidden');
+    }
+
+    async function saveMemberEdit(e) {
+      e.preventDefault();
+      if (!editingMemberId) return;
+      const btn = document.getElementById('member-edit-save');
+      btn.disabled = true;
+
+      const { error } = await supabaseClient.rpc('mod_update_profile', {
+        p_user: editingMemberId,
+        p_username: document.getElementById('member-edit-username').value,
+        p_bio: document.getElementById('member-edit-bio').value,
+        p_reset_avatar: document.getElementById('member-edit-avatar').checked
+      });
+      btn.disabled = false;
+      if (error) { alert('Kaydedilemedi: ' + friendlyError(error)); return; }
+
+      closeMemberEdit();
+      await loadModMembers();
+      await loadDashboardData();
+    }
+
+    // --- Moderatör: sekmeler, yorumlar, kurallar ---
+    function switchModTab(tab) {
+      if (tab === 'admins' && !isAdmin) tab = 'people';
+      const on  = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-amber-600 text-white";
+      const off = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-amber-600";
+      ['people', 'members', 'comments', 'rules', 'admins'].forEach(t => {
+        document.getElementById(`mod-pane-${t}`).classList.toggle('hidden', t !== tab);
+        document.getElementById(`mod-tab-btn-${t}`).className = t === tab ? on : off;
+      });
+      document.getElementById('mod-tab-btn-admins').classList.toggle('hidden', !isAdmin);
+      if (tab === 'admins') loadAdmins();
+      if (tab === 'people') loadModRoster();
+      if (tab === 'members') loadModMembers();
+      if (tab === 'comments') loadModComments();
+      if (tab === 'rules') fillModRules();
+    }
+
+    async function loadModComments() {
+      const { data, error } = await supabaseClient.rpc('mod_list_comments');
+      if (error) { alert('Yorumlar yüklenemedi: ' + friendlyError(error)); return; }
+      modComments = data || [];
+      renderModComments();
+    }
+
+    function renderModComments() {
+      const q = nameKey(document.getElementById('mod-comment-search').value);
+      const el = document.getElementById('mod-comments-list');
+      const filtered = modComments.filter(c =>
+        nameKey(c.comment_text).includes(q) || nameKey(c.target_name).includes(q));
+
+      if (filtered.length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Yorum bulunamadı.</p>';
+        return;
+      }
+
+      el.innerHTML = filtered.map(c => `
+        <div class="flex items-start justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="min-w-0">
+            <p class="text-[11px] text-gray-500"><span class="font-semibold text-indigo-500">${escapeHtml(c.target_name)}</span> kişisine • ${new Date(c.created_at).toLocaleDateString('tr-TR')}</p>
+            <p class="text-sm mt-1 break-words">${escapeHtml(c.comment_text)}</p>
+          </div>
+          <button onclick="modDeleteComment('${escapeHtml(c.id)}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600/90 hover:bg-red-500 text-white transition shrink-0">Sil</button>
+        </div>
+      `).join('');
+    }
+
+    async function modDeleteComment(id) {
+      if (!confirm('Bu yorum silinsin mi? Bu işlem geri alınamaz.')) return;
+      const { error } = await supabaseClient.rpc('mod_delete_comment', { p_id: String(id) });
+      if (error) { alert('Silinemedi: ' + friendlyError(error)); return; }
+      await loadModComments();
+    }
+
+    async function fillModRules() {
+      await loadRules();
+      const min = appSettings.min_ratings_to_unlock;
+      document.getElementById('rule-all').checked = min < 0;
+      document.getElementById('rule-min').value = min < 0 ? 1 : min;
+      document.getElementById('rule-comment').checked = appSettings.require_comment;
+      document.getElementById('rule-anon').checked = appSettings.anonymous_comments;
+      syncRuleInputs();
+    }
+
+    function syncRuleInputs() {
+      document.getElementById('rule-min').disabled = document.getElementById('rule-all').checked;
+    }
+
+    async function saveModRules() {
+      const all = document.getElementById('rule-all').checked;
+      const n = parseInt(document.getElementById('rule-min').value, 10);
+      if (!all && (!Number.isInteger(n) || n < 0 || n > 999)) {
+        alert('Kişi sayısı 0 ile 999 arasında olmalı.');
+        return;
+      }
+
+      const updates = [
+        ['min_ratings_to_unlock', String(all ? -1 : n)],
+        ['require_comment', String(document.getElementById('rule-comment').checked)],
+        ['anonymous_comments', String(document.getElementById('rule-anon').checked)]
+      ];
+      for (const [key, value] of updates) {
+        const { error } = await supabaseClient.rpc('mod_set_setting', { p_key: key, p_value: value });
+        if (error) { alert('Kaydedilemedi: ' + friendlyError(error)); return; }
+      }
+
+      await loadDashboardData();
+      alert('Kurallar kaydedildi.');
+    }
+
+    // --- Yönetici: moderatör atama / kaldırma ---
+    async function loadAdmins() {
+      const { data, error } = await supabaseClient.rpc('admin_list_moderators');
+      if (error) { alert('Moderatörler yüklenemedi: ' + friendlyError(error)); return; }
+      modAdmins = data || [];
+      renderAdmins();
+      renderAdminCandidates();
+    }
+
+    function renderAdmins() {
+      const el = document.getElementById('admin-mod-list');
+      if (modAdmins.length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Moderatör yok.</p>';
+        return;
+      }
+      el.innerHTML = modAdmins.map(m => `
+        <div class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="min-w-0">
+            <p class="text-sm font-medium truncate">${escapeHtml(m.full_name || 'Bilinmeyen')}${m.user_id === currentUser.id ? ' (sen)' : ''}</p>
+            <p class="text-[11px] ${m.is_admin_flag ? 'text-amber-500' : 'text-gray-500'}">${m.is_admin_flag ? 'Yönetici' : 'Moderatör'}${m.username ? ' · @' + escapeHtml(m.username) : ''}</p>
+          </div>
+          ${m.is_admin_flag ? '' : `<button onclick="adminRemoveMod('${escapeHtml(m.user_id)}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600/90 hover:bg-red-500 text-white transition shrink-0">Kaldır</button>`}
+        </div>
+      `).join('');
+    }
+
+    function renderAdminCandidates() {
+      const q = nameKey(document.getElementById('admin-search').value);
+      const modIds = new Set(modAdmins.map(m => m.user_id));
+      const list = allProfiles
+        .filter(p => !p.unclaimed && !modIds.has(p.id) &&
+          (q === '' || nameKey(p.full_name).includes(q) || nameKey(p.username).includes(q)))
+        .sort((a, b) => String(a.full_name).localeCompare(String(b.full_name), 'tr'))
+        .slice(0, 30);
+
+      const el = document.getElementById('admin-candidates');
+      if (list.length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Uygun üye bulunamadı.</p>';
+        return;
+      }
+      el.innerHTML = list.map(p => `
+        <div class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="flex items-center gap-3 min-w-0">
+            <img src="${avatarOf(p)}" class="w-8 h-8 shrink-0 rounded-full object-cover">
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate">${escapeHtml(p.full_name)}</p>
+              <p class="text-[11px] text-gray-500 truncate">@${escapeHtml(p.username || '')}</p>
+            </div>
+          </div>
+          <button onclick="adminAddMod('${escapeHtml(p.id)}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition shrink-0">Moderatör Yap</button>
+        </div>
+      `).join('');
+    }
+
+    async function adminAddMod(id) {
+      const p = allProfiles.find(x => x.id === id);
+      if (!confirm(`${p ? p.full_name : 'Bu kişi'} moderatör yapılsın mı?\n\nKişi ekleyip silebilir, yorumları silebilir ve kuralları değiştirebilir.`)) return;
+      const { error } = await supabaseClient.rpc('admin_add_moderator', { p_user_id: id });
+      if (error) { alert('Eklenemedi: ' + friendlyError(error)); return; }
+      await loadAdmins();
+    }
+
+    async function adminRemoveMod(id) {
+      const m = modAdmins.find(x => x.user_id === id);
+      if (!confirm(`${m && m.full_name ? m.full_name : 'Bu kişi'} artık moderatör olmasın mı?`)) return;
+      const { error } = await supabaseClient.rpc('admin_remove_moderator', { p_user_id: id });
+      if (error) { alert('Kaldırılamadı: ' + friendlyError(error)); await loadAdmins(); return; }
+      await loadAdmins();
+    }
+
     // ===== SIRALAMA =====
     function renderLeaderboard(profiles, evalData) {
       const listEl = document.getElementById('leaderboard-list');
@@ -1322,11 +1796,9 @@
 
       const locked = !hasRatedAll();
       const userScores = profiles.map(profile => {
-        const userEvals = (evalData || []).filter(e => e.target_id === profile.id);
-        const avgScore = userEvals.length > 0
-          ? (userEvals.reduce((sum, e) => sum + Number(e.score), 0) / userEvals.length).toFixed(1)
-          : 'Puan Yok';
-        return { ...profile, avgScore, evalCount: userEvals.length };
+        const sc = scoreMap.get(profile.id);
+        const avgScore = sc ? sc.avg.toFixed(1) : 'Puan Yok';
+        return { ...profile, avgScore, evalCount: sc ? sc.count : 0 };
       });
 
       const meRow = locked ? userScores.find(u => u.id === currentUser.id) : null;
@@ -1361,9 +1833,14 @@
       const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
       const { done, all } = ratingStats();
 
-      document.getElementById('rating-progress').innerText = all
-        ? 'Kilidini açtın! Sana verilen puanları ve yorumları görebilirsin.'
-        : `Sana verilen puanları ve yorumları görmek için en az 1 kişiyi puanlamalısın (${done}/1). Puan verirken yorum yazmak zorunludur.`;
+      document.getElementById('rating-progress').innerText =
+        (all
+          ? (appSettings.min_ratings_to_unlock === 0
+              ? 'Sana verilen puanları ve yorumları görebilirsin.'
+              : 'Kilidini açtın! Sana verilen puanları ve yorumları görebilirsin.')
+          : lockMessage())
+        + (appSettings.require_comment ? ' Puan verirken yorum yazmak zorunludur.' : '')
+        + (appSettings.anonymous_comments ? ' Yorumlar anonimdir.' : '');
 
       if (otherUsers.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
@@ -1383,7 +1860,7 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
               </div>
             </div>
-            <textarea id="comment-${u.id}" rows="2" placeholder="Yorum (zorunlu)..."
+            <textarea id="comment-${u.id}" rows="2" placeholder="Yorum ${appSettings.require_comment ? '(zorunlu)' : '(isteğe bağlı)'}..."
               class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
             <div class="flex items-center space-x-2 mt-2">
               <input type="number" min="1" max="10" placeholder="1-10" id="score-${u.id}" value="${myScore}"
@@ -1405,26 +1882,21 @@
         alert("Lütfen 1 ile 10 arasında bir puan girin.");
         return;
       }
-      if (!text) {
+      if (appSettings.require_comment && !text) {
         alert("Puan verirken yorum yazmak zorunludur.");
         return;
       }
 
-      const wasAll = hasRatedAll();
+      const wasUnlocked = hasRatedAll();
 
-      const { error: cErr } = await supabaseClient.from('comments').insert({
-        target_id: targetId, author_id: currentUser.id, comment_text: text
+      // Puan + yorum tek işlemde, kurallar sunucuda uygulanır
+      const { error } = await supabaseClient.rpc('submit_rating', {
+        p_target: targetId, p_score: score, p_comment: text
       });
-      if (cErr) { alert("Yorum gönderilemedi: " + cErr.message); return; }
-
-      const { error } = await supabaseClient.from('evaluations').upsert(
-        { evaluator_id: currentUser.id, target_id: targetId, score },
-        { onConflict: 'evaluator_id, target_id' }
-      );
-      if (error) { alert("Puan kaydedilemedi: " + error.message); return; }
+      if (error) { alert("Kaydedilemedi: " + friendlyError(error)); return; }
 
       await loadDashboardData();
-      alert(!wasAll && hasRatedAll()
+      alert(!wasUnlocked && hasRatedAll()
         ? "Kilidi açtın! Artık sana verilen puanları ve yorumları görebilirsin."
         : "Puanın ve yorumun kaydedildi!");
     }
