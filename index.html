@@ -57,7 +57,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kişi ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -341,8 +341,9 @@
     </section>
 
     <!-- KAPSAMLI PROFİL -->
-    <section id="profile-section" class="bg-white dark:bg-carddark p-5 sm:p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
-      <div id="profile-details">
+    <section id="profile-section" class="relative overflow-hidden bg-white dark:bg-carddark p-5 sm:p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
+      <div id="profile-bg" class="hidden"></div>
+      <div id="profile-details" class="relative">
         <p class="text-gray-500 text-sm">Profil yükleniyor...</p>
       </div>
     </section>
@@ -359,6 +360,10 @@
           <button onclick="switchSettingsTab('theme')" id="tab-btn-theme" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.364-6.364l-1.414 1.414M6.343 17.657l-1.414 1.414m12.728 0l-1.414-1.414M6.343 6.343L4.929 4.929"/></svg>
             Görünüm & Tema
+          </button>
+          <button onclick="switchSettingsTab('look')" id="tab-btn-look" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l2.5 5.5L20 9.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1z"/></svg>
+            Çerçeve & Arkaplan
           </button>
         </div>
 
@@ -399,6 +404,20 @@
               </button>
             </div>
           </div>
+
+          <div id="settings-tab-look" class="space-y-6 hidden">
+            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Çerçeve ve Profil Arkaplanı</h4>
+            <p id="look-status" class="text-xs text-gray-500 dark:text-gray-400">Yükleniyor...</p>
+            <div id="look-preview"></div>
+            <div>
+              <h5 class="text-xs font-bold uppercase tracking-wider text-indigo-500 mb-2">Çerçeveler</h5>
+              <div id="look-frames" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            </div>
+            <div>
+              <h5 class="text-xs font-bold uppercase tracking-wider text-indigo-500 mb-2">Arkaplanlar</h5>
+              <div id="look-bgs" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -418,6 +437,7 @@
         <button id="mod-tab-btn-categories" onclick="switchModTab('categories')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kategoriler</button>
         <button id="mod-tab-btn-comments" onclick="switchModTab('comments')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Yorumlar</button>
         <button id="mod-tab-btn-rules" onclick="switchModTab('rules')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kurallar</button>
+        <button id="mod-tab-btn-look" onclick="switchModTab('look')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Çerçeve & Arkaplan</button>
         <button id="mod-tab-btn-admins" onclick="switchModTab('admins')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Moderatörler</button>
       </div>
 
@@ -543,6 +563,46 @@
         </div>
       </div>
 
+      <!-- ÇERÇEVE VE ARKAPLAN (sadece yönetici) -->
+      <div id="mod-pane-look" class="hidden space-y-6">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <h3 id="cos-form-title" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Yeni Çerçeve / Arkaplan</h3>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+            Üyeler bir öğeyi ancak <b>ortalama puanı</b> gereken puana ulaştıysa seçebilir (0 yazarsan herkes kullanır).
+            <b>Çerçeve:</b> fotoğrafın etrafına binen, ortası şeffaf kare bir PNG; ya da sadece iki renk seçerek renkli halka yapabilirsin.
+            <b>Arkaplan:</b> profilin üstünde görünür ve aşağı doğru yavaşça kaybolur; geniş bir resim seç.
+          </p>
+          <form onsubmit="handleCosmeticSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select id="cos-kind" onchange="cosKindChanged()" class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+              <option value="frame">Çerçeve</option>
+              <option value="background">Arkaplan</option>
+            </select>
+            <input type="text" id="cos-name" maxlength="40" required placeholder="Ad (ör. Altın Çerçeve)"
+              class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+            <label class="flex items-center gap-2 text-xs font-medium">
+              Gereken ortalama puan:
+              <input type="number" id="cos-min" min="0" max="10" step="0.1" value="8" required
+                class="w-20 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-indigo-500">
+              <span class="text-gray-400">/ 10</span>
+            </label>
+            <input type="file" id="cos-file" accept="image/*" class="text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:text-indigo-600 dark:file:bg-indigo-950/60 dark:file:text-indigo-300">
+            <div id="cos-color-row" class="sm:col-span-2 flex flex-wrap items-center gap-3">
+              <label class="flex items-center gap-2 text-xs font-medium"><input type="checkbox" id="cos-use-color" class="w-4 h-4"> Renkli halka kullan</label>
+              <input type="color" id="cos-color-a" value="#ffd700" class="w-10 h-9 rounded cursor-pointer bg-transparent">
+              <input type="color" id="cos-color-b" value="#ff8c00" class="w-10 h-9 rounded cursor-pointer bg-transparent">
+            </div>
+            <div class="sm:col-span-2 flex gap-2">
+              <button type="submit" id="cos-submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold">Ekle</button>
+              <button type="button" id="cos-cancel" onclick="resetCosmeticForm()" class="hidden bg-gray-200 dark:bg-borderdark px-4 py-2.5 rounded-xl text-sm font-medium">Vazgeç</button>
+            </div>
+          </form>
+        </div>
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3">
+          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Mevcut Öğeler</h3>
+          <div id="cos-admin-list" class="space-y-2"></div>
+        </div>
+      </div>
+
       <!-- MODERATÖRLER (sadece yönetici) -->
       <div id="mod-pane-admins" class="hidden space-y-6">
         <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
@@ -605,6 +665,10 @@
     let categoryMembers = new Map();     // kategori id -> Set(kişi id)
     let selectedCategory = null;         // sıralama filtresi
     let modCatOpenId = null;             // moderatör panelinde kişi listesi açık olan kategori
+    let cosmetics = [];                  // çerçeve / arkaplan kataloğu (sunucudan)
+    let looks = new Map();               // kişi id -> { frame: {image,a,b}|null, bg: url|null }  (puanı hâlâ yetenler)
+    let myLook = { frame: null, bg: null };
+    let cosEditId = null;
     let scoreMap = new Map();   // kişi id -> { avg, count }  (sunucudan gelir)
     let unlockInfo = { unlocked: false, done: 0, required: 1 };
     let appSettings = { min_ratings_to_unlock: 1, require_comment: true, anonymous_comments: true };
@@ -683,7 +747,17 @@
         CATEGORY_EXISTS: 'Bu isimde bir kategori zaten var.',
         BAD_CATEGORY_NAME: 'Kategori adı 1 ile 40 karakter arasında olmalı.',
         NO_CATEGORY: 'Bu kategori artık yok. Listeyi yenile.',
-        TOO_MANY_CATEGORIES: 'En fazla 100 kategori olabilir.'
+        TOO_MANY_CATEGORIES: 'En fazla 100 kategori olabilir.',
+        LOCKED: 'Önce puanlama kilidini açmalısın.',
+        SCORE_TOO_LOW: 'Ortalama puanın bu öğe için yeterli değil.',
+        NO_COSMETIC: 'Bu öğe artık yok. Sayfayı yenile.',
+        BAD_COSMETIC_NAME: 'Ad 1 ile 40 karakter arasında olmalı.',
+        BAD_MIN_SCORE: 'Gereken puan 0 ile 10 arasında olmalı.',
+        BAD_IMAGE: 'Resim adresi geçersiz.',
+        BAD_COLOR: 'Renk geçersiz.',
+        IMAGE_REQUIRED: 'Bu tür için bir resim yüklemelisin (çerçevede renk de olur).',
+        BAD_KIND: 'Tür geçersiz.',
+        TOO_MANY_COSMETICS: 'En fazla 200 öğe olabilir.'
       };
       for (const k of Object.keys(map)) if (m.includes(k)) return map[k];
       return m;
@@ -739,12 +813,13 @@
     }
 
     function switchSettingsTab(tabName) {
-      ['profile', 'theme'].forEach(t => {
+      ['profile', 'theme', 'look'].forEach(t => {
         document.getElementById(`settings-tab-${t}`).classList.add('hidden');
         document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2";
       });
       document.getElementById(`settings-tab-${tabName}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${tabName}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 flex items-center gap-2";
+      if (tabName === 'look') loadLookTab();
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -931,6 +1006,7 @@
       allProfiles = [];
       allEvaluations = [];
       categories = []; categoryMembers = new Map(); selectedCategory = null; modCatOpenId = null;
+      cosmetics = []; looks = new Map(); myLook = { frame: null, bg: null }; cosEditId = null;
       resetSortState();
       isModerator = false;
       isAdmin = false;
@@ -997,7 +1073,7 @@
       allProfiles = [...(profiles || []), ...unclaimedPeople];
       allEvaluations = evalData || [];
 
-      await loadCategories();
+      await Promise.all([loadCategories(), loadLooks()]);
       renderCategoryFilter();
       renderLeaderboard(allProfiles, allEvaluations);
       renderUserRatingCards(allProfiles, allEvaluations);
@@ -1060,6 +1136,7 @@
       if (!targetProfile) return;
 
       showSection('profile-section');
+      applyProfileBg(userId);
       const profileContainer = document.getElementById('profile-details');
 
       const isMe = userId === currentUser.id;
@@ -1078,7 +1155,7 @@
 
       profileContainer.innerHTML = `
         <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
-          <img src="${avatarOf(targetProfile)}" class="w-28 h-28 rounded-full object-cover border-4 border-indigo-500 shadow-xl">
+          ${avatarFramed(targetProfile, 112, 'border-4 border-indigo-500 shadow-xl', 'shadow-xl')}
           <div class="flex-1 text-center sm:text-left space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <h3 class="text-2xl font-bold break-all">${targetProfile.unclaimed ? escapeHtml(targetProfile.full_name) : '@' + escapeHtml(targetProfile.username)}</h3>
@@ -1823,6 +1900,257 @@
       await loadDashboardData();
     }
 
+    // ===== ÇERÇEVE VE ARKAPLAN =====
+    // Hangi öğeyi kimin kullanabildiğine sunucu karar verir (ortalama puan eşiği).
+    const safeColor = c => /^#[0-9a-fA-F]{6}$/.test(c || '') ? c : null;
+    const safeUrl = u => /^https:\/\//i.test(u || '')
+      ? String(u).replace(/["'()\\\s<>]/g, ch => '%' + ch.charCodeAt(0).toString(16).padStart(2, '0')) : null;
+
+    async function loadLooks() {
+      const { data, error } = await supabaseClient.rpc('get_looks');
+      looks = new Map();
+      if (error || !data) {
+        if (error) console.error('Çerçeveler yüklenemedi. gorunum.sql Supabase\'de çalıştırıldı mı?', error);
+        return;
+      }
+      data.forEach(r => looks.set(r.person_id, {
+        frame: r.frame_id ? { image: r.frame_image, a: r.frame_a, b: r.frame_b } : null,
+        bg: r.bg_id ? r.bg_image : null
+      }));
+    }
+
+    // Fotoğrafı (varsa) çerçeveyle birlikte çizer. frame = { image, a, b } | null
+    function frameMarkup(p, px, frame, imgClass, framedImgClass) {
+      const size = `width:${px}px;height:${px}px;`;
+      if (!frame) {
+        return `<div class="shrink-0" style="${size}"><img src="${avatarOf(p)}" class="w-full h-full rounded-full object-cover ${imgClass || ''}"></div>`;
+      }
+      const a = safeColor(frame.a), b = safeColor(frame.b) || a;
+      const url = /^https:\/\//i.test(frame.image || '') ? escapeHtml(frame.image) : null;
+      const ring = a ? `padding:${Math.max(2, Math.round(px * 0.07))}px;background:linear-gradient(135deg,${a},${b});` : '';
+      return `<div class="relative shrink-0 rounded-full" style="${size}${ring}box-sizing:border-box">
+        <img src="${avatarOf(p)}" class="w-full h-full rounded-full object-cover ${framedImgClass || ''}">
+        ${url ? `<img src="${url}" alt="" class="absolute pointer-events-none select-none" style="left:-15%;top:-15%;width:130%;height:130%;max-width:none;object-fit:contain">` : ''}
+      </div>`;
+    }
+
+    function avatarFramed(p, px, imgClass, framedImgClass) {
+      return frameMarkup(p, px, looks.get(p.id)?.frame || null, imgClass, framedImgClass);
+    }
+
+    // Arkaplan: üstte tam görünür, aşağı doğru yavaşça kaybolur
+    function bgFadeStyle(url, height) {
+      const u = safeUrl(url);
+      if (!u) return '';
+      const mask = 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%)';
+      return `position:absolute;left:0;right:0;top:0;height:${height}px;pointer-events:none;background-image:url("${u}");background-size:cover;background-position:center top;opacity:.9;-webkit-mask-image:${mask};mask-image:${mask};`;
+    }
+
+    function applyProfileBg(userId) {
+      const el = document.getElementById('profile-bg');
+      if (!el) return;
+      const style = bgFadeStyle(looks.get(userId)?.bg, 320);
+      el.style.cssText = style;
+      el.classList.toggle('hidden', !style);
+    }
+
+    // --- Ayarlar > Çerçeve & Arkaplan (üye) ---
+    async function loadLookTab() {
+      const statusEl = document.getElementById('look-status');
+      statusEl.innerText = 'Yükleniyor...';
+      const [c, m] = await Promise.all([supabaseClient.rpc('get_cosmetics'), supabaseClient.rpc('get_my_look')]);
+      if (c.error || !c.data) {
+        console.error('Katalog yüklenemedi:', c.error);
+        cosmetics = [];
+        renderLookTab();
+        statusEl.innerText = 'Çerçeveler yüklenemedi. Yönetici gorunum.sql dosyasını çalıştırmış mı?';
+        return;
+      }
+      cosmetics = c.data.map(x => ({ ...x, min_score: Number(x.min_score) }));
+      const mine = (m.data || [])[0];
+      myLook = { frame: mine?.frame_id || null, bg: mine?.background_id || null };
+      renderLookTab();
+    }
+
+    function lookItemCard(c) {
+      const locked = !unlockInfo.unlocked;
+      const selected = (c.kind === 'frame' ? myLook.frame : myLook.bg) === c.id;
+      const thumb = c.kind === 'frame'
+        ? `<div class="flex justify-center py-1">${frameMarkup(currentUserProfile || { full_name: '?' }, 56, { image: c.image_url, a: c.color_a, b: c.color_b }, '', '')}</div>`
+        : `<div class="relative h-16 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark"><div style="${bgFadeStyle(c.image_url, 64)}"></div></div>`;
+      const label = c.usable
+        ? (selected ? '✓ Seçili' : 'Seç')
+        : (locked ? '🔒 Kilitli' : `🔒 ${c.min_score.toFixed(1)} puan gerekir`);
+      return `
+        <button type="button" ${c.usable || selected ? '' : 'disabled'} onclick="selectLook('${c.kind}', '${c.id}')"
+          class="text-center p-3 rounded-2xl border-2 transition space-y-2 ${selected ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-gray-200 dark:border-borderdark bg-gray-50 dark:bg-blackbg'} ${c.usable ? 'hover:border-indigo-400 cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+          ${thumb}
+          <span class="block text-xs font-bold truncate">${escapeHtml(c.name)}</span>
+          <span class="block text-[11px] ${c.usable ? 'text-indigo-500' : 'text-gray-500'}">${label}</span>
+          <span class="block text-[10px] text-gray-400">${c.min_score > 0 ? c.min_score.toFixed(1) + ' puan ve üzeri' : 'Herkes kullanabilir'}</span>
+        </button>`;
+    }
+
+    function renderLookTab() {
+      const frames = cosmetics.filter(c => c.kind === 'frame');
+      const bgs = cosmetics.filter(c => c.kind === 'background');
+      const statusEl = document.getElementById('look-status');
+      if (!unlockInfo.unlocked) {
+        statusEl.innerText = '🔒 ' + lockMessage() + ' Kilit açılınca puanına göre çerçeve ve arkaplan seçebilirsin.';
+      } else {
+        const sc = scoreMap.get(currentUser.id);
+        statusEl.innerText = sc ? `Şu anki ortalama puanın: ${sc.avg.toFixed(1)} / 10 (${sc.count} oy). Puanın yeterli olan öğeleri seçebilirsin.`
+                                : 'Henüz puan almadın; sadece herkesin kullanabildiği öğeleri seçebilirsin.';
+      }
+      const empty = '<p class="text-xs text-gray-500 col-span-full">Henüz eklenmemiş.</p>';
+      document.getElementById('look-frames').innerHTML = frames.length ? frames.map(lookItemCard).join('') : empty;
+      document.getElementById('look-bgs').innerHTML = bgs.length ? bgs.map(lookItemCard).join('') : empty;
+
+      const f = frames.find(c => c.id === myLook.frame), b = bgs.find(c => c.id === myLook.bg);
+      const frameObj = f ? { image: f.image_url, a: f.color_a, b: f.color_b } : null;
+      document.getElementById('look-preview').innerHTML = `
+        <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-borderdark bg-gray-50 dark:bg-blackbg p-5 flex items-center gap-4">
+          ${b ? `<div style="${bgFadeStyle(b.image_url, 200)}"></div>` : ''}
+          <div class="relative flex items-center gap-4">
+            ${frameMarkup(currentUserProfile || { full_name: '?' }, 80, frameObj, 'border-2 border-indigo-500', '')}
+            <div>
+              <p class="font-bold text-sm">${escapeHtml(currentUserProfile?.full_name || '')}</p>
+              <p class="text-xs text-gray-500">Önizleme${(f || b) ? '' : ' (hiçbir şey seçilmedi)'}</p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function selectLook(kind, id) {
+      const ok = cid => cosmetics.find(c => c.id === cid)?.usable ? cid : null;   // puanı düşmüş eski seçim yeni kaydı bozmasın
+      const frame = kind === 'frame' ? (myLook.frame === id ? null : id) : ok(myLook.frame);
+      const bg = kind === 'background' ? (myLook.bg === id ? null : id) : ok(myLook.bg);
+      const { error } = await supabaseClient.rpc('set_my_look', { p_frame: frame, p_bg: bg });
+      if (error) { alert('Kaydedilemedi: ' + friendlyError(error)); await loadLookTab(); return; }
+      myLook = { frame, bg };
+      await loadLooks();
+      renderLookTab();
+      renderLeaderboard(allProfiles, allEvaluations);
+    }
+
+    // --- Yönetici: çerçeve / arkaplan ekleme ---
+    async function loadAdminCosmetics() {
+      const { data, error } = await supabaseClient.rpc('get_cosmetics');
+      if (error) { alert('Liste yüklenemedi: ' + friendlyError(error)); return; }
+      cosmetics = (data || []).map(x => ({ ...x, min_score: Number(x.min_score) }));
+      renderAdminCosmetics();
+      cosKindChanged();
+    }
+
+    function renderAdminCosmetics() {
+      const el = document.getElementById('cos-admin-list');
+      if (cosmetics.length === 0) { el.innerHTML = '<p class="text-xs text-gray-500 text-center py-3">Henüz öğe yok.</p>'; return; }
+      const btn = "px-3 py-1.5 text-xs font-medium rounded-lg transition bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700";
+      el.innerHTML = cosmetics.map(c => `
+        <div class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="flex items-center gap-3 min-w-0">
+            ${c.kind === 'frame'
+              ? frameMarkup(currentUserProfile || { full_name: '?' }, 44, { image: c.image_url, a: c.color_a, b: c.color_b }, '', '')
+              : `<div class="relative w-16 h-11 shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark"><div style="${bgFadeStyle(c.image_url, 44)}"></div></div>`}
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate">${escapeHtml(c.name)}</p>
+              <p class="text-[11px] text-gray-500">${c.kind === 'frame' ? 'Çerçeve' : 'Arkaplan'} · ${c.min_score > 0 ? c.min_score.toFixed(1) + ' puan ve üzeri' : 'Herkes'}</p>
+            </div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button onclick="editCosmetic('${c.id}')" class="${btn}">Düzenle</button>
+            <button onclick="deleteCosmetic('${c.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg transition bg-red-600/90 hover:bg-red-500 text-white">Sil</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function cosKindChanged() {
+      const isFrame = document.getElementById('cos-kind').value === 'frame';
+      document.getElementById('cos-color-row').classList.toggle('hidden', !isFrame);
+    }
+
+    function resetCosmeticForm() {
+      cosEditId = null;
+      document.getElementById('cos-kind').disabled = false;
+      document.getElementById('cos-kind').value = 'frame';
+      document.getElementById('cos-name').value = '';
+      document.getElementById('cos-min').value = '8';
+      document.getElementById('cos-file').value = '';
+      document.getElementById('cos-use-color').checked = false;
+      document.getElementById('cos-form-title').innerText = 'Yeni Çerçeve / Arkaplan';
+      document.getElementById('cos-submit').innerText = 'Ekle';
+      document.getElementById('cos-cancel').classList.add('hidden');
+      cosKindChanged();
+    }
+
+    function editCosmetic(id) {
+      const c = cosmetics.find(x => x.id === id);
+      if (!c) return;
+      cosEditId = id;
+      document.getElementById('cos-kind').value = c.kind;
+      document.getElementById('cos-kind').disabled = true;     // tür sonradan değişmez
+      document.getElementById('cos-name').value = c.name;
+      document.getElementById('cos-min').value = c.min_score;
+      document.getElementById('cos-file').value = '';
+      document.getElementById('cos-use-color').checked = !!c.color_a;
+      if (c.color_a) document.getElementById('cos-color-a').value = c.color_a;
+      if (c.color_b || c.color_a) document.getElementById('cos-color-b').value = c.color_b || c.color_a;
+      document.getElementById('cos-form-title').innerText = 'Düzenle: ' + c.name + (c.image_url ? ' (resmi değiştirmek için yeni dosya seç)' : '');
+      document.getElementById('cos-submit').innerText = 'Kaydet';
+      document.getElementById('cos-cancel').classList.remove('hidden');
+      cosKindChanged();
+      document.getElementById('cos-form-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function handleCosmeticSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('cos-submit');
+      const kind = document.getElementById('cos-kind').value;
+      const min = parseFloat(document.getElementById('cos-min').value);
+      const file = document.getElementById('cos-file').files[0];
+      if (!(min >= 0 && min <= 10)) { alert(friendlyError('BAD_MIN_SCORE')); return; }
+      if (file && (!file.type.startsWith('image/') || file.size > 3 * 1024 * 1024)) {
+        alert('Lütfen en fazla 3 MB boyutunda bir resim seç.'); return;
+      }
+      const old = cosEditId ? cosmetics.find(x => x.id === cosEditId) : null;
+      const label = btn.innerText;
+      btn.disabled = true;
+      try {
+        let image = old ? old.image_url : null;
+        if (file) { btn.innerText = 'Yükleniyor...'; image = await uploadAvatarFile(file); }
+        const useColor = kind === 'frame' && document.getElementById('cos-use-color').checked;
+        const { error } = await supabaseClient.rpc('admin_save_cosmetic', {
+          p_id: cosEditId, p_kind: kind, p_name: document.getElementById('cos-name').value,
+          p_image_url: image || null,
+          p_color_a: useColor ? document.getElementById('cos-color-a').value : null,
+          p_color_b: useColor ? document.getElementById('cos-color-b').value : null,
+          p_min_score: min
+        });
+        if (error) throw error;
+        resetCosmeticForm();
+        await loadAdminCosmetics();
+        await loadLooks();
+        renderLeaderboard(allProfiles, allEvaluations);
+      } catch (err) {
+        alert('Kaydedilemedi: ' + friendlyError(err));
+      } finally {
+        btn.disabled = false;
+        btn.innerText = cosEditId ? 'Kaydet' : 'Ekle';
+        if (!label) btn.innerText = 'Ekle';
+      }
+    }
+
+    async function deleteCosmetic(id) {
+      const c = cosmetics.find(x => x.id === id);
+      if (!c || !confirm(`"${c.name}" silinsin mi? Kullanan üyelerden de kalkar.`)) return;
+      const { error } = await supabaseClient.rpc('admin_delete_cosmetic', { p_id: id });
+      if (error) { alert('Silinemedi: ' + friendlyError(error)); return; }
+      if (cosEditId === id) resetCosmeticForm();
+      await loadAdminCosmetics();
+      await loadLooks();
+      renderLeaderboard(allProfiles, allEvaluations);
+    }
+
     // ===== KATEGORİLER =====
     // Sunucu sadece görmeye hakkın olan kategorileri gönderir (gizli olanlar sadece üyelere ve moderatörlere).
     async function loadCategories() {
@@ -1996,18 +2324,20 @@
 
     // --- Moderatör: sekmeler, yorumlar, kurallar ---
     function switchModTab(tab) {
-      if (tab === 'admins' && !isAdmin) tab = 'people';
+      if ((tab === 'admins' || tab === 'look') && !isAdmin) tab = 'people';
       const on  = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-amber-600 text-white";
       const off = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-amber-600";
-      ['people', 'members', 'categories', 'comments', 'rules', 'admins'].forEach(t => {
+      ['people', 'members', 'categories', 'comments', 'rules', 'look', 'admins'].forEach(t => {
         document.getElementById(`mod-pane-${t}`).classList.toggle('hidden', t !== tab);
         document.getElementById(`mod-tab-btn-${t}`).className = t === tab ? on : off;
       });
       document.getElementById('mod-tab-btn-admins').classList.toggle('hidden', !isAdmin);
+      document.getElementById('mod-tab-btn-look').classList.toggle('hidden', !isAdmin);
       if (tab === 'admins') loadAdmins();
       if (tab === 'people') loadModRoster();
       if (tab === 'members') loadModMembers();
       if (tab === 'categories') modLoadCategories();
+      if (tab === 'look') loadAdminCosmetics();
       if (tab === 'comments') loadModComments();
       if (tab === 'rules') fillModRules();
     }
@@ -2185,7 +2515,7 @@
         <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
           <div class="flex items-center space-x-3 min-w-0">
             <span class="font-bold w-7 shrink-0 text-indigo-600 dark:text-indigo-400">${rank}</span>
-            <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover border border-indigo-500/30">
+            ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark border border-indigo-500/30', 'bg-gray-200 dark:bg-borderdark')}
             <div class="min-w-0">
               <p class="font-medium text-sm hover:underline truncate">${escapeHtml(u.full_name)}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
@@ -2230,7 +2560,7 @@
         return `
           <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
             <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
-              <img src="${avatarOf(u)}" class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-borderdark object-cover">
+              ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark', 'bg-gray-200 dark:bg-borderdark')}
               <div>
                 <p class="font-medium text-sm group-hover:underline">${escapeHtml(u.full_name)}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
