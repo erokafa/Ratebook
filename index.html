@@ -57,7 +57,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kişi ara..."
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -160,13 +160,18 @@
     <!-- DASHBOARD (ANA SAYFA) -->
     <section id="dashboard-section" class="space-y-8 hidden">
 
-      <!-- BU MU? BU MU? YÖNLENDİRME KARTI -->
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
-        <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">Sıralama oyunları, eleme turnuvası, Tier List ve Top 3 kürsü modları ile eğlen!</p>
-        <button onclick="initSortPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
-          Sıralama Oyunlarına Git
-        </button>
+      <!-- SIRALAMA TABLOSU -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/>
+          </svg>
+          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Sıralama</h2>
+        </div>
+        <div id="category-filter" class="flex gap-2 overflow-x-auto pb-3 mb-1"></div>
+        <div id="leaderboard-list" class="space-y-3">
+          <p class="text-gray-500 text-sm">Yükleniyor...</p>
+        </div>
       </div>
 
       <!-- KİŞİLERİ DEĞERLENDİR YÖNLENDİRME KARTI -->
@@ -183,18 +188,13 @@
         </button>
       </div>
 
-      <!-- SIRALAMA TABLOSU -->
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
-        <div class="flex items-center gap-2 mb-4">
-          <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/>
-          </svg>
-          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Sıralama</h2>
-        </div>
-        <div id="category-filter" class="flex gap-2 overflow-x-auto pb-3 mb-1"></div>
-        <div id="leaderboard-list" class="space-y-3">
-          <p class="text-gray-500 text-sm">Yükleniyor...</p>
-        </div>
+      <!-- BU MU? BU MU? YÖNLENDİRME KARTI -->
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
+        <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">Bu mu? Bu mu?</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">Sıralama oyunları, eleme turnuvası, Tier List ve Top 3 kürsü modları ile eğlen!</p>
+        <button onclick="initSortPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
+          Sıralama Oyunlarına Git
+        </button>
       </div>
     </section>
 
@@ -569,8 +569,9 @@
           <h3 id="cos-form-title" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Yeni Çerçeve / Arkaplan</h3>
           <p class="text-[11px] text-gray-500 dark:text-gray-400">
             Üyeler bir öğeyi ancak <b>ortalama puanı</b> gereken puana ulaştıysa seçebilir (0 yazarsan herkes kullanır).
-            <b>Çerçeve:</b> fotoğrafın etrafına binen, ortası şeffaf kare bir PNG; ya da sadece iki renk seçerek renkli halka yapabilirsin.
-            <b>Arkaplan:</b> profilin üstünde görünür ve aşağı doğru yavaşça kaybolur; geniş bir resim seç.
+            <b>Çerçeve:</b> fotoğrafın etrafına binen, ortası şeffaf kare bir resim (PNG, animasyonlu GIF/WebP) ya da <b>video</b> (MP4/WebM, kare, siyah yerler şeffaf görünür); ya da sadece iki renk seçerek renkli halka yapabilirsin.
+            <b>Arkaplan:</b> profilin üstünde görünür ve aşağı doğru yavaşça kaybolur; geniş bir resim ya da kısa, sessiz, döngüye uygun bir <b>video</b> (MP4/WebM) seç.
+            Resim en fazla 3 MB, video en fazla 10 MB olabilir.
           </p>
           <form onsubmit="handleCosmeticSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select id="cos-kind" onchange="cosKindChanged()" class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
@@ -585,7 +586,7 @@
                 class="w-20 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-indigo-500">
               <span class="text-gray-400">/ 10</span>
             </label>
-            <input type="file" id="cos-file" accept="image/*" class="text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:text-indigo-600 dark:file:bg-indigo-950/60 dark:file:text-indigo-300">
+            <input type="file" id="cos-file" accept="image/*,video/mp4,video/webm,video/quicktime" class="text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:text-indigo-600 dark:file:bg-indigo-950/60 dark:file:text-indigo-300">
             <div id="cos-color-row" class="sm:col-span-2 flex flex-wrap items-center gap-3">
               <label class="flex items-center gap-2 text-xs font-medium"><input type="checkbox" id="cos-use-color" class="w-4 h-4"> Renkli halka kullan</label>
               <input type="color" id="cos-color-a" value="#ffd700" class="w-10 h-9 rounded cursor-pointer bg-transparent">
@@ -1424,10 +1425,10 @@
     }
 
     function getRoundTitle(totalCount) {
-      if (totalCount === 2) return "BÜYÜK FİNAL ";
-      if (totalCount === 4) return "YARI FİNAL ";
-      if (totalCount === 8) return "ÇEYREK FİNAL ";
-      return `${tournamentRound}. TUR `;
+      if (totalCount === 2) return "BÜYÜK FİNAL 🏆";
+      if (totalCount === 4) return "YARI FİNAL 🥊";
+      if (totalCount === 8) return "ÇEYREK FİNAL ⚡";
+      return `${tournamentRound}. TUR 🔥`;
     }
 
     function renderCurrentMatch() {
@@ -1919,39 +1920,64 @@
       }));
     }
 
+    // Resim mi video mu? (adresin uzantısına bakılır)
+    const isVideoUrl = u => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(u || '');
+    const reduceMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+    let videoBudget = 8;   // küçük listelerde aynı anda en fazla bu kadar video oynar (telefonu yormasın)
+
+    function videoTag(url, style, cls) {
+      const play = reduceMotion() ? '' : 'autoplay';
+      return `<video src="${escapeHtml(url)}" ${play} muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true" class="${cls || ''}" style="${style}"></video>`;
+    }
+
     // Fotoğrafı (varsa) çerçeveyle birlikte çizer. frame = { image, a, b } | null
-    function frameMarkup(p, px, frame, imgClass, framedImgClass) {
+    // Çerçeve resmi PNG/GIF/WebP olabilir; video da olabilir (siyah yerler şeffaf görünür).
+    function frameMarkup(p, px, frame, imgClass, framedImgClass, lite) {
       const size = `width:${px}px;height:${px}px;`;
       if (!frame) {
         return `<div class="shrink-0" style="${size}"><img src="${avatarOf(p)}" class="w-full h-full rounded-full object-cover ${imgClass || ''}"></div>`;
       }
       const a = safeColor(frame.a), b = safeColor(frame.b) || a;
-      const url = /^https:\/\//i.test(frame.image || '') ? escapeHtml(frame.image) : null;
+      const url = /^https:\/\//i.test(frame.image || '') ? frame.image : null;
       const ring = a ? `padding:${Math.max(2, Math.round(px * 0.07))}px;background:linear-gradient(135deg,${a},${b});` : '';
+      const overlayStyle = 'left:-15%;top:-15%;width:130%;height:130%;max-width:none;object-fit:contain;';
+      let overlay = '';
+      if (url && isVideoUrl(url)) {
+        if (!lite || videoBudget > 0) {
+          if (lite) videoBudget--;
+          overlay = videoTag(url, overlayStyle + 'mix-blend-mode:screen;', 'absolute pointer-events-none select-none');
+        }
+      } else if (url) {
+        overlay = `<img src="${escapeHtml(url)}" alt="" class="absolute pointer-events-none select-none" style="${overlayStyle}">`;
+      }
       return `<div class="relative shrink-0 rounded-full" style="${size}${ring}box-sizing:border-box">
         <img src="${avatarOf(p)}" class="w-full h-full rounded-full object-cover ${framedImgClass || ''}">
-        ${url ? `<img src="${url}" alt="" class="absolute pointer-events-none select-none" style="left:-15%;top:-15%;width:130%;height:130%;max-width:none;object-fit:contain">` : ''}
+        ${overlay}
       </div>`;
     }
 
-    function avatarFramed(p, px, imgClass, framedImgClass) {
-      return frameMarkup(p, px, looks.get(p.id)?.frame || null, imgClass, framedImgClass);
+    function avatarFramed(p, px, imgClass, framedImgClass, lite) {
+      return frameMarkup(p, px, looks.get(p.id)?.frame || null, imgClass, framedImgClass, lite);
     }
 
-    // Arkaplan: üstte tam görünür, aşağı doğru yavaşça kaybolur
-    function bgFadeStyle(url, height) {
+    // Arkaplan (resim ya da video): üstte tam görünür, aşağı doğru yavaşça kaybolur
+    function bgFadeHtml(url, height) {
       const u = safeUrl(url);
       if (!u) return '';
       const mask = 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%)';
-      return `position:absolute;left:0;right:0;top:0;height:${height}px;pointer-events:none;background-image:url("${u}");background-size:cover;background-position:center top;opacity:.9;-webkit-mask-image:${mask};mask-image:${mask};`;
+      const base = `position:absolute;left:0;right:0;top:0;height:${height}px;pointer-events:none;opacity:.9;overflow:hidden;-webkit-mask-image:${mask};mask-image:${mask};`;
+      if (isVideoUrl(url)) {
+        return `<div style="${base}">${videoTag(url, 'width:100%;height:100%;object-fit:cover;object-position:center top;', '')}</div>`;
+      }
+      return `<div style="${base}background-image:url('${u}');background-size:cover;background-position:center top;"></div>`;
     }
 
     function applyProfileBg(userId) {
       const el = document.getElementById('profile-bg');
       if (!el) return;
-      const style = bgFadeStyle(looks.get(userId)?.bg, 320);
-      el.style.cssText = style;
-      el.classList.toggle('hidden', !style);
+      const html = bgFadeHtml(looks.get(userId)?.bg, 320);
+      el.innerHTML = html;
+      el.classList.toggle('hidden', !html);
     }
 
     // --- Ayarlar > Çerçeve & Arkaplan (üye) ---
@@ -1977,7 +2003,7 @@
       const selected = (c.kind === 'frame' ? myLook.frame : myLook.bg) === c.id;
       const thumb = c.kind === 'frame'
         ? `<div class="flex justify-center py-1">${frameMarkup(currentUserProfile || { full_name: '?' }, 56, { image: c.image_url, a: c.color_a, b: c.color_b }, '', '')}</div>`
-        : `<div class="relative h-16 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark"><div style="${bgFadeStyle(c.image_url, 64)}"></div></div>`;
+        : `<div class="relative h-16 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark">${bgFadeHtml(c.image_url, 64)}</div>`;
       const label = c.usable
         ? (selected ? '✓ Seçili' : 'Seç')
         : (locked ? '🔒 Kilitli' : `🔒 ${c.min_score.toFixed(1)} puan gerekir`);
@@ -2010,7 +2036,7 @@
       const frameObj = f ? { image: f.image_url, a: f.color_a, b: f.color_b } : null;
       document.getElementById('look-preview').innerHTML = `
         <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-borderdark bg-gray-50 dark:bg-blackbg p-5 flex items-center gap-4">
-          ${b ? `<div style="${bgFadeStyle(b.image_url, 200)}"></div>` : ''}
+          ${b ? bgFadeHtml(b.image_url, 200) : ''}
           <div class="relative flex items-center gap-4">
             ${frameMarkup(currentUserProfile || { full_name: '?' }, 80, frameObj, 'border-2 border-indigo-500', '')}
             <div>
@@ -2051,7 +2077,7 @@
           <div class="flex items-center gap-3 min-w-0">
             ${c.kind === 'frame'
               ? frameMarkup(currentUserProfile || { full_name: '?' }, 44, { image: c.image_url, a: c.color_a, b: c.color_b }, '', '')
-              : `<div class="relative w-16 h-11 shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark"><div style="${bgFadeStyle(c.image_url, 44)}"></div></div>`}
+              : `<div class="relative w-16 h-11 shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark">${bgFadeHtml(c.image_url, 44)}</div>`}
             <div class="min-w-0">
               <p class="text-sm font-medium truncate">${escapeHtml(c.name)}</p>
               <p class="text-[11px] text-gray-500">${c.kind === 'frame' ? 'Çerçeve' : 'Arkaplan'} · ${c.min_score > 0 ? c.min_score.toFixed(1) + ' puan ve üzeri' : 'Herkes'}</p>
@@ -2109,8 +2135,14 @@
       const min = parseFloat(document.getElementById('cos-min').value);
       const file = document.getElementById('cos-file').files[0];
       if (!(min >= 0 && min <= 10)) { alert(friendlyError('BAD_MIN_SCORE')); return; }
-      if (file && (!file.type.startsWith('image/') || file.size > 3 * 1024 * 1024)) {
-        alert('Lütfen en fazla 3 MB boyutunda bir resim seç.'); return;
+      if (file) {
+        const isImg = file.type.startsWith('image/');
+        const isVid = /^video\/(mp4|webm|quicktime)$/.test(file.type);
+        if (!isImg && !isVid) { alert('Lütfen bir resim ya da MP4 / WebM video seç.'); return; }
+        if (file.size > (isVid ? 10 : 3) * 1024 * 1024) {
+          alert(isVid ? 'Video en fazla 10 MB olabilir. Daha kısa ya da daha düşük kaliteli bir video dene.' : 'Resim en fazla 3 MB olabilir.');
+          return;
+        }
       }
       const old = cosEditId ? cosmetics.find(x => x.id === cosEditId) : null;
       const label = btn.innerText;
@@ -2486,6 +2518,7 @@
 
     // ===== SIRALAMA =====
     function renderLeaderboard(profiles, evalData) {
+      videoBudget = 8;
       const listEl = document.getElementById('leaderboard-list');
       if (!profiles || profiles.length === 0) {
         listEl.innerHTML = '<p class="text-gray-500 text-sm">Henüz kayıtlı üye yok.</p>';
@@ -2515,7 +2548,7 @@
         <div onclick="viewUserProfile('${u.id}')" class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark hover:border-indigo-500 cursor-pointer transition">
           <div class="flex items-center space-x-3 min-w-0">
             <span class="font-bold w-7 shrink-0 text-indigo-600 dark:text-indigo-400">${rank}</span>
-            ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark border border-indigo-500/30', 'bg-gray-200 dark:bg-borderdark')}
+            ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark border border-indigo-500/30', 'bg-gray-200 dark:bg-borderdark', true)}
             <div class="min-w-0">
               <p class="font-medium text-sm hover:underline truncate">${escapeHtml(u.full_name)}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
@@ -2560,7 +2593,7 @@
         return `
           <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
             <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
-              ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark', 'bg-gray-200 dark:bg-borderdark')}
+              ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark', 'bg-gray-200 dark:bg-borderdark', true)}
               <div>
                 <p class="font-medium text-sm group-hover:underline">${escapeHtml(u.full_name)}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
