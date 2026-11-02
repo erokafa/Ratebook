@@ -246,7 +246,7 @@
             <div id="chat-pending" class="hidden px-3 pb-1"></div>
             <form onsubmit="sendChatMessage(event)" class="flex items-end gap-2 p-3 border-t border-gray-200 dark:border-borderdark">
               <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="pickChatImage(this)">
-              <button type="button" onclick="document.getElementById('chat-file').click()" class="shrink-0 bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 rounded-xl px-3 py-2.5 text-lg leading-none" aria-label="Fotoğraf ekle">📷</button>
+              <button type="button" onclick="document.getElementById('chat-file').click()" class="shrink-0 bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 rounded-xl px-3 py-2.5 text-lg leading-none" aria-label="Fotoğraf ekle"><svg class="w-5 h-5 inline-block align-[-2px] stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
               <textarea id="chat-input" rows="1" maxlength="1000" placeholder="Mesaj yaz..." onkeydown="chatKeydown(event)"
                 class="flex-1 min-w-0 max-h-28 resize-none bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"></textarea>
               <button type="submit" id="chat-send-btn" class="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl">Gönder</button>
@@ -264,8 +264,14 @@
             <h2 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
               Sıralama Oyunları
             </h2>
-            <p class="text-xs text-gray-400 mt-1">Buradaki seçimler ve eğlenceli sıralamalar profil ortalama puanlarını etkilemez.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Buradaki seçimler ve eğlenceli sıralamalar profil ortalama puanlarını etkilemez.</p>
           </div>
+        </div>
+
+        <!-- KATEGORİ SEÇİCİ: oyunlar sadece seçili kategorideki kişilerle oynanır -->
+        <div id="sort-scope-wrap" class="hidden mb-5">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Kimlerle oynansın?</p>
+          <div id="sort-scope" class="flex gap-2 overflow-x-auto pb-1"></div>
         </div>
 
         <!-- OYUN MODU SEÇİM SEKMELERİ (BEYAZ ÇİZGİ İKONLARI) -->
@@ -274,11 +280,11 @@
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6"/></svg>
             <span>Bu mu? Bu mu? (Turnuva)</span>
           </button>
-          <button onclick="switchSortGame('top3')" id="game-tab-top3" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0 flex items-center gap-2">
+          <button onclick="switchSortGame('top3')" id="game-tab-top3" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/></svg>
             <span>En İyiler (Top 3)</span>
           </button>
-          <button onclick="switchSortGame('tier')" id="game-tab-tier" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0 flex items-center gap-2">
+          <button onclick="switchSortGame('tier')" id="game-tab-tier" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             <span>Tier List (Sınıflandır)</span>
           </button>
@@ -287,8 +293,8 @@
         <!-- OYUN ALANI 1: VS ELEME TURNUVASI -->
         <div id="sort-game-vs" class="space-y-4">
           <div class="flex justify-between items-center bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark">
-            <span id="tournament-status-text" class="text-xs font-semibold text-purple-400">Turnuva yükleniyor...</span>
-            <button onclick="resetAndStartTournament()" class="text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+            <span id="tournament-status-text" class="text-xs font-semibold text-purple-600 dark:text-purple-400">Turnuva yükleniyor...</span>
+            <button onclick="resetAndStartTournament()" class="text-xs bg-purple-100 dark:bg-purple-600/20 text-purple-700 dark:text-purple-300 hover:bg-purple-600 hover:text-white dark:hover:bg-purple-600 px-3 py-1.5 rounded-lg transition font-medium">
               Yeni Turnuva
             </button>
           </div>
@@ -297,11 +303,11 @@
 
         <!-- OYUN ALANI 2: TOP 3 KÜRSÜ SEÇİMİ -->
         <div id="sort-game-top3" class="hidden space-y-6">
-          <p class="text-xs text-gray-400 text-center">Top 3 listen için kişileri seç. Seçimin otomatik kaydedilir.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Top 3 listen için kişileri seç. Seçimin otomatik kaydedilir.</p>
           <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto text-center">
             <!-- 2. GÜMÜŞ -->
             <div class="flex flex-col items-center">
-              <div class="flex items-center gap-1 text-gray-300 mb-1">
+              <div class="flex items-center gap-1 text-gray-500 dark:text-gray-300 mb-1">
                 <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
                 <span class="text-xs font-black">2.</span>
               </div>
@@ -332,7 +338,7 @@
           </div>
 
           <div class="border-t border-gray-200 dark:border-borderdark pt-4">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Kişi Seç:</h4>
+            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Kişi Seç:</h4>
             <div id="top3-select-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto"></div>
           </div>
         </div>
@@ -340,42 +346,42 @@
         <!-- OYUN ALANI 3: TIER LIST (S - E) -->
         <div id="sort-game-tier" class="hidden space-y-4">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-xs text-gray-400">Üyeleri kategorilere ayır (otomatik kaydedilir):</span>
-            <button onclick="resetTierGame()" class="text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white px-3 py-1 rounded-lg transition font-medium">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Üyeleri kategorilere ayır (otomatik kaydedilir):</span>
+            <button onclick="resetTierGame()" class="text-xs bg-purple-100 dark:bg-purple-600/20 text-purple-700 dark:text-purple-300 hover:bg-purple-600 hover:text-white dark:hover:bg-purple-600 px-3 py-1 rounded-lg transition font-medium">
               Sıfırla
             </button>
           </div>
 
           <!-- TIER SIRALARI (S, A, B, C, D, E) -->
           <div class="space-y-2">
-            <div class="flex items-center gap-2 bg-red-950/40 border border-red-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-red-400 text-sm w-8 shrink-0 text-center">S</span>
+            <div class="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-red-600 dark:text-red-400 text-sm w-8 shrink-0 text-center">S</span>
               <div id="tier-S" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
-            <div class="flex items-center gap-2 bg-orange-950/40 border border-orange-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-orange-400 text-sm w-8 shrink-0 text-center">A</span>
+            <div class="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-orange-600 dark:text-orange-400 text-sm w-8 shrink-0 text-center">A</span>
               <div id="tier-A" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
-            <div class="flex items-center gap-2 bg-yellow-950/40 border border-yellow-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-yellow-400 text-sm w-8 shrink-0 text-center">B</span>
+            <div class="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-950/40 border border-yellow-200 dark:border-yellow-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-yellow-600 dark:text-yellow-400 text-sm w-8 shrink-0 text-center">B</span>
               <div id="tier-B" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
-            <div class="flex items-center gap-2 bg-green-950/40 border border-green-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-green-400 text-sm w-8 shrink-0 text-center">C</span>
+            <div class="flex items-center gap-2 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-green-600 dark:text-green-400 text-sm w-8 shrink-0 text-center">C</span>
               <div id="tier-C" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
-            <div class="flex items-center gap-2 bg-blue-950/40 border border-blue-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-blue-400 text-sm w-8 shrink-0 text-center">D</span>
+            <div class="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-blue-600 dark:text-blue-400 text-sm w-8 shrink-0 text-center">D</span>
               <div id="tier-D" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
-            <div class="flex items-center gap-2 bg-purple-950/40 border border-purple-800/40 p-2.5 rounded-xl">
-              <span class="font-extrabold text-purple-400 text-sm w-8 shrink-0 text-center">E</span>
+            <div class="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 p-2.5 rounded-xl">
+              <span class="font-extrabold text-purple-600 dark:text-purple-400 text-sm w-8 shrink-0 text-center">E</span>
               <div id="tier-E" class="flex-1 flex flex-wrap gap-2 min-h-[36px]"></div>
             </div>
           </div>
 
           <div class="border-t border-gray-200 dark:border-borderdark pt-4">
-            <h4 id="tier-progress-text" class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sıralanacak Kişi:</h4>
+            <h4 id="tier-progress-text" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Sıralanacak Kişi:</h4>
             <div id="tier-active-card"></div>
           </div>
         </div>
@@ -465,7 +471,7 @@
               <h5 class="text-xs font-bold uppercase tracking-wider text-indigo-500">Uygulama</h5>
               <p class="text-xs text-gray-500 dark:text-gray-400">RateBook'u telefonunun ana ekranına uygulama gibi ekleyebilirsin.</p>
               <button id="install-settings-btn" onclick="installApp()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium">Ana Ekrana Ekle</button>
-              <p id="install-settings-note" class="hidden text-xs text-emerald-500">✓ Uygulama zaten yüklü.</p>
+              <p id="install-settings-note" class="hidden text-xs text-emerald-500"><svg class="w-3.5 h-3.5 inline-block align-[-2px] stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Uygulama zaten yüklü.</p>
             </div>
           </div>
 
@@ -565,7 +571,7 @@
             <input type="text" id="mod-cat-name" maxlength="40" required placeholder="Yeni kategori adı..."
               class="flex-1 min-w-0 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
             <label class="flex items-center gap-2 text-xs font-medium px-1 shrink-0">
-              <input type="checkbox" id="mod-cat-hidden" class="w-4 h-4"> 🔒 Gizli
+              <input type="checkbox" id="mod-cat-hidden" class="w-4 h-4"> <svg class="w-3.5 h-3.5 inline-block align-[-2px] stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Gizli
             </label>
             <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shrink-0">Ekle</button>
           </form>
@@ -792,9 +798,18 @@
     let sortLoadedFor = null;       // kayıtlı sıralamalar hangi kullanıcı için yüklendi
     let sortLoadPromise = null;
     let sortSaveWarned = false;
+    let sortScope = null;        // null = herkes, yoksa kategori id'si
+    let sortSaved = {};          // kayıt anahtarı -> veri (tarayıcıdaki kopya)
+    let sortGameTab = 'vs';
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
+    // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
+    const ICONS = {"lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/>", "camera": "<path d=\"M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z\"/><circle cx=\"12\" cy=\"13\" r=\"4\"/>", "users": "<path d=\"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75\"/>", "check": "<polyline points=\"20 6 9 17 4 12\"/>", "trophy": "<path d=\"M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3\"/>", "swords": "<path d=\"M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6\"/>", "zap": "<polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\"/>", "flame": "<path d=\"M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-4 3 0-3-1-5-3-7-1 3-4 5-4 11 0 4 3 7 7 7z\"/>"};
+    function ic(name, size) {
+      return `<svg class="${size || 'w-3.5 h-3.5'} inline-block align-[-2px] stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
+    }
+
     function escapeHtml(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
@@ -1277,8 +1292,8 @@
             </div>
 
             <div class="flex justify-center sm:justify-start space-x-6 text-sm">
-              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : voteCount}</span> <span class="text-gray-500">Oy</span></div>
-              <div><span class="font-bold text-indigo-500">${locked ? '🔒' : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+              <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : voteCount}</span> <span class="text-gray-500">Oy</span></div>
+              <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
             </div>
 
             <div>
@@ -1292,7 +1307,7 @@
         <div class="pt-6 space-y-4">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
-            <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${locked ? '🔒' : comments.length})</h4>
+            <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${locked ? ic('lock') : comments.length})</h4>
           </div>
 
           ${isMe ? '' : `
@@ -1304,7 +1319,7 @@
 
           <div class="space-y-3 pt-2">
             ${locked
-              ? `<p class="text-xs text-gray-500">🔒 ${lockMessage()}</p>`
+              ? `<p class="text-xs text-gray-500">${ic('lock')} ${lockMessage()}</p>`
               : (comments.length === 0 ? `<p class="text-xs text-gray-500">Henüz yorum yapılmamış.${isMe ? '' : ' İlk yorumu sen yap!'}</p>` : '')}
             ${comments.map(c => `
               <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-2xl border border-gray-200 dark:border-borderdark flex items-start space-x-3">
@@ -1360,9 +1375,19 @@
       return sortSaveChain;
     }
 
+    // Kayıt anahtarı: "top3" (herkes) ya da "top3:<kategori id>"
+    const sortKey = g => sortScope ? `${g}:${sortScope}` : g;
+
+    // Oynanabilecek kişiler: kendin hariç, kategori seçiliyse sadece o kategoridekiler
+    function sortPool() {
+      const set = sortScope ? categoryMembers.get(sortScope) : null;
+      return allProfiles.filter(p => p.id !== currentUser.id && (!set || set.has(p.id)));
+    }
+
     function saveSortResult(game, data) {
       if (!currentUser) return;
       const uid = currentUser.id;
+      sortSaved[game] = data;
       return queueSortSave(() => saveSortNow(uid, game, data));
     }
 
@@ -1376,6 +1401,7 @@
     function deleteSortResult(game) {
       if (!currentUser) return;
       const uid = currentUser.id;
+      delete sortSaved[game];
       return queueSortSave(async () => {
         const { error } = await supabaseClient.from('sort_results')
           .delete().eq('user_id', uid).eq('game', game);
@@ -1383,7 +1409,7 @@
       });
     }
 
-    const personById = id => allProfiles.find(p => p.id === id && p.id !== currentUser.id) || null;
+    const personById = id => sortPool().find(p => p.id === id) || null;
 
     function restoreTop3(d) {
       podium = { 1: null, 2: null, 3: null };
@@ -1403,7 +1429,7 @@
       tierInitialized = false;
       if (!d || !d.assigned) return;
 
-      const candidates = allProfiles.filter(p => p.id !== currentUser.id);
+      const candidates = sortPool();
       candidates.forEach(p => {
         const t = d.assigned[p.id];
         if (TIERS.includes(t)) { tierAssigned[p.id] = t; addTierBadge(p, t); }
@@ -1435,12 +1461,39 @@
         .select('game, data').eq('user_id', currentUser.id);
       if (error) { console.error('Kayıtlı sıralamalar yüklenemedi:', error); return; }
 
-      const saved = Object.fromEntries((data || []).map(r => [r.game, r.data]));
-      restoreTop3(saved.top3);
-      restoreTier(saved.tier);
-      restoreTournament(saved.tournament);
+      sortSaved = Object.fromEntries((data || []).map(r => [r.game, r.data]));
+      applySortScope();
       sortLoadedFor = currentUser.id;
       refreshSortView();
+    }
+
+    // Seçili kategorinin kayıtlarını yükler (her kategorinin kendi Top 3 / Tier / Turnuvası vardır)
+    function applySortScope() {
+      currentRoundParticipants = []; nextRoundParticipants = []; tournamentRound = 1; currentMatchIndex = 0;
+      restoreTop3(sortSaved[sortKey('top3')]);
+      restoreTier(sortSaved[sortKey('tier')]);
+      restoreTournament(sortSaved[sortKey('tournament')]);
+    }
+
+    function renderSortScope() {
+      const wrap = document.getElementById('sort-scope-wrap'), el = document.getElementById('sort-scope');
+      if (!wrap) return;
+      if (categories.length === 0) { wrap.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden');
+      const chip = (id, label, active) => `
+        <button type="button" onclick="setSortScope(${id ? `'${id}'` : 'null'})"
+          class="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 dark:bg-blackbg text-gray-600 dark:text-gray-300 border-gray-200 dark:border-borderdark hover:border-purple-500'}">${label}</button>`;
+      const count = c => (categoryMembers.get(c.id) ? [...categoryMembers.get(c.id)].filter(id => id !== currentUser.id).length : 0);
+      el.innerHTML = chip(null, 'Herkes', !sortScope) + categories.map(c =>
+        chip(c.id, (c.is_hidden ? ic('lock') + ' ' : '') + escapeHtml(c.name) + ` <span class="opacity-70">${count(c)}</span>`, sortScope === c.id)).join('');
+    }
+
+    function setSortScope(id) {
+      if ((id || null) === sortScope) return;
+      sortScope = id || null;
+      applySortScope();
+      renderSortScope();
+      switchSortGame(sortGameTab);
     }
 
     function ensureSortLoaded() {
@@ -1462,11 +1515,11 @@
       tierQueue = []; totalTierPeopleCount = 0; tierAssigned = {}; tierInitialized = false;
       TIERS.forEach(t => { const el = document.getElementById(`tier-${t}`); if (el) el.innerHTML = ''; });
       currentRoundParticipants = []; nextRoundParticipants = []; tournamentRound = 1; currentMatchIndex = 0;
-      sortLoadedFor = null; sortLoadPromise = null; sortSaveWarned = false;
+      sortLoadedFor = null; sortLoadPromise = null; sortSaveWarned = false; sortScope = null; sortSaved = {}; sortGameTab = 'vs';
     }
 
     function persistTournament() {
-      saveSortResult('tournament', {
+      saveSortResult(sortKey('tournament'), {
         round: tournamentRound,
         index: currentMatchIndex,
         current: currentRoundParticipants.map(p => p.id),
@@ -1475,23 +1528,26 @@
     }
 
     function persistTop3() {
-      saveSortResult('top3', { 1: podium[1]?.id || null, 2: podium[2]?.id || null, 3: podium[3]?.id || null });
+      saveSortResult(sortKey('top3'), { 1: podium[1]?.id || null, 2: podium[2]?.id || null, 3: podium[3]?.id || null });
     }
 
     function persistTier() {
-      saveSortResult('tier', { assigned: tierAssigned });
+      saveSortResult(sortKey('tier'), { assigned: tierAssigned });
     }
 
     async function initSortPage() {
       showSection('sort-section');
       await ensureSortLoaded();
-      switchSortGame('vs');
+      if (sortScope && !categories.some(c => c.id === sortScope)) { sortScope = null; applySortScope(); }   // kategori silinmişse
+      renderSortScope();
+      switchSortGame(sortGameTab);
     }
 
     function switchSortGame(gameType) {
+      sortGameTab = gameType;
       ['vs', 'top3', 'tier'].forEach(g => {
         document.getElementById(`sort-game-${g}`).classList.add('hidden');
-        document.getElementById(`game-tab-${g}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-400 hover:text-white shrink-0 flex items-center gap-2";
+        document.getElementById(`game-tab-${g}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2";
       });
 
       document.getElementById(`sort-game-${gameType}`).classList.remove('hidden');
@@ -1510,9 +1566,11 @@
 
     // --- OYUN 1: ELEME TURNUVASI (VS) ---
     function resetAndStartTournament() {
-      const candidates = allProfiles.filter(p => p.id !== currentUser.id);
+      const candidates = sortPool();
       if (candidates.length < 2) {
-        alert("Turnuva başlatmak için en az 2 kişi gerekiyor.");
+        currentRoundParticipants = []; nextRoundParticipants = []; currentMatchIndex = 0;
+        document.getElementById('tournament-status-text').innerText = 'Turnuva başlatılamadı';
+        document.getElementById('tournament-container').innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Turnuva için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>';
         return;
       }
 
@@ -1534,10 +1592,10 @@
     }
 
     function getRoundTitle(totalCount) {
-      if (totalCount === 2) return "BÜYÜK FİNAL 🏆";
-      if (totalCount === 4) return "YARI FİNAL 🥊";
-      if (totalCount === 8) return "ÇEYREK FİNAL ⚡";
-      return `${tournamentRound}. TUR 🔥`;
+      if (totalCount === 2) return "BÜYÜK FİNAL " + ic('trophy');
+      if (totalCount === 4) return "YARI FİNAL " + ic('swords');
+      if (totalCount === 8) return "ÇEYREK FİNAL " + ic('zap');
+      return `${tournamentRound}. TUR ` + ic('flame');
     }
 
     function renderCurrentMatch() {
@@ -1548,14 +1606,14 @@
         const champion = currentRoundParticipants[0];
         statusText.innerText = "Turnuva Tamamlandı!";
         container.innerHTML = `
-          <div class="text-center py-8 space-y-4 bg-gradient-to-b from-purple-900/20 to-transparent p-6 rounded-3xl border border-purple-500/30">
+          <div class="text-center py-8 space-y-4 bg-gradient-to-b from-purple-100 dark:from-purple-900/20 to-transparent p-6 rounded-3xl border border-purple-500/30">
             <div class="flex justify-center text-yellow-400 mb-1">
               <svg class="w-12 h-12 stroke-current animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
             </div>
-            <h3 class="text-xs uppercase font-extrabold tracking-widest text-purple-400">Turnuva Şampiyonu</h3>
+            <h3 class="text-xs uppercase font-extrabold tracking-widest text-purple-600 dark:text-purple-400">Turnuva Şampiyonu</h3>
             <img src="${avatarOf(champion)}" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-yellow-500 shadow-2xl">
-            <h2 class="text-2xl font-black text-white">${escapeHtml(champion.full_name)}</h2>
-            <p class="text-xs text-gray-400">${handleOf(champion)}</p>
+            <h2 class="text-2xl font-black text-gray-900 dark:text-white">${escapeHtml(champion.full_name)}</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${handleOf(champion)}</p>
             <div class="pt-2">
               <button onclick="resetAndStartTournament()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">
                 Yeniden Turnuva Oyna
@@ -1579,7 +1637,7 @@
       const currentMatchNumber = (currentMatchIndex / 2) + 1;
       const roundTitle = getRoundTitle(currentRoundParticipants.length);
 
-      statusText.innerText = `${roundTitle} • Maç ${currentMatchNumber} / ${totalMatchesInRound}`;
+      statusText.innerHTML = `${roundTitle} • Maç ${currentMatchNumber} / ${totalMatchesInRound}`;
 
       const userA = currentRoundParticipants[currentMatchIndex];
       const userB = currentRoundParticipants[currentMatchIndex + 1];
@@ -1639,7 +1697,7 @@
 
       const listEl = document.getElementById('top3-select-list');
       const selectedIds = Object.values(podium).filter(Boolean).map(x => x.id);
-      const available = allProfiles.filter(p => p.id !== currentUser.id && !selectedIds.includes(p.id));
+      const available = sortPool().filter(p => !selectedIds.includes(p.id));
 
       listEl.innerHTML = available.map(p => `
         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
@@ -1648,16 +1706,17 @@
             <span class="text-xs font-medium truncate">${escapeHtml(p.full_name)}</span>
           </div>
           <div class="flex gap-1 shrink-0">
-            <button onclick="addToPodium('${p.id}', 1)" class="px-1.5 py-0.5 text-[10px] bg-yellow-500/20 text-yellow-300 rounded hover:bg-yellow-500 hover:text-black">1.</button>
-            <button onclick="addToPodium('${p.id}', 2)" class="px-1.5 py-0.5 text-[10px] bg-gray-500/20 text-gray-300 rounded hover:bg-gray-400 hover:text-black">2.</button>
-            <button onclick="addToPodium('${p.id}', 3)" class="px-1.5 py-0.5 text-[10px] bg-amber-600/20 text-amber-400 rounded hover:bg-amber-600 hover:text-black">3.</button>
+            <button onclick="addToPodium('${p.id}', 1)" class="px-1.5 py-0.5 text-[10px] bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 rounded hover:bg-yellow-500 hover:text-black">1.</button>
+            <button onclick="addToPodium('${p.id}', 2)" class="px-1.5 py-0.5 text-[10px] bg-gray-200 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 hover:text-black">2.</button>
+            <button onclick="addToPodium('${p.id}', 3)" class="px-1.5 py-0.5 text-[10px] bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded hover:bg-amber-600 hover:text-black">3.</button>
           </div>
         </div>
       `).join('');
     }
 
     function addToPodium(userId, rank) {
-      const person = allProfiles.find(p => p.id === userId);
+      const person = sortPool().find(p => p.id === userId);
+      if (!person) return;
       podium[rank] = person;
       renderTop3Game();
       persistTop3();
@@ -1675,12 +1734,12 @@
         const el = document.getElementById(`tier-${t}`);
         if (el) el.innerHTML = '';
       });
-      const candidates = allProfiles.filter(p => p.id !== currentUser.id);
+      const candidates = sortPool();
       tierQueue = [...candidates].sort(() => 0.5 - Math.random());
       totalTierPeopleCount = tierQueue.length;
       tierAssigned = {};
       tierInitialized = true;
-      deleteSortResult('tier');
+      if (sortSaved[sortKey('tier')]) deleteSortResult(sortKey('tier'));
       renderTierGame();
     }
 
@@ -1688,7 +1747,7 @@
       const container = document.getElementById(`tier-${tier}`);
       if (!container) return;
       const badge = document.createElement('div');
-      badge.className = "flex items-center gap-1.5 bg-gray-800 px-2 py-1 rounded-lg border border-gray-700 shrink-0";
+      badge.className = "flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm shrink-0";
       badge.innerHTML = `
         <img src="${avatarOf(person)}" class="w-5 h-5 rounded-full object-cover">
         <span class="text-[11px] font-medium">${escapeHtml(person.full_name)}</span>
@@ -1700,11 +1759,17 @@
       const activeEl = document.getElementById('tier-active-card');
       const progressEl = document.getElementById('tier-progress-text');
 
+      if (totalTierPeopleCount === 0) {
+        if (progressEl) progressEl.innerText = "Sıralanacak kimse yok";
+        activeEl.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Bu kategoride sınıflandırılacak kimse yok. Başka bir kategori seç.</p>';
+        return;
+      }
+
       if (tierQueue.length === 0) {
         if (progressEl) progressEl.innerText = "Sınıflandırma Tamamlandı!";
         activeEl.innerHTML = `
           <div class="text-center p-6 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
-            <p class="text-xs font-bold text-green-400 mb-2">Tüm üyeleri başarıyla sınıflandırdın!</p>
+            <p class="text-xs font-bold text-green-600 dark:text-green-400 mb-2">Tüm üyeleri başarıyla sınıflandırdın!</p>
             <button onclick="resetTierGame()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition font-medium">
               Yeniden Başlat
             </button>
@@ -1723,7 +1788,7 @@
             <img src="${avatarOf(currentPerson)}" class="w-10 h-10 rounded-full object-cover border border-purple-500/40">
             <div>
               <p class="font-bold text-xs">${escapeHtml(currentPerson.full_name)}</p>
-              <p class="text-[10px] text-gray-400">${handleOf(currentPerson)}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400">${handleOf(currentPerson)}</p>
             </div>
           </div>
           <div class="flex gap-1.5 flex-wrap justify-center">
@@ -2159,14 +2224,14 @@
       el.innerHTML = chatConvs.map(c => {
         const preview = c.lastAt
           ? ((c.lastSender === currentUser.id ? 'Sen: ' : (c.kind === 'category' && c.lastSender ? personName(c.lastSender).split(' ')[0] + ': ' : ''))
-             + (c.lastBody ? escapeHtml(c.lastBody) : '📷 Fotoğraf'))
+             + (c.lastBody ? escapeHtml(c.lastBody) : ic('camera') + ' Fotoğraf'))
           : '<span class="italic">Henüz mesaj yok</span>';
         return `
           <button type="button" onclick="openConversation('${c.id}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 transition ${c.id === chatOpenId ? 'bg-emerald-50 dark:bg-emerald-950/30' : ''}">
             ${chatAvatarHtml(c, 44)}
             <span class="flex-1 min-w-0">
               <span class="flex items-center justify-between gap-2">
-                <span class="font-semibold text-sm truncate">${c.kind === 'category' ? (c.hidden ? '🔒 ' : '👥 ') : ''}${escapeHtml(c.title)}</span>
+                <span class="font-semibold text-sm truncate">${c.kind === 'category' ? ic(c.hidden ? 'lock' : 'users') + ' ' : ''}${escapeHtml(c.title)}</span>
                 <span class="text-[10px] text-gray-400 shrink-0">${chatTime(c.lastAt)}</span>
               </span>
               <span class="flex items-center justify-between gap-2">
@@ -2207,7 +2272,7 @@
       document.getElementById('chat-empty').classList.add('hidden');
       document.getElementById('chat-thread').classList.remove('hidden');
       document.getElementById('chat-thread-avatar').innerHTML = chatAvatarHtml(meta, 36);
-      document.getElementById('chat-thread-title').innerText = (meta.kind === 'category' ? (meta.hidden ? '🔒 ' : '👥 ') : '') + meta.title;
+      document.getElementById('chat-thread-title').innerHTML = (meta.kind === 'category' ? ic(meta.hidden ? 'lock' : 'users') + ' ' : '') + escapeHtml(meta.title);
       const cat = meta.kind === 'category' ? categories.find(x => x.id === meta.catId) : null;
       document.getElementById('chat-thread-sub').innerText = meta.kind === 'category'
         ? 'Grup sohbeti' + (cat ? ` · ${cat.member_count} kişi` : '') : 'Özel mesaj';
@@ -2257,10 +2322,7 @@
           <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
             <div class="max-w-[82%]">
               ${isGroup && !mine ? `<p class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 ml-1 mb-0.5">${escapeHtml(personName(m.sender))}</p>` : ''}
-              <div onclick="chatToggleMenu(${m.id})" class="cursor-pointer px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap ${mine ? 'bg-emerald-600 text-white rounded-br-md' : 'bg-gray-100 dark:bg-borderdark rounded-bl-md'}">
-                ${img}${m.body ? escapeHtml(m.body) : ''}
-                <span class="block text-[10px] mt-0.5 text-right ${mine ? 'text-emerald-100' : 'text-gray-400'}">${new Date(m.at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
+              <div onclick="chatToggleMenu(${m.id})" class="cursor-pointer px-3 py-1.5 rounded-2xl text-sm leading-snug break-words ${mine ? 'bg-emerald-600 text-white rounded-br-md' : 'bg-gray-100 dark:bg-borderdark rounded-bl-md'}">${img}${m.body ? `<span class="whitespace-pre-wrap">${escapeHtml(m.body)}</span>` : ''}<span class="block text-[10px] leading-none mt-1 text-right ${mine ? 'text-emerald-100' : 'text-gray-400'}">${new Date(m.at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span></div>
               ${menu}
             </div>
           </div>`;
@@ -2603,8 +2665,8 @@
         ? `<div class="flex justify-center py-1">${frameMarkup(currentUserProfile || { full_name: '?' }, 56, { image: c.image_url, a: c.color_a, b: c.color_b }, '', '')}</div>`
         : `<div class="relative h-16 rounded-lg overflow-hidden bg-gray-200 dark:bg-borderdark">${bgFadeHtml(c.image_url, 64)}</div>`;
       const label = c.usable
-        ? (selected ? '✓ Seçili' : 'Seç')
-        : (locked ? '🔒 Kilitli' : `🔒 ${c.min_score.toFixed(1)} puan gerekir`);
+        ? (selected ? ic('check') + ' Seçili' : 'Seç')
+        : (locked ? ic('lock') + ' Kilitli' : ic('lock') + ` ${c.min_score.toFixed(1)} puan gerekir`);
       return `
         <button type="button" ${c.usable || selected ? '' : 'disabled'} onclick="selectLook('${c.kind}', '${c.id}')"
           class="text-center p-3 rounded-2xl border-2 transition space-y-2 ${selected ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-gray-200 dark:border-borderdark bg-gray-50 dark:bg-blackbg'} ${c.usable ? 'hover:border-indigo-400 cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
@@ -2620,7 +2682,7 @@
       const bgs = cosmetics.filter(c => c.kind === 'background');
       const statusEl = document.getElementById('look-status');
       if (!unlockInfo.unlocked) {
-        statusEl.innerText = '🔒 ' + lockMessage() + ' Kilit açılınca puanına göre çerçeve ve arkaplan seçebilirsin.';
+        statusEl.innerHTML = ic('lock') + ' ' + escapeHtml(lockMessage() + ' Kilit açılınca puanına göre çerçeve ve arkaplan seçebilirsin.');
       } else {
         const sc = scoreMap.get(currentUser.id);
         statusEl.innerText = sc ? `Şu anki ortalama puanın: ${sc.avg.toFixed(1)} / 10 (${sc.count} oy). Puanın yeterli olan öğeleri seçebilirsin.`
@@ -2806,7 +2868,7 @@
       return `<div class="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-2">${list.map(c => `
         <button type="button" onclick="filterByCategory('${c.id}')"
           title="${c.is_hidden ? 'Gizli kategori: sadece içindekiler ve moderatörler görür' : 'Bu kategoridekileri listele'}"
-          class="px-2.5 py-1 text-[11px] font-semibold rounded-full border transition ${c.is_hidden ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800' : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'} hover:opacity-80">${c.is_hidden ? '🔒 ' : ''}${escapeHtml(c.name)}</button>`).join('')}</div>`;
+          class="px-2.5 py-1 text-[11px] font-semibold rounded-full border transition ${c.is_hidden ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800' : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'} hover:opacity-80">${c.is_hidden ? ic('lock') + ' ' : ''}${escapeHtml(c.name)}</button>`).join('')}</div>`;
     }
 
     function renderCategoryFilter() {
@@ -2817,7 +2879,7 @@
         <button type="button" onclick="filterByCategory(${id ? `'${id}'` : 'null'})"
           class="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-50 dark:bg-blackbg text-gray-600 dark:text-gray-300 border-gray-200 dark:border-borderdark hover:border-indigo-500'}">${label}</button>`;
       el.innerHTML = chip(null, 'Hepsi', !selectedCategory) + categories.map(c =>
-        chip(selectedCategory === c.id ? null : c.id, (c.is_hidden ? '🔒 ' : '') + escapeHtml(c.name) + ` <span class="opacity-60">${c.member_count}</span>`, selectedCategory === c.id)).join('');
+        chip(selectedCategory === c.id ? null : c.id, (c.is_hidden ? ic('lock') + ' ' : '') + escapeHtml(c.name) + ` <span class="opacity-60">${c.member_count}</span>`, selectedCategory === c.id)).join('');
     }
 
     function filterByCategory(id) {
@@ -2847,7 +2909,7 @@
           <div class="bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div class="min-w-0">
-                <p class="text-sm font-medium truncate">${c.is_hidden ? '🔒 ' : ''}${escapeHtml(c.name)}</p>
+                <p class="text-sm font-medium truncate">${c.is_hidden ? ic('lock') + ' ' : ''}${escapeHtml(c.name)}</p>
                 <p class="text-[11px] text-gray-500">${c.is_hidden ? 'Gizli · sadece içindekiler görür' : 'Açık · herkes görür'} · <span id="mod-cat-count-${c.id}">${c.member_count}</span> kişi</p>
               </div>
               <div class="flex flex-wrap justify-end gap-1.5">
@@ -3156,7 +3218,7 @@
           </div>
           <div class="text-right shrink-0">
             <span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
-              ${hide ? '🔒' : u.avgScore + ' / 10'}
+              ${hide ? ic('lock') : u.avgScore + ' / 10'}
             </span>
             <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${hide ? 'Gizli' : u.evalCount + ' Oy'}</p>
           </div>
