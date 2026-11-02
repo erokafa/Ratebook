@@ -91,6 +91,12 @@
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
         <span class="hidden sm:inline">Değerlendir</span>
       </button>
+      <!-- MESAJLAR -->
+      <button id="chat-nav-btn" onclick="openChat()" class="relative bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 px-3 py-2 rounded-xl text-xs font-medium text-emerald-600 dark:text-emerald-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span class="hidden sm:inline">Mesajlar</span>
+        <span id="chat-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold items-center justify-center leading-none">0</span>
+      </button>
       <button onclick="openMyProfile()" class="bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         <span class="hidden sm:inline">Profilim</span>
@@ -205,6 +211,48 @@
         <button onclick="initSortPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
           Sıralama Oyunlarına Git
         </button>
+      </div>
+    </section>
+
+    <!-- MESAJLAR -->
+    <section id="chat-section" class="hidden">
+      <div class="bg-white dark:bg-carddark rounded-2xl border border-gray-200 dark:border-borderdark shadow-xl overflow-hidden grid md:grid-cols-[300px_1fr] h-[78vh] min-h-[460px]">
+        <!-- Sohbet listesi -->
+        <div id="chat-list-pane" class="flex flex-col min-h-0 md:border-r border-gray-200 dark:border-borderdark">
+          <div class="flex items-center justify-between gap-2 p-4 border-b border-gray-200 dark:border-borderdark">
+            <h2 class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Mesajlar</h2>
+            <button onclick="openNewChat()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">+ Yeni Mesaj</button>
+          </div>
+          <div id="chat-list" class="flex-1 min-h-0 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
+            <p class="p-4 text-xs text-gray-500">Yükleniyor...</p>
+          </div>
+        </div>
+
+        <!-- Konuşma -->
+        <div id="chat-thread-pane" class="flex flex-col min-h-0 max-md:hidden">
+          <div id="chat-empty" class="flex-1 flex items-center justify-center p-6 text-center text-sm text-gray-500">
+            Bir sohbet seç ya da "Yeni Mesaj" ile birine yaz.
+          </div>
+          <div id="chat-thread" class="hidden flex-1 min-h-0 flex flex-col">
+            <div class="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-borderdark">
+              <button onclick="closeChatThread()" class="md:hidden text-gray-500 hover:text-gray-800 dark:hover:text-white px-2 py-1 text-lg leading-none" aria-label="Geri">&larr;</button>
+              <div id="chat-thread-avatar" class="shrink-0"></div>
+              <div class="min-w-0">
+                <p id="chat-thread-title" class="font-bold text-sm truncate"></p>
+                <p id="chat-thread-sub" class="text-[11px] text-gray-500 truncate"></p>
+              </div>
+            </div>
+            <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto p-3 space-y-1.5"></div>
+            <div id="chat-pending" class="hidden px-3 pb-1"></div>
+            <form onsubmit="sendChatMessage(event)" class="flex items-end gap-2 p-3 border-t border-gray-200 dark:border-borderdark">
+              <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="pickChatImage(this)">
+              <button type="button" onclick="document.getElementById('chat-file').click()" class="shrink-0 bg-gray-100 dark:bg-borderdark hover:bg-gray-200 dark:hover:bg-gray-800 rounded-xl px-3 py-2.5 text-lg leading-none" aria-label="Fotoğraf ekle">📷</button>
+              <textarea id="chat-input" rows="1" maxlength="1000" placeholder="Mesaj yaz..." onkeydown="chatKeydown(event)"
+                class="flex-1 min-w-0 max-h-28 resize-none bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"></textarea>
+              <button type="submit" id="chat-send-btn" class="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl">Gönder</button>
+            </form>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -452,6 +500,7 @@
         <button id="mod-tab-btn-members" onclick="switchModTab('members')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Üyeler</button>
         <button id="mod-tab-btn-categories" onclick="switchModTab('categories')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kategoriler</button>
         <button id="mod-tab-btn-comments" onclick="switchModTab('comments')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Yorumlar</button>
+        <button id="mod-tab-btn-reports" onclick="switchModTab('reports')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Bildirilen Mesajlar</button>
         <button id="mod-tab-btn-rules" onclick="switchModTab('rules')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kurallar</button>
         <button id="mod-tab-btn-look" onclick="switchModTab('look')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Çerçeve & Arkaplan</button>
         <button id="mod-tab-btn-admins" onclick="switchModTab('admins')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Moderatörler</button>
@@ -535,6 +584,18 @@
           <input type="text" id="mod-comment-search" oninput="renderModComments()" placeholder="Yorumda veya kişide ara..."
             class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
           <div id="mod-comments-list" class="space-y-2 max-h-[32rem] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- BİLDİRİLEN MESAJLAR -->
+      <div id="mod-pane-reports" class="hidden">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Bildirilen Mesajlar</h3>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+            Özel mesajları ve grup sohbetlerini okuyamazsın. Burada sadece üyelerin <b>bildirdiği</b> mesajlar görünür. Uygunsuzsa mesajı sil, değilse bildirimi yoksay.
+            Bir kategorinin sohbetini "Kategoriler" sekmesinden, bir üyenin tüm mesajlarını "Üyeler" sekmesinden toptan silebilirsin.
+          </p>
+          <div id="mod-reports-list" class="space-y-2"></div>
         </div>
       </div>
 
@@ -638,6 +699,19 @@
     </section>
 
   </main>
+
+  <!-- YENİ MESAJ PENCERESİ -->
+  <div id="chat-new-modal" class="hidden fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onclick="if(event.target===this) closeNewChat()">
+    <div class="bg-white dark:bg-carddark rounded-2xl border border-gray-200 dark:border-borderdark shadow-2xl w-full max-w-md p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Yeni Mesaj</h3>
+        <button onclick="closeNewChat()" class="text-gray-400 hover:text-gray-600 text-xl leading-none px-1" aria-label="Kapat">&times;</button>
+      </div>
+      <input type="text" id="chat-new-search" oninput="renderNewChatList()" placeholder="Kişi ara..."
+        class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500">
+      <div id="chat-new-list" class="max-h-80 overflow-y-auto space-y-1"></div>
+    </div>
+  </div>
 
   <!-- UYGULAMAYI YÜKLE ŞERİDİ -->
   <div id="install-banner" class="hidden fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:max-w-sm z-[70] bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl p-3.5 flex items-center gap-3">
@@ -785,7 +859,11 @@
         BAD_COLOR: 'Renk geçersiz.',
         IMAGE_REQUIRED: 'Bu tür için bir resim yüklemelisin (çerçevede renk de olur).',
         BAD_KIND: 'Tür geçersiz.',
-        TOO_MANY_COSMETICS: 'En fazla 200 öğe olabilir.'
+        TOO_MANY_COSMETICS: 'En fazla 200 öğe olabilir.',
+        EMPTY_MESSAGE: 'Mesaj boş olamaz.',
+        MESSAGE_TOO_LONG: 'Mesaj en fazla 1000 karakter olabilir.',
+        TOO_FAST: 'Çok hızlı mesaj gönderiyorsun, biraz bekle.',
+        NO_MESSAGE: 'Bu mesaj artık yok.'
       };
       for (const k of Object.keys(map)) if (m.includes(k)) return map[k];
       return m;
@@ -1037,6 +1115,7 @@
       allEvaluations = [];
       categories = []; categoryMembers = new Map(); selectedCategory = null; modCatOpenId = null;
       cosmetics = []; looks = new Map(); myLook = { frame: null, bg: null }; cosEditId = null;
+      chatStop();
       resetSortState();
       isModerator = false;
       isAdmin = false;
@@ -1108,6 +1187,7 @@
       renderLeaderboard(allProfiles, allEvaluations);
       renderUserRatingCards(allProfiles, allEvaluations);
       await ensureSortLoaded();
+      chatInit();
     }
 
     // ===== ARAMA =====
@@ -1860,6 +1940,7 @@
               <div class="flex flex-wrap justify-end gap-1.5">
                 <button onclick="openMemberEdit('${id}')" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Düzenle</button>
                 <button onclick="modResetRatings('${id}')" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Puanları Sıfırla</button>
+                <button onclick="modDeleteUserMessages('${id}')" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Mesajlarını Sil</button>
                 <button onclick="modToggleBlock('${id}')" class="${btn} ${m.is_blocked ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600/90 hover:bg-red-500'} text-white">${m.is_blocked ? 'Engeli Kaldır' : 'Engelle'}</button>
               </div>` : ''}
           </div>`;
@@ -1928,6 +2009,449 @@
       closeMemberEdit();
       await loadModMembers();
       await loadDashboardData();
+    }
+
+    // ===== MESAJLAŞMA =====
+    // Mesajlar sunucuda kontrol edilir: özel mesajı sadece iki kişi, grup sohbetini sadece kategorideki kişiler okur.
+    let chatConvs = [];          // sohbet listesi (sunucudan)
+    let chatOpenId = null;       // açık sohbet
+    let chatOpenMeta = null;     // açık sohbetin başlığı vb.
+    let chatMsgs = [];           // açık sohbetin mesajları (eskiden yeniye)
+    let chatChannel = null;      // anlık mesaj kanalı
+    let chatPollTimer = null;
+    let chatPendingImage = null; // gönderilmeyi bekleyen fotoğraf adresi
+    let chatMenuId = null;       // işlem menüsü açık olan mesaj
+    let chatAvailable = true;
+    let chatListTimer = null;
+    const chatSectionOpen = () => !document.getElementById('chat-section').classList.contains('hidden');
+    const personName = id => allProfiles.find(p => p.id === id)?.full_name || 'Bilinmeyen';
+
+    function chatInit() {
+      if (!currentUser) return;
+      refreshChatList();
+      startChatRealtime();
+      if (!chatPollTimer) chatPollTimer = setInterval(chatPoll, 20000);
+    }
+
+    function chatStop() {
+      if (chatChannel) { try { supabaseClient.removeChannel(chatChannel); } catch (e) {} chatChannel = null; }
+      clearInterval(chatPollTimer); chatPollTimer = null;
+      clearTimeout(chatListTimer);
+      chatConvs = []; chatOpenId = null; chatOpenMeta = null; chatMsgs = []; chatPendingImage = null; chatMenuId = null; chatAvailable = true;
+      const b = document.getElementById('chat-badge'); if (b) b.classList.add('hidden');
+    }
+
+    function startChatRealtime() {
+      if (chatChannel || !supabaseClient.channel) return;
+      try {
+        chatChannel = supabaseClient.channel('chat-messages')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, onChatInsert)
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_messages' }, onChatDelete)
+          .subscribe();
+      } catch (e) { console.warn('Anlık mesajlar başlatılamadı, yoklama ile devam edilecek:', e); }
+    }
+
+    // Anlık mesaj geldiğinde (sadece okuma hakkın olan mesajlar gelir)
+    function onChatInsert(payload) {
+      const m = payload && payload.new;
+      if (!m) return;
+      if (m.conversation_id === chatOpenId && chatSectionOpen()) {
+        if (!chatMsgs.some(x => x.id === m.id)) {
+          chatMsgs.push({ id: m.id, sender: m.sender_id, body: m.body, image: m.image_url, at: m.created_at });
+          renderChatMessages(true);
+        }
+        if (m.sender_id !== currentUser.id) chatMarkReadSoon();
+      }
+      scheduleChatListRefresh();
+    }
+
+    function onChatDelete(payload) {
+      const id = payload && payload.old && payload.old.id;
+      if (id && chatMsgs.some(x => x.id === id)) { chatMsgs = chatMsgs.filter(x => x.id !== id); renderChatMessages(false); }
+      scheduleChatListRefresh();
+    }
+
+    function scheduleChatListRefresh() {
+      clearTimeout(chatListTimer);
+      chatListTimer = setTimeout(refreshChatList, 400);
+    }
+
+    let chatReadTimer = null;
+    function chatMarkReadSoon() {
+      clearTimeout(chatReadTimer);
+      chatReadTimer = setTimeout(async () => {
+        if (!chatOpenId || !chatSectionOpen()) return;
+        await supabaseClient.rpc('chat_mark_read', { p_conv: chatOpenId });
+        scheduleChatListRefresh();
+      }, 300);
+    }
+
+    // Yedek: anlık bağlantı kopsa da mesajlar en geç 20 sn içinde gelir
+    async function chatPoll() {
+      if (!currentUser || document.hidden) return;
+      await refreshChatList();
+      if (chatOpenId && chatSectionOpen()) {
+        const { data, error } = await supabaseClient.rpc('chat_get_messages', { p_conv: chatOpenId, p_before: null, p_limit: 40 });
+        if (error || !data) return;
+        const fresh = data.map(mapChatMsg).reverse();
+        const sig = a => a.map(x => x.id).join(',');
+        if (sig(fresh) !== sig(chatMsgs.slice(-fresh.length))) {
+          const older = chatMsgs.filter(x => fresh.length && x.id < fresh[0].id);
+          chatMsgs = [...older, ...fresh];
+          renderChatMessages(true);
+        }
+        if (fresh.some(x => x.sender !== currentUser.id)) chatMarkReadSoon();
+      }
+    }
+
+    const mapChatMsg = r => ({ id: Number(r.msg_id), sender: r.msg_sender, body: r.msg_body, image: r.msg_image, at: r.msg_at });
+
+    async function refreshChatList() {
+      if (!currentUser) return;
+      const { data, error } = await supabaseClient.rpc('chat_list');
+      if (error || !data) {
+        if (error) console.error('Sohbet listesi yüklenemedi. sohbet.sql Supabase\'de çalıştırıldı mı?', error);
+        chatAvailable = false; chatConvs = [];
+        const btn = document.getElementById('chat-nav-btn'); if (btn) btn.classList.add('hidden');
+        return;
+      }
+      chatAvailable = true;
+      document.getElementById('chat-nav-btn').classList.remove('hidden');
+      chatConvs = data.map(r => ({
+        id: r.conv_id, kind: r.conv_kind, title: r.title || 'Sohbet', otherId: r.other_id, catId: r.cat_id,
+        hidden: r.is_hidden, lastBody: r.last_body, lastImage: r.last_image, lastAt: r.last_at, lastSender: r.last_sender,
+        unread: Number(r.unread || 0)
+      }));
+      updateChatBadge();
+      if (chatSectionOpen()) renderChatList();
+    }
+
+    function updateChatBadge() {
+      const total = chatConvs.reduce((n, c) => n + (c.id === chatOpenId && chatSectionOpen() ? 0 : c.unread), 0);
+      const b = document.getElementById('chat-badge');
+      b.innerText = total > 99 ? '99+' : String(total);
+      b.classList.toggle('hidden', total === 0);
+      b.classList.toggle('flex', total > 0);
+    }
+
+    function chatTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso), now = new Date();
+      return d.toDateString() === now.toDateString()
+        ? d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    }
+
+    function chatAvatarHtml(conv, px) {
+      if (conv.kind === 'category') {
+        return `<div class="shrink-0 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-purple-500 to-pink-500" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.42)}px">${escapeHtml((conv.title || '?').trim().charAt(0).toLocaleUpperCase('tr-TR'))}</div>`;
+      }
+      const p = allProfiles.find(x => x.id === conv.otherId) || { full_name: conv.title };
+      return `<img src="${avatarOf(p)}" class="shrink-0 rounded-full object-cover" style="width:${px}px;height:${px}px">`;
+    }
+
+    function renderChatList() {
+      const el = document.getElementById('chat-list');
+      if (chatConvs.length === 0) {
+        el.innerHTML = '<p class="p-4 text-xs text-gray-500">Henüz sohbet yok. "Yeni Mesaj" ile birine yaz. Üyesi olduğun kategorilerin grup sohbetleri de burada görünür.</p>';
+        return;
+      }
+      el.innerHTML = chatConvs.map(c => {
+        const preview = c.lastAt
+          ? ((c.lastSender === currentUser.id ? 'Sen: ' : (c.kind === 'category' && c.lastSender ? personName(c.lastSender).split(' ')[0] + ': ' : ''))
+             + (c.lastBody ? escapeHtml(c.lastBody) : '📷 Fotoğraf'))
+          : '<span class="italic">Henüz mesaj yok</span>';
+        return `
+          <button type="button" onclick="openConversation('${c.id}')" class="w-full text-left flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-borderdark/50 transition ${c.id === chatOpenId ? 'bg-emerald-50 dark:bg-emerald-950/30' : ''}">
+            ${chatAvatarHtml(c, 44)}
+            <span class="flex-1 min-w-0">
+              <span class="flex items-center justify-between gap-2">
+                <span class="font-semibold text-sm truncate">${c.kind === 'category' ? (c.hidden ? '🔒 ' : '👥 ') : ''}${escapeHtml(c.title)}</span>
+                <span class="text-[10px] text-gray-400 shrink-0">${chatTime(c.lastAt)}</span>
+              </span>
+              <span class="flex items-center justify-between gap-2">
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate">${preview}</span>
+                ${c.unread > 0 && c.id !== chatOpenId ? `<span class="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">${c.unread > 99 ? '99+' : c.unread}</span>` : ''}
+              </span>
+            </span>
+          </button>`;
+      }).join('');
+    }
+
+    async function openChat() {
+      showSection('chat-section');
+      if (!chatOpenId) closeChatThread(true);
+      await refreshChatList();
+      renderChatList();
+      updateChatBadge();
+    }
+
+    // Telefonda liste ile konuşma arasında geçiş
+    function showChatPane(thread) {
+      document.getElementById('chat-list-pane').classList.toggle('max-md:hidden', thread);
+      document.getElementById('chat-thread-pane').classList.toggle('max-md:hidden', !thread);
+    }
+
+    function closeChatThread(silent) {
+      chatOpenId = null; chatOpenMeta = null; chatMsgs = []; chatPendingImage = null; chatMenuId = null;
+      document.getElementById('chat-thread').classList.add('hidden');
+      document.getElementById('chat-empty').classList.remove('hidden');
+      showChatPane(false);
+      if (!silent) { renderChatList(); updateChatBadge(); }
+    }
+
+    async function openConversation(id, metaOverride) {
+      const meta = metaOverride || chatConvs.find(c => c.id === id);
+      if (!meta) return;
+      chatOpenId = id; chatOpenMeta = meta; chatMsgs = []; chatPendingImage = null; chatMenuId = null;
+      document.getElementById('chat-empty').classList.add('hidden');
+      document.getElementById('chat-thread').classList.remove('hidden');
+      document.getElementById('chat-thread-avatar').innerHTML = chatAvatarHtml(meta, 36);
+      document.getElementById('chat-thread-title').innerText = (meta.kind === 'category' ? (meta.hidden ? '🔒 ' : '👥 ') : '') + meta.title;
+      const cat = meta.kind === 'category' ? categories.find(x => x.id === meta.catId) : null;
+      document.getElementById('chat-thread-sub').innerText = meta.kind === 'category'
+        ? 'Grup sohbeti' + (cat ? ` · ${cat.member_count} kişi` : '') : 'Özel mesaj';
+      document.getElementById('chat-input').value = '';
+      renderChatPending();
+      showChatPane(true);
+      renderChatList();
+      document.getElementById('chat-messages').innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Yükleniyor...</p>';
+
+      const { data, error } = await supabaseClient.rpc('chat_get_messages', { p_conv: id, p_before: null, p_limit: 40 });
+      if (chatOpenId !== id) return;
+      if (error) {
+        document.getElementById('chat-messages').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Mesajlar yüklenemedi: ${escapeHtml(friendlyError(error))}</p>`;
+        return;
+      }
+      chatMsgs = (data || []).map(mapChatMsg).reverse();
+      renderChatMessages(true);
+      await supabaseClient.rpc('chat_mark_read', { p_conv: id });
+      const c = chatConvs.find(x => x.id === id); if (c) c.unread = 0;
+      updateChatBadge(); renderChatList();
+    }
+
+    function renderChatMessages(scrollDown) {
+      const el = document.getElementById('chat-messages');
+      if (!chatOpenId) return;
+      if (chatMsgs.length === 0) {
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-6">Henüz mesaj yok. İlk mesajı sen yaz!</p>';
+        return;
+      }
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+      const isGroup = chatOpenMeta && chatOpenMeta.kind === 'category';
+      let lastDay = '';
+      el.innerHTML = chatMsgs.map(m => {
+        const mine = m.sender === currentUser.id;
+        const day = new Date(m.at).toDateString();
+        const sep = day !== lastDay ? `<div class="text-center text-[10px] text-gray-400 py-1">${new Date(m.at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' })}</div>` : '';
+        lastDay = day;
+        const img = m.image && /^https:\/\//i.test(m.image)
+          ? `<a href="${escapeHtml(m.image)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(m.image)}" loading="lazy" class="max-w-full rounded-xl mb-1" style="max-height:240px"></a>` : '';
+        const canDelete = mine || isModerator;
+        const menu = chatMenuId === m.id ? `
+          <div class="flex gap-3 mt-1 text-[11px] ${mine ? 'justify-end' : ''}">
+            ${canDelete ? `<button type="button" onclick="chatDeleteMessage(${m.id})" class="text-red-500 hover:underline">Sil</button>` : ''}
+            ${!mine ? `<button type="button" onclick="chatReportMessage(${m.id})" class="text-amber-600 dark:text-amber-400 hover:underline">Bildir</button>` : ''}
+          </div>` : '';
+        return `${sep}
+          <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[82%]">
+              ${isGroup && !mine ? `<p class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 ml-1 mb-0.5">${escapeHtml(personName(m.sender))}</p>` : ''}
+              <div onclick="chatToggleMenu(${m.id})" class="cursor-pointer px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap ${mine ? 'bg-emerald-600 text-white rounded-br-md' : 'bg-gray-100 dark:bg-borderdark rounded-bl-md'}">
+                ${img}${m.body ? escapeHtml(m.body) : ''}
+                <span class="block text-[10px] mt-0.5 text-right ${mine ? 'text-emerald-100' : 'text-gray-400'}">${new Date(m.at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              ${menu}
+            </div>
+          </div>`;
+      }).join('');
+      if (scrollDown && (nearBottom || scrollDown === 'force' || el.dataset.fresh !== chatOpenId)) {
+        el.scrollTop = el.scrollHeight;
+        el.dataset.fresh = chatOpenId;
+      }
+    }
+
+    function chatToggleMenu(id) {
+      chatMenuId = chatMenuId === id ? null : id;
+      renderChatMessages(false);
+    }
+
+    function chatKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('chat-send-btn').click(); }
+    }
+
+    function renderChatPending() {
+      const el = document.getElementById('chat-pending');
+      if (!chatPendingImage) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+      el.classList.remove('hidden');
+      el.innerHTML = `<div class="inline-flex items-center gap-2 bg-gray-100 dark:bg-borderdark rounded-xl p-1.5">
+        <img src="${escapeHtml(chatPendingImage)}" class="h-14 rounded-lg">
+        <button type="button" onclick="chatPendingImage=null;renderChatPending()" class="text-gray-500 hover:text-red-500 px-2 text-lg leading-none" aria-label="Kaldır">&times;</button></div>`;
+    }
+
+    // Fotoğrafı küçültüp yükler (telefon fotoğrafları büyük olur)
+    async function shrinkImage(file, maxDim = 1280) {
+      try {
+        const bmp = await createImageBitmap(file);
+        const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+        c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+        const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+        return blob && blob.size < file.size ? blob : file;
+      } catch (e) { return file; }
+    }
+
+    async function pickChatImage(input) {
+      const file = input.files[0]; input.value = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { alert('Lütfen bir resim seç.'); return; }
+      if (file.size > 20 * 1024 * 1024) { alert('Resim çok büyük.'); return; }
+      const btn = document.getElementById('chat-send-btn'); btn.disabled = true; btn.innerText = 'Yükleniyor...';
+      try {
+        const blob = await shrinkImage(file);
+        if (blob.size > 5 * 1024 * 1024) throw new Error('Resim 5 MB\'tan küçük olmalı.');
+        const name = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '_' + Math.random().toString(36).slice(2));
+        const path = `public/chat_${name}.${blob === file ? (file.name.split('.').pop() || 'jpg') : 'jpg'}`;
+        const { error } = await supabaseClient.storage.from('avatars').upload(path, blob, { contentType: blob.type || file.type });
+        if (error) throw error;
+        chatPendingImage = supabaseClient.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+        renderChatPending();
+      } catch (err) {
+        alert('Fotoğraf yüklenemedi: ' + (err.message || err));
+      } finally { btn.disabled = false; btn.innerText = 'Gönder'; }
+    }
+
+    async function sendChatMessage(e) {
+      e.preventDefault();
+      if (!chatOpenId) return;
+      const input = document.getElementById('chat-input');
+      const body = input.value.trim();
+      if (!body && !chatPendingImage) return;
+      const btn = document.getElementById('chat-send-btn'); btn.disabled = true;
+      const image = chatPendingImage;
+      const { data, error } = await supabaseClient.rpc('chat_send', { p_conv: chatOpenId, p_body: body || null, p_image: image || null });
+      btn.disabled = false;
+      if (error) { alert('Mesaj gönderilemedi: ' + friendlyError(error)); return; }
+      input.value = ''; chatPendingImage = null; renderChatPending();
+      const id = Number(data);
+      if (!chatMsgs.some(x => x.id === id)) chatMsgs.push({ id, sender: currentUser.id, body: body || null, image: image || null, at: new Date().toISOString() });
+      renderChatMessages('force');
+      scheduleChatListRefresh();
+      input.focus();
+    }
+
+    async function chatDeleteMessage(id) {
+      const m = chatMsgs.find(x => x.id === id);
+      const mine = m && m.sender === currentUser.id;
+      if (!confirm(mine ? 'Bu mesaj herkes için silinsin mi?' : 'Bu mesaj silinsin mi? (moderatör yetkisi)')) return;
+      const { error } = await supabaseClient.rpc('chat_delete_message', { p_msg: id });
+      if (error) { alert('Silinemedi: ' + friendlyError(error)); return; }
+      chatMsgs = chatMsgs.filter(x => x.id !== id); chatMenuId = null;
+      renderChatMessages(false); scheduleChatListRefresh();
+    }
+
+    async function chatReportMessage(id) {
+      const reason = prompt('Bu mesajı moderatörlere bildirmek üzeresin. İstersen nedenini yaz:', '');
+      if (reason === null) return;
+      const { error } = await supabaseClient.rpc('chat_report', { p_msg: id, p_reason: reason });
+      if (error) { alert('Bildirilemedi: ' + friendlyError(error)); return; }
+      chatMenuId = null; renderChatMessages(false);
+      alert('Mesaj moderatörlere bildirildi. Teşekkürler.');
+    }
+
+    // --- Yeni mesaj: kişi seç ---
+    function openNewChat() {
+      document.getElementById('chat-new-modal').classList.remove('hidden');
+      document.getElementById('chat-new-search').value = '';
+      renderNewChatList();
+      setTimeout(() => document.getElementById('chat-new-search').focus(), 50);
+    }
+    function closeNewChat() { document.getElementById('chat-new-modal').classList.add('hidden'); }
+
+    function renderNewChatList() {
+      const q = nameKey(document.getElementById('chat-new-search').value);
+      const list = allProfiles
+        .filter(p => !p.unclaimed && p.id !== currentUser.id && (nameKey(p.full_name).includes(q) || nameKey(p.username).includes(q)))
+        .sort((a, b) => a.full_name.localeCompare(b.full_name, 'tr'));
+      document.getElementById('chat-new-list').innerHTML = list.length === 0
+        ? '<p class="text-xs text-gray-500 text-center py-4">Kişi bulunamadı.</p>'
+        : list.map(p => `
+          <button type="button" onclick="startDm('${p.id}')" class="w-full text-left flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-borderdark/50">
+            <img src="${avatarOf(p)}" class="w-9 h-9 shrink-0 rounded-full object-cover">
+            <span class="min-w-0"><span class="block text-sm font-medium truncate">${escapeHtml(p.full_name)}</span><span class="block text-[11px] text-gray-500 truncate">${handleOf(p)}</span></span>
+          </button>`).join('');
+    }
+
+    async function startDm(personId) {
+      const { data, error } = await supabaseClient.rpc('chat_open_dm', { p_other: personId });
+      if (error) { alert('Sohbet açılamadı: ' + friendlyError(error)); return; }
+      closeNewChat();
+      showSection('chat-section');
+      const p = allProfiles.find(x => x.id === personId);
+      await refreshChatList();
+      const meta = chatConvs.find(c => c.id === data) || { id: data, kind: 'dm', title: p ? p.full_name : 'Sohbet', otherId: personId, unread: 0 };
+      await openConversation(data, meta);
+    }
+
+    // --- Moderatör: bildirilen mesajlar, toplu silme ---
+    let modReports = [];
+    async function loadReports() {
+      const { data, error } = await supabaseClient.rpc('mod_list_reports');
+      if (error) { alert('Bildirimler yüklenemedi: ' + friendlyError(error)); return; }
+      modReports = data || [];
+      renderReports();
+    }
+
+    function renderReports() {
+      const el = document.getElementById('mod-reports-list');
+      const tab = document.getElementById('mod-tab-btn-reports');
+      if (tab) tab.innerText = modReports.length ? `Bildirilen Mesajlar (${modReports.length})` : 'Bildirilen Mesajlar';
+      if (modReports.length === 0) { el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Bildirilen mesaj yok.</p>'; return; }
+      const btn = "px-3 py-1.5 text-xs font-medium rounded-lg transition";
+      el.innerHTML = modReports.map(r => `
+        <div class="bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark space-y-2">
+          <div class="flex flex-wrap justify-between gap-2 text-[11px] text-gray-500">
+            <span><b>${escapeHtml(r.sender_name || 'Bilinmeyen')}</b> yazdı · ${escapeHtml(r.source)}</span>
+            <span>${new Date(r.message_at).toLocaleString('tr-TR')}</span>
+          </div>
+          ${r.body ? `<p class="text-sm break-words whitespace-pre-wrap">${escapeHtml(r.body)}</p>` : ''}
+          ${r.image_url && /^https:\/\//i.test(r.image_url) ? `<a href="${escapeHtml(r.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(r.image_url)}" class="rounded-lg" style="max-height:160px"></a>` : ''}
+          <p class="text-[11px] text-amber-600 dark:text-amber-400">Bildiren: ${escapeHtml(r.reporter_name || '?')}${r.reason ? ' — "' + escapeHtml(r.reason) + '"' : ''}</p>
+          <div class="flex gap-2 justify-end">
+            <button onclick="modDismissReport(${r.report_id})" class="${btn} bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700">Yoksay</button>
+            <button onclick="modDeleteReported(${r.message_id})" class="${btn} bg-red-600/90 hover:bg-red-500 text-white">Mesajı Sil</button>
+          </div>
+        </div>`).join('');
+    }
+
+    async function modDismissReport(id) {
+      const { error } = await supabaseClient.rpc('mod_dismiss_report', { p_id: id });
+      if (error) { alert('İşlem başarısız: ' + friendlyError(error)); return; }
+      await loadReports();
+    }
+
+    async function modDeleteReported(msgId) {
+      if (!confirm('Bu mesaj herkes için silinsin mi?')) return;
+      const { error } = await supabaseClient.rpc('chat_delete_message', { p_msg: msgId });
+      if (error) { alert('Silinemedi: ' + friendlyError(error)); return; }
+      await loadReports();
+    }
+
+    async function modDeleteUserMessages(id) {
+      const m = modMembers.find(x => x.id === id);
+      if (!confirm(`${m ? m.full_name : 'Bu üye'} kişisinin gönderdiği TÜM mesajlar (özel mesajlar ve grup sohbetleri) silinsin mi?\n\nBu işlem geri alınamaz. Mesajların içeriğini görmezsin.`)) return;
+      const { data, error } = await supabaseClient.rpc('mod_delete_user_messages', { p_user: id });
+      if (error) { alert('Silinemedi: ' + friendlyError(error)); return; }
+      alert(`${data ?? 0} mesaj silindi.`);
+    }
+
+    async function modClearCategoryChat(id) {
+      const c = categories.find(x => x.id === id);
+      if (!c || !confirm(`"${c.name}" grup sohbetindeki TÜM mesajlar silinsin mi?\n\nBu işlem geri alınamaz. Kategori ve üyeleri silinmez.`)) return;
+      const { data, error } = await supabaseClient.rpc('mod_clear_category_chat', { p_cat: id });
+      if (error) { alert('Temizlenemedi: ' + friendlyError(error)); return; }
+      alert(`${data ?? 0} mesaj silindi.`);
     }
 
     // ===== UYGULAMA OLARAK YÜKLE (PWA) =====
@@ -2329,6 +2853,7 @@
               <div class="flex flex-wrap justify-end gap-1.5">
                 <button onclick="modToggleCatPeople('${c.id}')" class="${btn}">${open ? 'Kapat' : 'Kişiler'}</button>
                 <button onclick="modRenameCategory('${c.id}')" class="${btn}">Adı Değiştir</button>
+                <button onclick="modClearCategoryChat('${c.id}')" class="${btn}">Sohbeti Temizle</button>
                 <button onclick="modToggleCatHidden('${c.id}')" class="${btn}">${c.is_hidden ? 'Açık Yap' : 'Gizli Yap'}</button>
                 <button onclick="modDeleteCategory('${c.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg transition bg-red-600/90 hover:bg-red-500 text-white">Sil</button>
               </div>
@@ -2433,7 +2958,7 @@
       if ((tab === 'admins' || tab === 'look') && !isAdmin) tab = 'people';
       const on  = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-amber-600 text-white";
       const off = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-amber-600";
-      ['people', 'members', 'categories', 'comments', 'rules', 'look', 'admins'].forEach(t => {
+      ['people', 'members', 'categories', 'comments', 'reports', 'rules', 'look', 'admins'].forEach(t => {
         document.getElementById(`mod-pane-${t}`).classList.toggle('hidden', t !== tab);
         document.getElementById(`mod-tab-btn-${t}`).className = t === tab ? on : off;
       });
@@ -2446,6 +2971,7 @@
       if (tab === 'look') loadAdminCosmetics();
       if (tab === 'comments') loadModComments();
       if (tab === 'rules') fillModRules();
+      if (tab === 'reports') loadReports();
     }
 
     async function loadModComments() {
