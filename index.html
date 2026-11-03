@@ -111,7 +111,7 @@
         <span class="hidden sm:inline">Ayarlar</span>
       </button>
       <span id="user-display-name" class="font-semibold text-xs hidden lg:inline text-gray-400"></span>
-      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-xl text-xs font-medium">Çıkış</button>
+      <button onclick="confirmLogout()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded-xl text-xs font-medium">Çıkış</button>
     </div>
 
     <!-- Mobil Arama Çubuğu -->
@@ -288,6 +288,10 @@
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             <span>Tier List (Sınıflandır)</span>
           </button>
+          <button onclick="switchSortGame('rank')" id="game-tab-rank" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <span>Tam Sıralama (1'den N'e)</span>
+          </button>
         </div>
 
         <!-- OYUN ALANI 1: VS ELEME TURNUVASI -->
@@ -340,6 +344,23 @@
           <div class="border-t border-gray-200 dark:border-borderdark pt-4">
             <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Kişi Seç:</h4>
             <div id="top3-select-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- OYUN ALANI 4: TAM SIRALAMA -->
+        <div id="sort-game-rank" class="hidden space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-2 bg-gray-50 dark:bg-blackbg p-3.5 rounded-xl border border-gray-200 dark:border-borderdark">
+            <span id="rank-status-text" class="text-xs font-semibold text-purple-600 dark:text-purple-400">Yükleniyor...</span>
+            <div class="flex gap-2">
+              <button id="rank-undo-btn" onclick="rankUndo()" class="text-xs bg-gray-200 dark:bg-borderdark text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition font-medium">Geri Al</button>
+              <button onclick="resetRankGame()" class="text-xs bg-purple-100 dark:bg-purple-600/20 text-purple-700 dark:text-purple-300 hover:bg-purple-600 hover:text-white dark:hover:bg-purple-600 px-3 py-1.5 rounded-lg transition font-medium">Baştan Başla</button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Karşına çıkan ikiliden daha üstte olması gerekeni seç. Herkes sırayla yerini bulur, sonunda 1'den başlayan tam bir sıralaman olur. Seçimlerin otomatik kaydedilir.</p>
+          <div id="rank-container"></div>
+          <div id="rank-list-wrap" class="border-t border-gray-200 dark:border-borderdark pt-4">
+            <h4 id="rank-list-title" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Şu Anki Sıralama</h4>
+            <ol id="rank-list" class="space-y-1.5 max-h-72 overflow-y-auto"></ol>
           </div>
         </div>
 
@@ -489,6 +510,9 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
+        RateBook · Sürüm <span id="app-version">1.0</span>
       </div>
     </section>
 
@@ -801,9 +825,14 @@
     let sortScope = null;        // null = herkes, yoksa kategori id'si
     let sortSaved = {};          // kayıt anahtarı -> veri (tarayıcıdaki kopya)
     let sortGameTab = 'vs';
+    // Tam Sıralama: sıralı liste + sıradaki kişi + ikili arama sınırları
+    let rankSorted = [], rankQueue = [], rankCur = null, rankLo = 0, rankHi = 0, rankHistory = [], rankInitialized = false, rankLock = false;
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
+    const APP_VERSION = '1.0';
+    window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
+
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
     const ICONS = {"lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0110 0v4\"/>", "camera": "<path d=\"M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z\"/><circle cx=\"12\" cy=\"13\" r=\"4\"/>", "users": "<path d=\"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75\"/>", "check": "<polyline points=\"20 6 9 17 4 12\"/>", "trophy": "<path d=\"M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3\"/>", "swords": "<path d=\"M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6\"/>", "zap": "<polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\"/>", "flame": "<path d=\"M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-4 3 0-3-1-5-3-7-1 3-4 5-4 11 0 4 3 7 7 7z\"/>"};
     function ic(name, size) {
@@ -1120,6 +1149,11 @@
         updateUI(true);
         loadDashboardData();
       }
+    }
+
+    // Çıkış düğmesi: yanlışlıkla basılmasın diye önce sorar
+    function confirmLogout() {
+      if (confirm('Çıkış yapmak istediğine emin misin?')) logout();
     }
 
     async function logout() {
@@ -1473,6 +1507,7 @@
       restoreTop3(sortSaved[sortKey('top3')]);
       restoreTier(sortSaved[sortKey('tier')]);
       restoreTournament(sortSaved[sortKey('tournament')]);
+      restoreRank(sortSaved[sortKey('rank')]);
     }
 
     function renderSortScope() {
@@ -1508,6 +1543,7 @@
       if (!document.getElementById('sort-game-vs').classList.contains('hidden') && currentRoundParticipants.length > 0) renderCurrentMatch();
       if (!document.getElementById('sort-game-top3').classList.contains('hidden')) renderTop3Game();
       if (!document.getElementById('sort-game-tier').classList.contains('hidden') && tierInitialized) renderTierGame();
+      if (!document.getElementById('sort-game-rank').classList.contains('hidden') && rankInitialized) renderRankGame();
     }
 
     function resetSortState() {
@@ -1515,6 +1551,7 @@
       tierQueue = []; totalTierPeopleCount = 0; tierAssigned = {}; tierInitialized = false;
       TIERS.forEach(t => { const el = document.getElementById(`tier-${t}`); if (el) el.innerHTML = ''; });
       currentRoundParticipants = []; nextRoundParticipants = []; tournamentRound = 1; currentMatchIndex = 0;
+      rankSorted = []; rankQueue = []; rankCur = null; rankLo = 0; rankHi = 0; rankHistory = []; rankInitialized = false;
       sortLoadedFor = null; sortLoadPromise = null; sortSaveWarned = false; sortScope = null; sortSaved = {}; sortGameTab = 'vs';
     }
 
@@ -1545,7 +1582,7 @@
 
     function switchSortGame(gameType) {
       sortGameTab = gameType;
-      ['vs', 'top3', 'tier'].forEach(g => {
+      ['vs', 'top3', 'tier', 'rank'].forEach(g => {
         document.getElementById(`sort-game-${g}`).classList.add('hidden');
         document.getElementById(`game-tab-${g}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2";
       });
@@ -1561,6 +1598,10 @@
       if (gameType === 'tier') {
         if (!tierInitialized) resetTierGame();
         else renderTierGame();
+      }
+      if (gameType === 'rank') {
+        if (!rankInitialized) resetRankGame();
+        else renderRankGame();
       }
     }
 
@@ -1726,6 +1767,133 @@
       podium[rank] = null;
       renderTop3Game();
       persistTop3();
+    }
+
+    // --- OYUN 4: TAM SIRALAMA ---
+    // Her yeni kişi, sıralı listedeki kişilerle ikili aramayla karşılaştırılır (en fazla ~log2(N) seçim).
+    function persistRank() {
+      saveSortResult(sortKey('rank'), {
+        sorted: rankSorted.map(p => p.id), queue: rankQueue.map(p => p.id),
+        cur: rankCur ? rankCur.id : null, lo: rankLo, hi: rankHi
+      });
+    }
+
+    function rankAdvance() {
+      rankCur = rankQueue.shift() || null;
+      rankLo = 0; rankHi = rankSorted.length;
+    }
+
+    function restoreRank(d) {
+      rankSorted = []; rankQueue = []; rankCur = null; rankLo = 0; rankHi = 0; rankHistory = []; rankInitialized = false;
+      if (!d || !Array.isArray(d.sorted)) return;
+      const pool = sortPool();
+      const byId = new Map(pool.map(p => [p.id, p]));
+      const used = new Set();
+      const take = ids => (Array.isArray(ids) ? ids : []).map(id => byId.get(id)).filter(p => p && !used.has(p.id) && used.add(p.id));
+      rankSorted = take(d.sorted);
+      const curP = d.cur ? take([d.cur])[0] || null : null;
+      rankQueue = take(d.queue);
+      // sonradan katılan kişiler sıraya girer
+      rankQueue.push(...pool.filter(p => !used.has(p.id)).sort(() => 0.5 - Math.random()));
+      if (curP) {
+        rankCur = curP;
+        const ok = Number.isInteger(d.lo) && Number.isInteger(d.hi) && d.lo >= 0 && d.lo <= d.hi && d.hi <= rankSorted.length && rankSorted.length === (d.sorted || []).length;
+        rankLo = ok ? d.lo : 0; rankHi = ok ? d.hi : rankSorted.length;
+      } else {
+        if (rankSorted.length === 0 && rankQueue.length) rankSorted.push(rankQueue.shift());
+        rankAdvance();
+      }
+      rankInitialized = true;
+    }
+
+    function resetRankGame() {
+      const pool = sortPool().sort(() => 0.5 - Math.random());
+      rankHistory = [];
+      rankSorted = pool.slice(0, 1); rankQueue = pool.slice(1); rankCur = null;
+      rankAdvance();
+      rankInitialized = true;
+      if (sortSaved[sortKey('rank')]) deleteSortResult(sortKey('rank'));
+      renderRankGame();
+      if (pool.length >= 2) persistRank();
+    }
+
+    function rankSnapshot() {
+      rankHistory.push({ sorted: [...rankSorted], queue: [...rankQueue], cur: rankCur, lo: rankLo, hi: rankHi });
+      if (rankHistory.length > 60) rankHistory.shift();
+    }
+
+    function rankUndo() {
+      const h = rankHistory.pop();
+      if (!h) return;
+      rankSorted = h.sorted; rankQueue = h.queue; rankCur = h.cur; rankLo = h.lo; rankHi = h.hi;
+      renderRankGame(); persistRank();
+    }
+
+    function rankPick(curWins) {
+      if (rankLock || !rankCur) return;
+      rankLock = true; setTimeout(() => { rankLock = false; }, 300);
+      rankSnapshot();
+      const mid = Math.floor((rankLo + rankHi) / 2);
+      if (curWins) rankHi = mid; else rankLo = mid + 1;
+      if (rankLo >= rankHi) { rankSorted.splice(rankLo, 0, rankCur); rankAdvance(); }
+      renderRankGame(); persistRank();
+    }
+
+    function renderRankGame() {
+      const status = document.getElementById('rank-status-text');
+      const box = document.getElementById('rank-container');
+      const listEl = document.getElementById('rank-list');
+      const total = rankSorted.length + rankQueue.length + (rankCur ? 1 : 0);
+      document.getElementById('rank-undo-btn').classList.toggle('hidden', rankHistory.length === 0);
+
+      if (total < 2) {
+        status.innerText = 'Başlatılamadı';
+        box.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Sıralama için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>';
+        document.getElementById('rank-list-wrap').classList.add('hidden');
+        return;
+      }
+      document.getElementById('rank-list-wrap').classList.remove('hidden');
+
+      if (!rankCur) {
+        status.innerText = 'Sıralama tamamlandı!';
+        box.innerHTML = `<div class="text-center py-4 space-y-1">
+          <div class="flex justify-center text-yellow-500">${ic('trophy', 'w-10 h-10')}</div>
+          <p class="text-sm font-bold">Tam sıralaman hazır!</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Aşağıda ${total} kişinin sıralamasını görüyorsun. Bu sıralama sadece sana özel, kimse görmez.</p></div>`;
+      } else {
+        const mid = Math.floor((rankLo + rankHi) / 2);
+        const other = rankSorted[mid];
+        const card = (u, curWins) => `
+          <button type="button" onclick="rankPick(${curWins})"
+            class="w-full bg-gray-50 dark:bg-blackbg p-5 rounded-2xl border-2 border-gray-200 dark:border-borderdark text-center space-y-3 cursor-pointer select-none transition hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/30 active:scale-95 focus:outline-none focus-visible:border-purple-500">
+            <img src="${avatarOf(u)}" class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-purple-500 shadow-lg pointer-events-none">
+            <span class="block">
+              <span class="block font-bold text-sm text-gray-900 dark:text-gray-100">${escapeHtml(u.full_name)}</span>
+              <span class="block text-[11px] text-gray-500">${handleOf(u)}</span>
+            </span>
+          </button>`;
+        const curFirst = (rankSorted.length + rankLo + rankHi) % 2 === 0;   // sağ/sol hep aynı tarafta olmasın
+        const left = curFirst ? card(rankCur, true) : card(other, false);
+        const right = curFirst ? card(other, false) : card(rankCur, true);
+        const done = rankSorted.length;
+        status.innerText = `Sıralanan: ${done} / ${total} kişi`;
+        box.innerHTML = `
+          <p class="text-center text-sm font-semibold mb-3">Hangisi daha üstte olmalı?</p>
+          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+            ${left}
+            <div class="font-extrabold text-xl text-purple-500 tracking-widest text-center">VS</div>
+            ${right}
+          </div>`;
+      }
+
+      document.getElementById('rank-list-title').innerText = rankCur ? `Şu Anki Sıralama (${rankSorted.length} kişi)` : 'Sıralaman';
+      listEl.innerHTML = rankSorted.map((p, i) => {
+        const medal = i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : i === 2 ? 'text-amber-600' : 'text-gray-500 dark:text-gray-400';
+        return `<li class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
+          <span class="w-7 text-center font-black text-sm ${medal}">${i + 1}</span>
+          <img src="${avatarOf(p)}" class="w-7 h-7 rounded-full object-cover">
+          <span class="text-xs font-medium truncate">${escapeHtml(p.full_name)}</span></li>`;
+      }).join('');
     }
 
     // --- OYUN 3: TIER LIST ---
