@@ -1,7 +1,9 @@
-// RateBook servis çalışanı: uygulamanın kabuğunu saklar, veriye (Supabase) hiç dokunmaz.
-// Sayfa her zaman önce internetten gelir, yenilikler hemen görünür; internet yoksa son kopya açılır.
-const CACHE = 'ratebook-shell-v1';
+// RateBook servis çalışanı: uygulamanın kabuğunu ve kütüphaneleri saklar, veriye (Supabase) hiç dokunmaz.
+// Sayfa saklanan kopyadan anında açılır; internet hızlıysa (1,5 sn içinde) güncel sürüm gelir.
+const CACHE = 'ratebook-shell-v2';
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+// Sadece bu iki kütüphane saklanır (Tailwind ve Supabase istemcisi); diğer her şey olduğu gibi geçer
+const LIBS = ['https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
@@ -18,16 +20,34 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
-  // Sadece kendi sitemizin GET istekleri; Supabase ve CDN istekleri olduğu gibi geçer
-  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (req.method !== 'GET') return;
 
-  // Sayfa açılışı: önce internet, olmazsa saklanan kopya
-  if (req.mode === 'navigate') {
+  // Kütüphaneler: önce saklanan, arkada yenile (her açılışta internetten beklemesin)
+  if (LIBS.some(l => req.url.startsWith(l))) {
     e.respondWith(
-      fetch(req)
-        .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./', copy)); return res; })
-        .catch(() => caches.match('./').then(r => r || caches.match(req)))
+      caches.open(CACHE).then(cache => cache.match(req).then(hit => {
+        const net = fetch(req).then(res => {
+          if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
+          return res;
+        }).catch(() => hit);
+        return hit || net;
+      }))
     );
+    return;
+  }
+
+  // Geri kalan dış istekler (Supabase vb.) olduğu gibi geçer
+  if (url.origin !== self.location.origin) return;
+
+  // Sayfa açılışı: saklanan kopya varsa en fazla 1,5 sn internet beklenir, yoksa kopya açılır
+  if (req.mode === 'navigate') {
+    e.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      const hit = await cache.match('./');
+      const net = fetch(req).then(res => { if (res.ok) cache.put('./', res.clone()); return res; });
+      if (!hit) return net.catch(() => Response.error());
+      return Promise.race([net.catch(() => hit), new Promise(r => setTimeout(() => r(hit), 1500))]);
+    })());
     return;
   }
 

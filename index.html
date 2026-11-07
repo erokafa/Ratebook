@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="RateBook">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://ttjnidnzafyhuoxhaojk.supabase.co" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -28,7 +31,7 @@
       }
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
   <style>
     @media (max-width: 640px) {
       input, textarea, select { font-size: 16px !important; }
@@ -158,7 +161,7 @@
     </section>
 
     <!-- GİRİŞ YAP PANELİ -->
-    <section id="login-section" class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-4 sm:my-10 shadow-xl">
+    <section id="login-section" class="hidden bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark max-w-md mx-auto my-4 sm:my-10 shadow-xl">
       <h2 class="text-2xl font-bold mb-4 text-center">Giriş Yap</h2>
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
@@ -972,25 +975,37 @@
       if (tabName === 'look') loadLookTab();
     }
 
+    // Oturum tarayıcıda kayıtlıysa giriş ekranını hiç göstermeden ana sayfayı açarız;
+    // sunucudan doğrulama arkada yapılır (oturum yoksa o zaman giriş ekranına döner).
+    const AUTH_STORAGE_KEY = 'sb-ttjnidnzafyhuoxhaojk-auth-token';
+    function hasStoredSession() { try { return !!localStorage.getItem(AUTH_STORAGE_KEY); } catch (e) { return false; } }
+    function cachedName() { try { return localStorage.getItem('rb_name') || ''; } catch (e) { return ''; } }
+
     window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
+      const optimistic = hasStoredSession();
+      if (optimistic) updateUI(true); else updateUI(false);
+
       const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        await fetchCurrentUserProfile();
-        updateUI(true);
-        loadDashboardData();
-      } else {
-        updateUI(false);
-      }
+      if (!session) { updateUI(false); return; }
+      currentUser = session.user;
+      if (!optimistic) updateUI(true);
+      // Profil/moderatör kontrolü ve ana sayfa verileri aynı anda çekilir
+      await Promise.all([
+        fetchCurrentUserProfile().then(() => updateUI(true, true)),
+        loadDashboardData()
+      ]);
     });
 
     async function fetchCurrentUserProfile() {
       if (!currentUser) return;
-      await checkModerator();
-      const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+      const [, { data }] = await Promise.all([
+        checkModerator(),
+        supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single()
+      ]);
       if (data) {
         currentUserProfile = data;
+        try { localStorage.setItem('rb_name', data.full_name || ''); } catch (e) {}
         document.getElementById('setting-fullname').value = data.full_name || '';
         document.getElementById('setting-username').value = data.username || '';
         document.getElementById('setting-bio').value = data.bio || '';
@@ -1002,16 +1017,16 @@
       document.getElementById(id).classList.remove('hidden');
     }
 
-    function updateUI(isLoggedIn) {
+    function updateUI(isLoggedIn, keepSection) {
       document.getElementById('mod-menu-btn').classList.toggle('hidden', !(isLoggedIn && isModerator));
       if (isLoggedIn) {
         document.getElementById('auth-buttons').classList.add('hidden');
         document.getElementById('nav-search-container').classList.remove('hidden');
         document.getElementById('user-menu').classList.remove('hidden');
         document.getElementById('mobile-search-container').classList.remove('hidden');
-        const nameToShow = currentUserProfile ? currentUserProfile.full_name : currentUser.email;
+        const nameToShow = currentUserProfile ? currentUserProfile.full_name : (cachedName() || (currentUser && currentUser.email) || '');
         document.getElementById('user-display-name').innerText = nameToShow;
-        showSection('dashboard-section');
+        if (!keepSection) showSection('dashboard-section');
         refreshInstallUi();
       } else {
         document.getElementById('auth-buttons').classList.remove('hidden');
@@ -1145,9 +1160,8 @@
       if (error) alert(/banned/i.test(error.message) ? "Hesabın engellenmiş. Yönetici ile iletişime geç." : "Giriş Başarısız: " + error.message);
       else {
         currentUser = data.user;
-        await fetchCurrentUserProfile();
         updateUI(true);
-        loadDashboardData();
+        await Promise.all([fetchCurrentUserProfile().then(() => updateUI(true, true)), loadDashboardData()]);
       }
     }
 
@@ -1158,6 +1172,7 @@
 
     async function logout() {
       await supabaseClient.auth.signOut();
+      try { localStorage.removeItem('rb_name'); } catch (e) {}
       currentUser = null;
       currentUserProfile = null;
       allProfiles = [];
@@ -1208,16 +1223,18 @@
     }
 
     async function loadDashboardData() {
-      const { data: profiles } = await supabaseClient.from('profiles').select('*');
-      // Sadece KENDİ verdiğim puanlar (ortalamalar get_scores ile gelir)
-      const { data: evalData } = await supabaseClient
-        .from('evaluations').select('evaluator_id, target_id, score').eq('evaluator_id', currentUser.id);
-      if ((await loadRules()) === false) return;
-
-      const { data: unclaimed } = await supabaseClient
-        .from('roster')
-        .select('id, full_name')
-        .is('claimed_by', null);
+      // Hepsi aynı anda çekilir (art arda beklemek açılışı yavaşlatıyordu)
+      const [profRes, evalRes, rulesOk, rosterRes] = await Promise.all([
+        supabaseClient.from('profiles').select('*'),
+        // Sadece KENDİ verdiğim puanlar (ortalamalar get_scores ile gelir)
+        supabaseClient.from('evaluations').select('evaluator_id, target_id, score').eq('evaluator_id', currentUser.id),
+        loadRules(),
+        supabaseClient.from('roster').select('id, full_name').is('claimed_by', null),
+        loadCategories(),
+        loadLooks()
+      ]);
+      if (rulesOk === false || !currentUser) return;
+      const profiles = profRes.data, evalData = evalRes.data, unclaimed = rosterRes.data;
 
       const unclaimedPeople = (unclaimed || []).map(r => ({
         id: r.id,
@@ -1231,12 +1248,11 @@
       allProfiles = [...(profiles || []), ...unclaimedPeople];
       allEvaluations = evalData || [];
 
-      await Promise.all([loadCategories(), loadLooks()]);
       renderCategoryFilter();
       renderLeaderboard(allProfiles, allEvaluations);
       renderUserRatingCards(allProfiles, allEvaluations);
-      await ensureSortLoaded();
       chatInit();
+      await ensureSortLoaded();
     }
 
     // ===== ARAMA =====
@@ -1987,13 +2003,9 @@
     const nameKey = s => normName(s).toLocaleLowerCase('tr-TR');
 
     async function checkModerator() {
-      const { data, error } = await supabaseClient.rpc('is_moderator');
-      isModerator = !error && data === true;
-      isAdmin = false;
-      if (isModerator) {
-        const res = await supabaseClient.rpc('is_admin');
-        isAdmin = !res.error && res.data === true;
-      }
+      const [mod, adm] = await Promise.all([supabaseClient.rpc('is_moderator'), supabaseClient.rpc('is_admin')]);
+      isModerator = !mod.error && mod.data === true;
+      isAdmin = isModerator && !adm.error && adm.data === true;
     }
 
     function openModPanel() {
