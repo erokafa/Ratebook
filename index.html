@@ -208,12 +208,35 @@
       </div>
 
       <!-- BU MU? BU MU? YÖNLENDİRME KARTI -->
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg">
-        <h2 class="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">Bu mu? Bu mu?</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">Sıralama oyunları, eleme turnuvası, Tier List ve Top 3 kürsü modları ile eğlen!</p>
-        <button onclick="initSortPage()" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-500/20">
-          Sıralama Oyunlarına Git
-        </button>
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-indigo-600 text-white shadow-2xl shadow-purple-500/25">
+        <div class="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-pink-300/20 blur-2xl"></div>
+        <div class="relative">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-white/70">Sıralama Oyunları</p>
+          <h2 class="text-2xl sm:text-3xl font-black mt-1 tracking-tight">Bu mu? Bu mu?</h2>
+          <p class="text-sm text-white/85 mt-2 max-w-md">Arkadaşlarını düellolara sok, kürsüyü kur, tier list'i doldur. Seçimlerin sadece sana özel.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+          <button onclick="openSortGame('vs')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6"/></svg>
+            <span class="text-xs font-bold leading-tight text-center">Bu mu? Bu mu?</span>
+          </button>
+          <button onclick="openSortGame('top3')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/></svg>
+            <span class="text-xs font-bold leading-tight text-center">En İyiler (Top 3)</span>
+          </button>
+          <button onclick="openSortGame('tier')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h5"/></svg>
+            <span class="text-xs font-bold leading-tight text-center">Tier List</span>
+          </button>
+          <button onclick="openSortGame('rank')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <span class="text-xs font-bold leading-tight text-center">Tam Sıralama</span>
+          </button>
+          </div>
+          <button onclick="initSortPage()" class="mt-5 w-full sm:w-auto bg-white text-purple-700 hover:bg-purple-50 font-extrabold text-sm px-7 py-3 rounded-xl transition shadow-lg">
+            Oyunlara Git →
+          </button>
+        </div>
       </div>
     </section>
 
@@ -261,15 +284,15 @@
 
     <!-- SIRALA (KİŞİSEL SIRALAMA OYUNLARI) SAYFASI -->
     <section id="sort-section" class="space-y-6 hidden">
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-xl">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-gray-200 dark:border-borderdark pb-4">
-          <div>
-            <h2 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
-              Sıralama Oyunları
-            </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Buradaki seçimler ve eğlenceli sıralamalar profil ortalama puanlarını etkilemez.</p>
-          </div>
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-indigo-600 text-white shadow-2xl shadow-purple-500/25">
+        <div class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-pink-300/20 blur-2xl"></div>
+        <div class="relative">
+          <h2 class="text-3xl font-black tracking-tight">Sıralama Oyunları</h2>
+          <p class="text-sm text-white/85 mt-2 max-w-lg">Bir oyun seç, arkadaşlarını sıraya diz. Buradaki seçimler sadece sana özel; profil ortalama puanlarını etkilemez.</p>
         </div>
+      </div>
+      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-xl">
 
         <!-- KATEGORİ SEÇİCİ: oyunlar sadece seçili kategorideki kişilerle oynanır -->
         <div id="sort-scope-wrap" class="hidden mb-5">
@@ -277,23 +300,35 @@
           <div id="sort-scope" class="flex gap-2 overflow-x-auto pb-1"></div>
         </div>
 
-        <!-- OYUN MODU SEÇİM SEKMELERİ (BEYAZ ÇİZGİ İKONLARI) -->
-        <div class="flex border-b border-gray-200 dark:border-borderdark gap-2 mb-6 overflow-x-auto pb-1">
-          <button onclick="switchSortGame('vs')" id="game-tab-vs" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-purple-600 text-white shrink-0 flex items-center gap-2">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6"/></svg>
-            <span>Bu mu? Bu mu? (Turnuva)</span>
+        <!-- OYUN SEÇİM KARTLARI -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <button onclick="switchSortGame('vs')" id="game-tab-vs" class="flex flex-col items-start gap-3 p-4 rounded-2xl text-left transition">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6"/></svg></span>
+            <span class="block min-w-0">
+              <span class="block text-sm font-extrabold leading-tight">Bu mu? Bu mu?</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">İkili düellolarla şampiyonu bul.</span>
+            </span>
           </button>
-          <button onclick="switchSortGame('top3')" id="game-tab-top3" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/></svg>
-            <span>En İyiler (Top 3)</span>
+          <button onclick="switchSortGame('top3')" id="game-tab-top3" class="flex flex-col items-start gap-3 p-4 rounded-2xl text-left transition">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 text-white shadow-md"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M18 9a3 3 0 003 3v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2a3 3 0 003-3m12 0H6m6 8v3m-4 0h8"/></svg></span>
+            <span class="block min-w-0">
+              <span class="block text-sm font-extrabold leading-tight">En İyiler (Top 3)</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">Kürsüyü kur, ilk 3'ü seç.</span>
+            </span>
           </button>
-          <button onclick="switchSortGame('tier')" id="game-tab-tier" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-            <span>Tier List (Sınıflandır)</span>
+          <button onclick="switchSortGame('tier')" id="game-tab-tier" class="flex flex-col items-start gap-3 p-4 rounded-2xl text-left transition">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h5"/></svg></span>
+            <span class="block min-w-0">
+              <span class="block text-sm font-extrabold leading-tight">Tier List</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">Herkesi S'den E'ye sınıflandır.</span>
+            </span>
           </button>
-          <button onclick="switchSortGame('rank')" id="game-tab-rank" class="px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-            <span>Tam Sıralama (1'den N'e)</span>
+          <button onclick="switchSortGame('rank')" id="game-tab-rank" class="flex flex-col items-start gap-3 p-4 rounded-2xl text-left transition">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white shadow-md"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+            <span class="block min-w-0">
+              <span class="block text-sm font-extrabold leading-tight">Tam Sıralama</span>
+              <span class="block text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">1'den N'ye kesin sıralama çıkar.</span>
+            </span>
           </button>
         </div>
 
@@ -1596,15 +1631,34 @@
       switchSortGame(sortGameTab);
     }
 
+    // Oyun seçim kartları: seçili olan renkli çerçeve + gölge alır
+    const SORT_CARD_ACCENT = {
+      vs:   'border-rose-500 ring-rose-500/20',
+      top3: 'border-amber-500 ring-amber-500/20',
+      tier: 'border-emerald-500 ring-emerald-500/20',
+      rank: 'border-sky-500 ring-sky-500/20'
+    };
+    function sortCardClass(g, active) {
+      const base = 'flex flex-col items-start gap-3 p-4 rounded-2xl text-left transition border-2 ';
+      return base + (active
+        ? `bg-white dark:bg-carddark shadow-xl ring-4 ${SORT_CARD_ACCENT[g]}`
+        : 'bg-gray-50 dark:bg-blackbg border-gray-200 dark:border-borderdark hover:-translate-y-0.5 hover:shadow-lg opacity-80 hover:opacity-100');
+    }
+
+    function openSortGame(g) {
+      sortGameTab = g;
+      initSortPage();
+    }
+
     function switchSortGame(gameType) {
       sortGameTab = gameType;
       ['vs', 'top3', 'tier', 'rank'].forEach(g => {
         document.getElementById(`sort-game-${g}`).classList.add('hidden');
-        document.getElementById(`game-tab-${g}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white shrink-0 flex items-center gap-2";
+        document.getElementById(`game-tab-${g}`).className = sortCardClass(g, false);
       });
 
       document.getElementById(`sort-game-${gameType}`).classList.remove('hidden');
-      document.getElementById(`game-tab-${gameType}`).className = "px-4 py-2 text-xs font-bold rounded-xl transition bg-purple-600 text-white shrink-0 flex items-center gap-2";
+      document.getElementById(`game-tab-${gameType}`).className = sortCardClass(gameType, true);
 
       if (gameType === 'vs') {
         if (currentRoundParticipants.length === 0) resetAndStartTournament();
