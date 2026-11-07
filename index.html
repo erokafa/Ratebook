@@ -362,7 +362,7 @@
 
       <!-- 3) OYUN: tüm ekranı kaplar -->
       <div id="sort-play" class="hidden fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-gray-100 dark:bg-blackbg" style="position:fixed;inset:0;z-index:60;overflow-y:auto">
-        <div class="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-white/90 dark:bg-carddark/90 backdrop-blur border-b border-gray-200 dark:border-borderdark" style="padding-top:max(0.75rem, env(safe-area-inset-top))">
+        <div class="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-white dark:bg-carddark border-b border-gray-200 dark:border-borderdark" style="padding-top:max(0.75rem, env(safe-area-inset-top))">
           <button onclick="exitSortGame()" class="shrink-0 flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-borderdark text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg> Çık
           </button>
@@ -1085,7 +1085,7 @@
     }
 
     function showSection(id) {
-      if (id !== 'sort-section') { const pl = document.getElementById('sort-play'); if (pl) pl.classList.add('hidden'); sortView = 'hub'; }
+      if (id !== 'sort-section') { const pl = document.getElementById('sort-play'); if (pl) pl.classList.add('hidden'); sortView = 'hub'; const nv = document.querySelector('nav'); if (nv) nv.style.display = ''; }
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
     }
@@ -1693,6 +1693,8 @@
       document.getElementById('sort-hub').classList.toggle('hidden', v !== 'hub');
       document.getElementById('sort-setup').classList.toggle('hidden', v !== 'setup');
       document.getElementById('sort-play').classList.toggle('hidden', v !== 'play');
+      const nav = document.querySelector('nav');
+      if (nav) nav.style.display = v === 'play' ? 'none' : '';   // oyun tam ekran: arkada menü görünmesin
     }
 
     const hasSavedAnywhere = key => Object.keys(sortSaved).some(k => k === key || k.startsWith(key + ':'));
