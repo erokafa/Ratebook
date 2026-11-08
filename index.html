@@ -194,17 +194,23 @@
       </div>
 
       <!-- KİŞİLERİ DEĞERLENDİR YÖNLENDİRME KARTI -->
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark text-center shadow-lg flex flex-col items-center justify-center space-y-3">
-        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-full text-indigo-500">
-          <svg class="w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white shadow-2xl shadow-indigo-500/25">
+        <div class="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-cyan-300/20 blur-2xl"></div>
+        <div class="relative">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-white/70">Puanlama</p>
+          <h2 class="text-2xl sm:text-3xl font-black mt-1 tracking-tight">Kişileri Değerlendir</h2>
+          <p class="text-sm text-white/85 mt-2 max-w-md">Kişilere 1-10 arası puan ver ve yorum bırak.</p>
+          <div class="mt-4 max-w-md">
+            <div class="flex items-center justify-between text-xs font-bold text-white/90">
+              <span id="dash-rate-text"></span><span id="dash-rate-percent"></span>
+            </div>
+            <div class="mt-1.5 h-2.5 rounded-full bg-white/25 overflow-hidden"><div id="dash-rate-bar" class="h-full w-0 rounded-full bg-white transition-all duration-500"></div></div>
+          </div>
+          <button onclick="showSection('rate-section')" class="mt-5 w-full sm:w-auto bg-white text-indigo-700 hover:bg-indigo-50 font-extrabold text-sm px-7 py-3 rounded-xl transition shadow-lg">
+            Değerlendirmeye Başla →
+          </button>
         </div>
-        <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Kişileri Değerlendir</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 max-w-md">Üyeleri tek tek görüntüleyip onlara 1-10 arası puan verebilir ve yorum bırakabilirsin.</p>
-        <button onclick="showSection('rate-section')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl transition">
-          Değerlendirme Sayfasına Git
-        </button>
       </div>
 
       <!-- BU MU? BU MU? YÖNLENDİRME KARTI -->
@@ -215,7 +221,7 @@
           <p class="text-[11px] font-bold uppercase tracking-widest text-white/70">Sıralama Oyunları</p>
           <h2 class="text-2xl sm:text-3xl font-black mt-1 tracking-tight">Bu mu? Bu mu?</h2>
           <p class="text-sm text-white/85 mt-2 max-w-md">Arkadaşlarını düellolara sok, kürsüyü kur, tier list'i doldur. Seçimlerin sadece sana özel.</p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-5">
           <button onclick="openSortGame('vs')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
             <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l3 3M19 13l-3 3M5 14l6-6"/></svg>
             <span class="text-xs font-bold leading-tight text-center">Bu mu? Bu mu?</span>
@@ -231,6 +237,10 @@
           <button onclick="openSortGame('rank')" class="flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
             <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
             <span class="text-xs font-bold leading-tight text-center">Tam Sıralama</span>
+          </button>
+          <button onclick="openSortGame('blind')" class="col-span-2 sm:col-span-1 flex flex-col items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur px-2 py-3.5 transition">
+            <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A10.9 10.9 0 0112 5c5 0 9 4 10 7a11 11 0 01-2.7 4M6.1 6.1A11 11 0 002 12c1 3 5 7 10 7a10.7 10.7 0 004-.8"/></svg>
+            <span class="text-xs font-bold leading-tight text-center">Kör Sıralama</span>
           </button>
           </div>
           <button onclick="initSortPage()" class="mt-5 w-full sm:w-auto bg-white text-purple-700 hover:bg-purple-50 font-extrabold text-sm px-7 py-3 rounded-xl transition shadow-lg">
@@ -328,6 +338,14 @@
               <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-snug">1'den N'ye kesin sıralama çıkar.</span>
             </span>
           </button>
+          <button onclick="openSortSetup('blind')" id="game-card-blind" class="group relative col-span-2 flex flex-col items-start gap-4 p-5 rounded-3xl text-left transition duration-200 bg-white dark:bg-carddark border-2 border-gray-200 dark:border-borderdark hover:-translate-y-1 hover:shadow-2xl hover:border-purple-400 active:scale-[0.98]">
+            <span id="game-badge-blind" class="hidden absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300">Kayıtlı</span>
+            <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white shadow-lg"><svg class="w-7 h-7 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A10.9 10.9 0 0112 5c5 0 9 4 10 7a11 11 0 01-2.7 4M6.1 6.1A11 11 0 002 12c1 3 5 7 10 7a10.7 10.7 0 004-.8"/></svg></span>
+            <span class="block min-w-0">
+              <span class="block text-base font-extrabold leading-tight">Kör Sıralama</span>
+              <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-snug">Kim geleceğini bilmeden sıraya yerleştir.</span>
+            </span>
+          </button>
         </div>
       </div>
 
@@ -351,6 +369,7 @@
             <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Kimlerle oynansın?</p>
             <div id="sort-scope" class="flex flex-wrap gap-2"></div>
           </div>
+          <div id="setup-extra" class="hidden"></div>
           <p id="setup-pool" class="text-xs font-semibold text-gray-500 dark:text-gray-400"></p>
 
           <div class="space-y-2.5">
@@ -412,6 +431,25 @@
               <input id="top3-search" oninput="renderTop3Game()" type="search" placeholder="İsim ara..." class="w-40 bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-lg px-3 py-1.5 text-xs outline-none focus:border-amber-500">
             </div>
             <div id="top3-select-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- OYUN ALANI 5: KÖR SIRALAMA -->
+        <div id="sort-game-blind" class="hidden space-y-4">
+          <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark">
+            <div class="flex flex-wrap justify-between items-center gap-2">
+              <span id="blind-status-text" class="text-xs font-extrabold tracking-wide text-fuchsia-600 dark:text-fuchsia-400">Yükleniyor...</span>
+              <div class="flex gap-2">
+                <button id="blind-undo-btn" onclick="blindUndo()" class="text-xs bg-gray-200 dark:bg-borderdark text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition font-semibold">Son Hamleyi Geri Al</button>
+                <button onclick="resetBlindGame()" class="text-xs bg-fuchsia-100 dark:bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500 px-3 py-1.5 rounded-lg transition font-semibold">Yeni Oyun</button>
+              </div>
+            </div>
+            <div class="mt-3 h-2 rounded-full bg-gray-200 dark:bg-borderdark overflow-hidden"><div id="blind-progress-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 transition-all duration-500"></div></div>
+          </div>
+          <div id="blind-current"></div>
+          <div>
+            <h4 id="blind-slots-title" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Sıralar</h4>
+            <div id="blind-slots" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
           </div>
         </div>
 
@@ -486,18 +524,24 @@
     </section>
 
     <!-- AYRI SEKSİYON: ÜYELERİ DEĞERLENDİR SAYFASI -->
-    <section id="rate-section" class="space-y-6 hidden">
-      <div class="bg-white dark:bg-carddark p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-5 h-5 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-          <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Üyeleri Değerlendir</h2>
-        </div>
-        <p id="rating-progress" class="text-xs text-gray-500 dark:text-gray-400 mb-4"></p>
-        <div id="users-to-rate" class="grid gap-4 md:grid-cols-2">
+    <section id="rate-section" class="space-y-5 hidden">
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white shadow-2xl shadow-indigo-500/25">
+        <div class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-cyan-300/20 blur-2xl"></div>
+        <div class="relative">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-white/70">Puanlama</p>
+          <h2 class="text-3xl font-black tracking-tight mt-1">Kişileri Değerlendir</h2>
+          <p id="rating-progress" class="text-sm text-white/85 mt-2 max-w-xl"></p>
+          <div class="mt-4">
+            <div class="flex items-center justify-between text-xs font-bold text-white/90">
+              <span id="rate-count-text"></span><span id="rate-percent"></span>
+            </div>
+            <div class="mt-1.5 h-2.5 rounded-full bg-white/25 overflow-hidden"><div id="rate-progress-bar" class="h-full w-0 rounded-full bg-white transition-all duration-500"></div></div>
+          </div>
         </div>
       </div>
+      <div id="rate-filters" class="flex flex-wrap gap-2"></div>
+      <div id="users-to-rate" class="grid gap-4 md:grid-cols-2"></div>
     </section>
 
     <!-- KAPSAMLI PROFİL -->
@@ -913,6 +957,7 @@
     let sortSaved = {};          // kayıt anahtarı -> veri (tarayıcıdaki kopya)
     let sortGameTab = 'vs';
     // Tam Sıralama: sıralı liste + sıradaki kişi + ikili arama sınırları
+    let blindSlots = [], blindQueue = [], blindCur = null, blindHistory = [], blindInitialized = false, blindLock = false, blindSizeChoice = 0;
     let rankSorted = [], rankQueue = [], rankCur = null, rankLo = 0, rankHi = 0, rankHistory = [], rankInitialized = false, rankLock = false;
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
@@ -1616,6 +1661,7 @@
       restoreTier(sortSaved[sortKey('tier')]);
       restoreTournament(sortSaved[sortKey('tournament')]);
       restoreRank(sortSaved[sortKey('rank')]);
+      restoreBlind(sortSaved[sortKey('blind')]);
     }
 
     function renderSortScope() {
@@ -1655,6 +1701,7 @@
       if (!document.getElementById('sort-game-top3').classList.contains('hidden')) renderTop3Game();
       if (!document.getElementById('sort-game-tier').classList.contains('hidden') && tierInitialized) renderTierGame();
       if (!document.getElementById('sort-game-rank').classList.contains('hidden') && rankInitialized) renderRankGame();
+      if (!document.getElementById('sort-game-blind').classList.contains('hidden') && blindInitialized) renderBlindGame();
     }
 
     function resetSortState() {
@@ -1663,6 +1710,7 @@
       TIERS.forEach(t => { const el = document.getElementById(`tier-${t}`); if (el) el.innerHTML = ''; });
       currentRoundParticipants = []; nextRoundParticipants = []; tournamentRound = 1; currentMatchIndex = 0;
       rankSorted = []; rankQueue = []; rankCur = null; rankLo = 0; rankHi = 0; rankHistory = []; rankInitialized = false;
+      blindSlots = []; blindQueue = []; blindCur = null; blindHistory = []; blindInitialized = false;
       sortLoadedFor = null; sortLoadPromise = null; sortSaveWarned = false; sortScope = null; sortSaved = {}; sortGameTab = 'vs';
     }
 
@@ -1703,7 +1751,10 @@
               icon: '<path d="M4 6h16M4 12h10M4 18h5"/>' },
       rank: { key: 'rank', min: 2, title: 'Tam Sıralama', desc: '1\'den N\'ye kesin sıralama çıkar.', grad: 'from-sky-500 to-indigo-500',
               how: 'İkili karşılaştırmalarla herkes sırayla yerini bulur. Sonunda 1\'den başlayan tam bir sıralaman olur.',
-              icon: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>' }
+              icon: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>' },
+      blind:{ key: 'blind', min: 3, title: 'Kör Sıralama', desc: 'Kim geleceğini bilmeden sıraya yerleştir.', grad: 'from-fuchsia-500 to-pink-500',
+              how: 'Sırayla rastgele kişiler gelir. Sadece sıradaki kişiyi görürsün, sonrakinin kim olduğunu bilmezsin. Her kişiyi numaralı bir sıraya yerleştir; 1. sıra en iyisi. Yerleştirdiğin yer kesindir, sadece son hamleni geri alabilirsin.',
+              icon: '<path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A10.9 10.9 0 0112 5c5 0 9 4 10 7a11 11 0 01-2.7 4M6.1 6.1A11 11 0 002 12c1 3 5 7 10 7a10.7 10.7 0 004-.8"/>' }
     };
     let sortView = 'hub';   // 'hub' (menü) | 'setup' (ayarlar) | 'play' (oyun)
 
@@ -1745,6 +1796,7 @@
     // Ayar ekranı: kaç kişi oynayacak, başlatılabilir mi, kayıtlı ilerleme var mı
     function refreshSetup() {
       if (sortView !== 'setup') return;
+      renderSetupExtra();
       const m = SORT_GAMES[sortGameTab];
       const n = sortPool().length;
       const enough = n >= m.min;
@@ -1770,6 +1822,7 @@
         if (g === 'vs') resetAndStartTournament();
         else if (g === 'tier') resetTierGame();
         else if (g === 'rank') resetRankGame();
+        else if (g === 'blind') resetBlindGame(blindSizeChoice);
         else if (g === 'top3') {
           podium = { 1: null, 2: null, 3: null };
           if (sortSaved[sortKey('top3')]) deleteSortResult(sortKey('top3'));
@@ -1791,7 +1844,7 @@
 
     function switchSortGame(gameType) {
       sortGameTab = gameType;
-      ['vs', 'top3', 'tier', 'rank'].forEach(g => {
+      ['vs', 'top3', 'tier', 'rank', 'blind'].forEach(g => {
         document.getElementById(`sort-game-${g}`).classList.add('hidden');
       });
 
@@ -1809,6 +1862,10 @@
       if (gameType === 'rank') {
         if (!rankInitialized) resetRankGame();
         else renderRankGame();
+      }
+      if (gameType === 'blind') {
+        if (!blindInitialized) resetBlindGame();
+        else renderBlindGame();
       }
     }
 
@@ -2001,6 +2058,146 @@
       persistTop3();
     }
 
+    // --- OYUN 5: KÖR SIRALAMA ---
+    // Rastgele kişiler tek tek gelir; sıradaki kişiyi görürsün, sonrakini bilmezsin. Yerleştirdiğin yer kesindir.
+    function persistBlind() {
+      saveSortResult(sortKey('blind'), {
+        n: blindSlots.length, slots: blindSlots.map(p => p ? p.id : null),
+        queue: blindQueue.map(p => p.id), cur: blindCur ? blindCur.id : null
+      });
+    }
+
+    function restoreBlind(d) {
+      blindSlots = []; blindQueue = []; blindCur = null; blindHistory = []; blindInitialized = false;
+      if (!d || !Array.isArray(d.slots) || d.slots.length < 3 || d.slots.length > 30) return;
+      const pool = sortPool();
+      const byId = new Map(pool.map(p => [p.id, p]));
+      const used = new Set();
+      const take = id => { const p = id && byId.get(id); if (!p || used.has(p.id)) return null; used.add(p.id); return p; };
+      blindSlots = d.slots.map(take);
+      const curP = take(d.cur);
+      blindQueue = (Array.isArray(d.queue) ? d.queue : []).map(take).filter(Boolean);
+      blindCur = curP || blindQueue.shift() || null;
+      // oyundan çıkan kişiler olduysa boşalan sıralar için yedek kişi bul; olmazsa fazla sıraları kaldır
+      let empties = blindSlots.filter(x => !x).length;
+      const left = () => blindQueue.length + (blindCur ? 1 : 0);
+      const spare = pool.filter(p => !used.has(p.id)).sort(() => 0.5 - Math.random());
+      while (empties > left() && spare.length) { const p = spare.pop(); used.add(p.id); blindQueue.push(p); }
+      while (empties > left()) {
+        const i = blindSlots.lastIndexOf(null);
+        blindSlots.splice(i, 1); empties--;
+      }
+      if (blindSlots.length < 3) { blindSlots = []; blindQueue = []; blindCur = null; return; }
+      if (!blindCur) blindCur = blindQueue.shift() || null;
+      blindInitialized = true;
+    }
+
+    function resetBlindGame(n) {
+      const pool = sortPool().sort(() => 0.5 - Math.random());
+      blindHistory = [];
+      if (pool.length < 3) {
+        blindSlots = []; blindQueue = []; blindCur = null; blindInitialized = true;
+        if (sortSaved[sortKey('blind')]) deleteSortResult(sortKey('blind'));
+        renderBlindGame();
+        return;
+      }
+      const size = Math.max(3, Math.min(pool.length, Number.isInteger(n) && n > 0 ? n : (blindSizeChoice || 10)));
+      const picks = pool.slice(0, size);
+      blindSlots = Array(size).fill(null);
+      blindCur = picks[0];
+      blindQueue = picks.slice(1);
+      blindInitialized = true;
+      renderBlindGame();
+      persistBlind();
+    }
+
+    function blindPlace(i) {
+      if (blindLock || !blindCur || blindSlots[i]) return;
+      blindLock = true; setTimeout(() => { blindLock = false; }, 250);
+      blindHistory = [{ slots: [...blindSlots], queue: [...blindQueue], cur: blindCur }];   // sadece son hamle geri alınabilir
+      blindSlots[i] = blindCur;
+      blindCur = blindQueue.shift() || null;
+      renderBlindGame(); persistBlind();
+    }
+
+    function blindUndo() {
+      const h = blindHistory.pop();
+      if (!h) return;
+      blindSlots = h.slots; blindQueue = h.queue; blindCur = h.cur;
+      renderBlindGame(); persistBlind();
+    }
+
+    function renderBlindGame() {
+      const status = document.getElementById('blind-status-text');
+      const cur = document.getElementById('blind-current');
+      const slotsEl = document.getElementById('blind-slots');
+      const n = blindSlots.length;
+      document.getElementById('blind-undo-btn').classList.toggle('hidden', blindHistory.length === 0);
+
+      if (n < 3) {
+        status.innerText = 'Başlatılamadı'; setBar('blind-progress-bar', 0);
+        cur.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Kör sıralama için en az 3 kişi gerekiyor. Başka bir kategori seç.</p>';
+        slotsEl.innerHTML = ''; document.getElementById('blind-slots-title').classList.add('hidden');
+        return;
+      }
+      document.getElementById('blind-slots-title').classList.remove('hidden');
+      const filled = blindSlots.filter(Boolean).length;
+      setBar('blind-progress-bar', filled / n * 100);
+
+      if (blindCur) {
+        status.innerText = `Yerleştirilen: ${filled} / ${n}`;
+        cur.innerHTML = `
+          <div class="relative overflow-hidden text-center rounded-3xl p-6 bg-gradient-to-br from-fuchsia-500/15 to-pink-500/10 border-2 border-fuchsia-500/40">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-fuchsia-600 dark:text-fuchsia-300">Sıradaki kişi</p>
+            <img src="${avatarOf(blindCur)}" class="w-28 h-28 rounded-full mx-auto mt-3 object-cover ring-4 ring-fuchsia-400/60 shadow-xl">
+            <p class="font-black text-lg mt-3 break-words">${escapeHtml(blindCur.full_name)}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${handleOf(blindCur)}</p>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mt-3">Aşağıdan bir sıra seç. Sonra kimin geleceğini bilmiyorsun!</p>
+          </div>`;
+      } else {
+        status.innerText = 'Sıralama tamamlandı!';
+        cur.innerHTML = `
+          <div class="text-center py-4 space-y-2">
+            <div class="flex justify-center text-yellow-500">${ic('trophy', 'w-10 h-10')}</div>
+            <p class="text-sm font-bold">Kör sıralaman hazır!</p>
+            <button onclick="resetBlindGame()" class="mt-1 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-extrabold text-sm px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95">Yeniden Oyna</button>
+          </div>`;
+      }
+
+      const badge = i => i === 0 ? 'bg-yellow-400 text-yellow-950' : i === 1 ? 'bg-gray-300 text-gray-800' : i === 2 ? 'bg-amber-600 text-white' : 'bg-gray-200 dark:bg-borderdark text-gray-700 dark:text-gray-300';
+      slotsEl.innerHTML = blindSlots.map((p, i) => p
+        ? `<div class="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark shadow-sm">
+            <span class="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl font-black text-lg ${badge(i)}">${i + 1}</span>
+            <img src="${avatarOf(p)}" class="w-10 h-10 rounded-full object-cover">
+            <span class="text-sm font-bold truncate">${escapeHtml(p.full_name)}</span>
+          </div>`
+        : `<button type="button" ${blindCur ? `onclick="blindPlace(${i})"` : 'disabled'}
+            class="flex items-center gap-3 p-3 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-left transition ${blindCur ? 'hover:border-fuchsia-500 hover:bg-fuchsia-500/10 active:scale-[0.98] cursor-pointer' : 'opacity-60'}">
+            <span class="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl font-black text-lg ${badge(i)}">${i + 1}</span>
+            <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">${blindCur ? 'Buraya koy' : 'Boş'}</span>
+          </button>`
+      ).join('');
+    }
+
+    // Ayar ekranında "kaç sıra olsun?" seçici (sadece Kör Sıralama)
+    function renderSetupExtra() {
+      const el = document.getElementById('setup-extra');
+      if (!el) return;
+      if (sortGameTab !== 'blind') { el.classList.add('hidden'); el.innerHTML = ''; return; }
+      const n = sortPool().length;
+      const opts = [...new Set([5, 7, 10, 15, (n >= 3 && n <= 20) ? n : 0].filter(x => x >= 3 && x <= n))].sort((a, b) => a - b);
+      if (!opts.length) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+      if (!opts.includes(blindSizeChoice)) blindSizeChoice = opts.includes(10) ? 10 : opts[opts.length - 1];
+      el.classList.remove('hidden');
+      el.innerHTML = `
+        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Kaç sıra olsun?</p>
+        <div class="flex flex-wrap gap-2">${opts.map(o => `<button type="button" onclick="setBlindSize(${o})" class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition ${o === blindSizeChoice
+          ? 'border-fuchsia-500 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-300'
+          : 'border-gray-200 dark:border-borderdark text-gray-600 dark:text-gray-300 hover:border-fuchsia-400'}">${o === n ? `Hepsi (${o})` : o}</button>`).join('')}</div>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5">Yeni oyunda geçerli. Kayıtlı oyun kaldığı yerden devam eder.</p>`;
+    }
+    function setBlindSize(n) { blindSizeChoice = n; renderSetupExtra(); }
+
     // --- OYUN 4: TAM SIRALAMA ---
     // Her yeni kişi, sıralı listedeki kişilerle ikili aramayla karşılaştırılır (en fazla ~log2(N) seçim).
     function persistRank() {
@@ -2157,7 +2354,7 @@
         if (progressEl) progressEl.innerText = "Sınıflandırma Tamamlandı!";
         activeEl.innerHTML = `
           <div class="text-center p-6 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
-            <p class="text-xs font-bold text-green-600 dark:text-green-400 mb-2">Tüm üyeleri başarıyla sınıflandırdın!</p>
+            <p class="text-xs font-bold text-green-600 dark:text-green-400 mb-2">Tüm kişileri başarıyla sınıflandırdın!</p>
             <button onclick="resetTierGame()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition font-medium">
               Yeniden Başlat
             </button>
@@ -3648,7 +3845,7 @@
 
       const el = document.getElementById('admin-candidates');
       if (list.length === 0) {
-        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Uygun üye bulunamadı.</p>';
+        el.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Uygun kişi bulunamadı.</p>';
         return;
       }
       el.innerHTML = list.map(p => `
@@ -3686,7 +3883,7 @@
       videoBudget = 8;
       const listEl = document.getElementById('leaderboard-list');
       if (!profiles || profiles.length === 0) {
-        listEl.innerHTML = '<p class="text-gray-500 text-sm">Henüz kayıtlı üye yok.</p>';
+        listEl.innerHTML = '<p class="text-gray-500 text-sm">Henüz kayıtlı kişi yok.</p>';
         return;
       }
       const inCat = selectedCategory ? categoryMembers.get(selectedCategory) : null;
@@ -3733,10 +3930,39 @@
     }
 
     // ===== ÜYELERİ DEĞERLENDİR =====
+    // Puan düğmeleri: 1-10, rengi puana göre değişir
+    const SCORE_BG = ['bg-red-500', 'bg-red-500', 'bg-orange-500', 'bg-orange-500', 'bg-yellow-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500', 'bg-green-500', 'bg-emerald-500'];
+    let rateFilter = 'all';          // 'all' | 'todo' | 'done'
+    const rateDrafts = {};           // yazılıp gönderilmemiş yorum/puanlar (liste yenilense de kaybolmaz)
+
+    function scoreChipsHtml(id, sel) {
+      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => n === sel
+        ? `<button type="button" onclick="setScore('${id}', ${n})" class="h-10 rounded-xl text-sm font-black text-white shadow-lg scale-105 transition ${SCORE_BG[n - 1]}">${n}</button>`
+        : `<button type="button" onclick="setScore('${id}', ${n})" class="h-10 rounded-xl text-sm font-bold bg-gray-100 dark:bg-blackbg text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-indigo-400 transition">${n}</button>`
+      ).join('');
+    }
+    function setScore(id, n) {
+      document.getElementById(`score-${id}`).value = n;
+      document.getElementById(`chips-${id}`).innerHTML = scoreChipsHtml(id, n);
+    }
+    function setRateFilter(f) { rateFilter = f; renderUserRatingCards(allProfiles, allEvaluations); }
+    function captureRateDrafts() {
+      document.querySelectorAll('#users-to-rate textarea').forEach(t => {
+        const id = t.id.replace('comment-', '');
+        const sc = document.getElementById(`score-${id}`);
+        rateDrafts[id] = { text: t.value, score: sc ? sc.value : '' };
+      });
+    }
+
     function renderUserRatingCards(profiles, evalData) {
+      captureRateDrafts();
       const container = document.getElementById('users-to-rate');
       const otherUsers = (profiles || []).filter(p => p.id !== currentUser.id);
-      const { done, all } = ratingStats();
+      const myEvals = new Map((evalData || []).filter(e => e.evaluator_id === currentUser.id).map(e => [e.target_id, e.score]));
+      const doneCount = otherUsers.filter(u => myEvals.has(u.id)).length;
+      const total = otherUsers.length;
+      const pct = total ? Math.round(doneCount / total * 100) : 0;
+      const { all } = ratingStats();
 
       document.getElementById('rating-progress').innerText =
         (all
@@ -3746,34 +3972,57 @@
           : lockMessage())
         + (appSettings.require_comment ? ' Puan verirken yorum yazmak zorunludur.' : '')
         + (appSettings.anonymous_comments ? ' Yorumlar anonimdir.' : '');
+      document.getElementById('rate-count-text').innerText = `${doneCount} / ${total} kişiyi puanladın`;
+      document.getElementById('rate-percent').innerText = `%${pct}`;
+      setBar('rate-progress-bar', pct);
+      const dt = document.getElementById('dash-rate-text');
+      if (dt) { dt.innerText = `${doneCount} / ${total} kişiyi puanladın`; document.getElementById('dash-rate-percent').innerText = `%${pct}`; setBar('dash-rate-bar', pct); }
 
-      if (otherUsers.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka üye bulunmuyor.</p>';
+      const chip = (f, label, n) => `<button onclick="setRateFilter('${f}')" class="px-4 py-2 rounded-full text-xs font-bold transition ${rateFilter === f
+        ? 'bg-indigo-600 text-white shadow-md'
+        : 'bg-white dark:bg-carddark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-indigo-400'}">${label} <span class="opacity-70">${n}</span></button>`;
+      document.getElementById('rate-filters').innerHTML =
+        chip('all', 'Hepsi', total) + chip('todo', 'Puanlanmamış', total - doneCount) + chip('done', 'Puanlanmış', doneCount);
+
+      if (total === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Değerlendirilecek başka kişi bulunmuyor.</p>';
+        return;
+      }
+      const shown = otherUsers.filter(u => rateFilter === 'all' || (rateFilter === 'done') === myEvals.has(u.id));
+      if (!shown.length) {
+        container.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500 dark:text-gray-400">${rateFilter === 'todo' ? 'Hepsini puanladın, harika!' : 'Henüz kimseyi puanlamadın.'}</div>`;
         return;
       }
 
-      container.innerHTML = otherUsers.map(u => {
-        const myEval = (evalData || []).find(e => e.evaluator_id === currentUser.id && e.target_id === u.id);
-        const myScore = myEval ? myEval.score : '';
+      container.innerHTML = shown.map(u => {
+        const saved = myEvals.get(u.id);
+        const d = rateDrafts[u.id];
+        const cur = d && d.score !== '' ? Number(d.score) : (saved || 0);
+        const text = d ? d.text : '';
+        const status = saved
+          ? `<span class="ml-auto shrink-0 text-xs font-black px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300">${saved}/10</span>`
+          : `<span class="ml-auto shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300">Bekliyor</span>`;
 
         return `
-          <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-xl border border-gray-200 dark:border-borderdark flex flex-col justify-between">
-            <div onclick="viewUserProfile('${u.id}')" class="flex items-center space-x-3 mb-3 cursor-pointer group">
-              ${avatarFramed(u, 40, 'bg-gray-200 dark:bg-borderdark', 'bg-gray-200 dark:bg-borderdark', true)}
-              <div>
-                <p class="font-medium text-sm group-hover:underline">${escapeHtml(u.full_name)}</p>
+          <div class="bg-white dark:bg-carddark p-5 rounded-3xl border border-gray-200 dark:border-borderdark shadow-lg flex flex-col gap-4">
+            <div onclick="viewUserProfile('${u.id}')" class="flex items-center gap-3 cursor-pointer group">
+              ${avatarFramed(u, 56, 'bg-gray-200 dark:bg-borderdark', 'bg-gray-200 dark:bg-borderdark', true)}
+              <div class="min-w-0">
+                <p class="font-extrabold text-base group-hover:underline truncate">${escapeHtml(u.full_name)}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${handleOf(u)}</p>
               </div>
+              ${status}
+            </div>
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Puanın</p>
+              <div id="chips-${u.id}" class="grid grid-cols-5 gap-1.5 sm:gap-2">${scoreChipsHtml(u.id, cur)}</div>
+              <input type="hidden" id="score-${u.id}" value="${cur || ''}">
             </div>
             <textarea id="comment-${u.id}" rows="2" placeholder="Yorum ${appSettings.require_comment ? '(zorunlu)' : '(isteğe bağlı)'}..."
-              class="w-full bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500"></textarea>
-            <div class="flex items-center space-x-2 mt-2">
-              <input type="number" min="1" max="10" placeholder="1-10" id="score-${u.id}" value="${myScore}"
-                class="w-20 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-indigo-500">
-              <button onclick="submitRating('${u.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded-lg text-xs font-medium">
-                ${myEval ? 'Güncelle' : 'Puan Ver'}
-              </button>
-            </div>
+              class="w-full bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500">${escapeHtml(text)}</textarea>
+            <button onclick="submitRating('${u.id}')" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white py-3 rounded-2xl text-sm font-extrabold shadow-md transition active:scale-[0.98]">
+              ${saved ? 'Puanı Güncelle' : 'Puan Ver'}
+            </button>
           </div>
         `;
       }).join('');
@@ -3800,6 +4049,8 @@
       });
       if (error) { alert("Kaydedilemedi: " + friendlyError(error)); return; }
 
+      const ta = document.getElementById(`comment-${targetId}`); if (ta) ta.value = '';
+      delete rateDrafts[targetId];
       await loadDashboardData();
       alert(!wasUnlocked && hasRatedAll()
         ? "Kilidi açtın! Artık sana verilen puanları ve yorumları görebilirsin."
