@@ -525,6 +525,10 @@
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l2.5 5.5L20 9.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1z"/></svg>
             Çerçeve & Arkaplan
           </button>
+          <button onclick="switchSettingsTab('notif')" id="tab-btn-notif" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+            Bildirimler
+          </button>
         </div>
 
         <div class="md:col-span-3 p-4 sm:p-6">
@@ -549,6 +553,14 @@
               </div>
               <button type="submit" id="setting-submit-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Değişiklikleri Kaydet</button>
             </form>
+          </div>
+
+          <div id="settings-tab-notif" class="space-y-5 hidden">
+            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Bildirimler</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-300 max-w-md">Yeni mesaj geldiğinde telefonuna ya da bilgisayarına bildirim düşsün. Bildirimde mesajın metni görünmez, sadece kimden geldiği yazar. Sadece girebildiğin sohbetler için bildirim alırsın.</p>
+            <div id="push-status" class="text-sm font-bold"></div>
+            <button id="push-toggle-btn" onclick="togglePush()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition disabled:opacity-50">Bildirimleri Aç</button>
+            <p id="push-note" class="text-xs text-gray-500 dark:text-gray-400 max-w-md leading-relaxed"></p>
           </div>
 
           <div id="settings-tab-theme" class="space-y-6 hidden">
@@ -1038,13 +1050,14 @@
     }
 
     function switchSettingsTab(tabName) {
-      ['profile', 'theme', 'look'].forEach(t => {
+      ['profile', 'theme', 'look', 'notif'].forEach(t => {
         document.getElementById(`settings-tab-${t}`).classList.add('hidden');
         document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2";
       });
       document.getElementById(`settings-tab-${tabName}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${tabName}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 flex items-center gap-2";
       if (tabName === 'look') loadLookTab();
+      if (tabName === 'notif') renderNotifTab();
     }
 
     // Oturum tarayıcıda kayıtlıysa giriş ekranını hiç göstermeden ana sayfayı açarız;
@@ -1067,6 +1080,11 @@
         fetchCurrentUserProfile().then(() => updateUI(true, true)),
         loadDashboardData()
       ]);
+      pushSyncOnStart();
+      if (location.hash === '#chat') {   // bildirime tıklanarak açıldı
+        history.replaceState(null, '', location.pathname + location.search);
+        openChat();
+      }
     });
 
     async function fetchCurrentUserProfile() {
@@ -1244,6 +1262,7 @@
     }
 
     async function logout() {
+      await pushDetach();
       await supabaseClient.auth.signOut();
       try { localStorage.removeItem('rb_name'); } catch (e) {}
       currentUser = null;
@@ -3013,6 +3032,115 @@
       const html = bgFadeHtml(looks.get(userId)?.bg, 320);
       el.innerHTML = html;
       el.classList.toggle('hidden', !html);
+    }
+
+    // ---------------- BİLDİRİMLER (Web Push) ----------------
+    // Bildirimde mesaj metni yoktur; sunucu sadece sohbete girme hakkı olanlara gönderir.
+    const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    const pushFlagKey = () => 'rb_push_' + (currentUser ? currentUser.id : '');
+    function pushFlag(v) {
+      try { if (v === undefined) return localStorage.getItem(pushFlagKey()) === '1'; if (v) localStorage.setItem(pushFlagKey(), '1'); else localStorage.removeItem(pushFlagKey()); } catch (e) {}
+    }
+    function urlB64ToU8(b64) {
+      const pad = '='.repeat((4 - b64.length % 4) % 4);
+      const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      return Uint8Array.from(raw, c => c.charCodeAt(0));
+    }
+    async function pushCurrentSub() {
+      try { const reg = await navigator.serviceWorker.ready; return await reg.pushManager.getSubscription(); } catch (e) { return null; }
+    }
+
+    async function renderNotifTab() {
+      const st = document.getElementById('push-status'), btn = document.getElementById('push-toggle-btn'), note = document.getElementById('push-note');
+      btn.classList.remove('hidden'); btn.disabled = false; note.innerText = '';
+      if (!pushSupported()) {
+        st.innerText = 'Bu tarayıcı bildirimleri desteklemiyor.'; st.className = 'text-sm font-bold text-gray-500';
+        btn.classList.add('hidden');
+        note.innerText = "iPhone'da önce siteyi Ana Ekrana ekle (Paylaş > Ana Ekrana Ekle), sonra uygulamayı ana ekrandaki simgesinden aç ve burayı yeniden dene.";
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        st.innerText = 'Bildirimler engellenmiş.'; st.className = 'text-sm font-bold text-red-500';
+        btn.classList.add('hidden');
+        note.innerText = 'Tarayıcı ya da telefon ayarlarından bu site için bildirime izin ver, sonra buraya dön.';
+        return;
+      }
+      const on = Notification.permission === 'granted' && !!(await pushCurrentSub()) && pushFlag();
+      st.innerText = on ? 'Bildirimler AÇIK' : 'Bildirimler kapalı';
+      st.className = 'text-sm font-bold ' + (on ? 'text-green-500' : 'text-gray-500');
+      btn.innerText = on ? 'Bildirimleri Kapat' : 'Bildirimleri Aç';
+      btn.dataset.on = on ? '1' : '';
+    }
+
+    async function togglePush() {
+      const btn = document.getElementById('push-toggle-btn');
+      btn.disabled = true;
+      try {
+        if (btn.dataset.on) await disablePush(); else await enablePush();
+      } catch (e) { alert(e.message || 'Bildirim ayarı değiştirilemedi.'); }
+      renderNotifTab();
+    }
+
+    async function subscribeAndSave(key) {
+      const reg = await navigator.serviceWorker.ready;
+      const old = await reg.pushManager.getSubscription();
+      if (old) await old.unsubscribe();    // anahtar değişmiş olabilir; temiz abonelik
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToU8(key) });
+      const j = sub.toJSON();
+      const { error } = await supabaseClient.rpc('push_save', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+      if (error) { await sub.unsubscribe(); throw new Error('Bildirim kaydedilemedi: ' + error.message); }
+    }
+
+    async function enablePush() {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') throw new Error('Bildirim izni verilmedi.');
+      const { data: key, error } = await supabaseClient.rpc('push_public_key');
+      if (error || !key) throw new Error('Bildirim sistemi henüz kurulmamış. Yönetici kurulumu tamamlayınca tekrar dene.');
+      await subscribeAndSave(key);
+      pushFlag(true);
+    }
+
+    async function disablePush() {
+      const sub = await pushCurrentSub();
+      if (sub) {
+        await supabaseClient.rpc('push_remove', { p_endpoint: sub.endpoint });
+        await sub.unsubscribe();
+      }
+      pushFlag(false);
+    }
+
+    // Çıkış yaparken bu cihazın bildirim adresi hesaptan ayrılır (ortak cihazda başkası görmesin)
+    async function pushDetach() {
+      if (!pushSupported()) return;
+      try {
+        const sub = await pushCurrentSub();
+        if (sub) {
+          await Promise.race([supabaseClient.rpc('push_remove', { p_endpoint: sub.endpoint }), new Promise(r => setTimeout(r, 2000))]);
+          await sub.unsubscribe();
+        }
+      } catch (e) {}
+    }
+
+    // Açılışta: bu üye bildirimi açmışsa cihaz adresini onun hesabına yeniden bağla
+    async function pushSyncOnStart() {
+      if (!pushSupported() || Notification.permission !== 'granted' || !pushFlag()) return;
+      try {
+        const sub = await pushCurrentSub();
+        if (sub) {
+          const j = sub.toJSON();
+          await supabaseClient.rpc('push_save', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+        } else {
+          const { data: key } = await supabaseClient.rpc('push_public_key');
+          if (key) await subscribeAndSave(key);
+        }
+      } catch (e) {}
+    }
+
+    // Bildirime tıklanınca açık siteye haber gelir
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', ev => {
+        if (ev.data && ev.data.type === 'open-chat' && currentUser) openChat();
+      });
     }
 
     // --- Ayarlar > Çerçeve & Arkaplan (üye) ---
