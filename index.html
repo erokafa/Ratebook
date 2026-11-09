@@ -1010,7 +1010,7 @@
         COMMENT_REQUIRED: 'Puan verirken yorum yazmak zorunludur.',
         EMPTY_COMMENT: 'Yorum boş olamaz.',
         COMMENT_TOO_LONG: 'Yorum en fazla 500 karakter olabilir.',
-        BAD_SCORE: 'Lütfen 1 ile 10 arasında bir puan girin.',
+        BAD_SCORE: 'Puan 1 ile 10 arasında olmalı (buçuklu olabilir, örn. 7,5).',
         SELF: 'Kendine puan veya yorum veremezsin.',
         NO_TARGET: 'Bu kişi artık listede değil. Sayfayı yenile.',
         NOT_ALLOWED: 'Bu işlem için yetkin yok.',
@@ -3935,15 +3935,39 @@
     let rateFilter = 'all';          // 'all' | 'todo' | 'done'
     const rateDrafts = {};           // yazılıp gönderilmemiş yorum/puanlar (liste yenilense de kaybolmaz)
 
-    function scoreChipsHtml(id, sel) {
-      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => n === sel
+    const fmtScore = v => String(Number(v)).replace('.', ',');
+    function scorePickerHtml(id, val) {
+      val = Number(val) || 0;
+      const base = Math.floor(val), half = val % 1 !== 0;
+      const chips = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => n === base
         ? `<button type="button" onclick="setScore('${id}', ${n})" class="h-10 rounded-xl text-sm font-black text-white shadow-lg scale-105 transition ${SCORE_BG[n - 1]}">${n}</button>`
         : `<button type="button" onclick="setScore('${id}', ${n})" class="h-10 rounded-xl text-sm font-bold bg-gray-100 dark:bg-blackbg text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-indigo-400 transition">${n}</button>`
       ).join('');
+      const canHalf = base >= 1 && base < 10;
+      return `
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-2">${chips}</div>
+        <div class="mt-2.5 flex items-center justify-between gap-3">
+          <span class="text-sm font-black ${val ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400'}">${val ? 'Seçili: ' + fmtScore(val) + ' / 10' : 'Puan seç'}</span>
+          <button type="button" onclick="toggleHalf('${id}')" ${canHalf ? '' : 'disabled'}
+            class="px-3.5 py-1.5 rounded-xl text-xs font-bold border-2 transition disabled:opacity-40 ${half
+              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300'
+              : 'border-gray-200 dark:border-borderdark text-gray-600 dark:text-gray-300 hover:border-indigo-400'}">
+            ${half ? 'Buçuk ekli (,5)' : '+ Buçuk (,5)'}
+          </button>
+        </div>`;
+    }
+    function applyScore(id, val) {
+      document.getElementById(`score-${id}`).value = val;
+      document.getElementById(`picker-${id}`).innerHTML = scorePickerHtml(id, val);
     }
     function setScore(id, n) {
-      document.getElementById(`score-${id}`).value = n;
-      document.getElementById(`chips-${id}`).innerHTML = scoreChipsHtml(id, n);
+      const cur = Number(document.getElementById(`score-${id}`).value) || 0;
+      applyScore(id, n + (cur % 1 !== 0 && n < 10 ? 0.5 : 0));   // buçuk seçiliyse korunur
+    }
+    function toggleHalf(id) {
+      const cur = Number(document.getElementById(`score-${id}`).value) || 0;
+      if (cur < 1 || cur >= 10) return;
+      applyScore(id, cur % 1 !== 0 ? cur - 0.5 : cur + 0.5);
     }
     function setRateFilter(f) { rateFilter = f; renderUserRatingCards(allProfiles, allEvaluations); }
     function captureRateDrafts() {
@@ -4000,7 +4024,7 @@
         const cur = d && d.score !== '' ? Number(d.score) : (saved || 0);
         const text = d ? d.text : '';
         const status = saved
-          ? `<span class="ml-auto shrink-0 text-xs font-black px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300">${saved}/10</span>`
+          ? `<span class="ml-auto shrink-0 text-xs font-black px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300">${fmtScore(saved)}/10</span>`
           : `<span class="ml-auto shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300">Bekliyor</span>`;
 
         return `
@@ -4015,7 +4039,7 @@
             </div>
             <div>
               <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Puanın</p>
-              <div id="chips-${u.id}" class="grid grid-cols-5 gap-1.5 sm:gap-2">${scoreChipsHtml(u.id, cur)}</div>
+              <div id="picker-${u.id}">${scorePickerHtml(u.id, cur)}</div>
               <input type="hidden" id="score-${u.id}" value="${cur || ''}">
             </div>
             <textarea id="comment-${u.id}" rows="2" placeholder="Yorum ${appSettings.require_comment ? '(zorunlu)' : '(isteğe bağlı)'}..."
@@ -4032,8 +4056,8 @@
       const score = Number(document.getElementById(`score-${targetId}`).value);
       const text = document.getElementById(`comment-${targetId}`).value.trim();
 
-      if (!Number.isInteger(score) || score < 1 || score > 10) {
-        alert("Lütfen 1 ile 10 arasında bir puan girin.");
+      if (!Number.isFinite(score) || score < 1 || score > 10 || (score * 2) % 1 !== 0) {
+        alert("Lütfen 1 ile 10 arasında bir puan seç (buçuklu olabilir).");
         return;
       }
       if (appSettings.require_comment && !text) {
