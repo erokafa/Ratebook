@@ -62,13 +62,14 @@
 
     <!-- BÖLÜM ANAHTARI: Kişiler | Filmler (mesajlar, ayarlar, profil ikisinde de ortak) -->
     <div id="mode-switch" class="hidden max-sm:order-2 shrink-0 sm:ml-2">
-      <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark">
+      <div role="group" aria-label="Bölüm seç" class="relative grid grid-cols-2 p-1 rounded-full bg-gray-200/80 dark:bg-white/[0.06] border border-gray-300/60 dark:border-white/10 shadow-inner select-none">
+        <span id="mode-pill" aria-hidden="true" class="absolute top-1 bottom-1 left-1 rounded-full" style="width:calc(50% - 4px);transition:transform .35s cubic-bezier(.34,1.35,.5,1),background .3s,box-shadow .3s"></span>
         <button type="button" id="mode-btn-people" onclick="setMode('people')" aria-pressed="true">
-          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           <span>Kişiler</span>
         </button>
         <button type="button" id="mode-btn-movies" onclick="setMode('movies')" aria-pressed="false">
-          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
           <span>Filmler</span>
         </button>
       </div>
@@ -1480,16 +1481,20 @@
 
     function applyModeUi() {
       document.body.dataset.mode = appMode;
-      const base = 'flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-extrabold transition ';
-      const on = {
-        people: 'bg-indigo-600 text-white shadow',
-        movies: 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow'
-      };
-      const off = 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white';
+      // Kayan hap: seçili bölümün altına kayar, rengi bölüme göre değişir
+      const pill = document.getElementById('mode-pill');
+      if (pill) {
+        pill.style.transform = appMode === 'movies' ? 'translateX(100%)' : 'translateX(0)';
+        pill.style.background = appMode === 'movies' ? 'linear-gradient(135deg,#f59e0b,#f43f5e)' : 'linear-gradient(135deg,#6366f1,#9333ea)';
+        pill.style.boxShadow = appMode === 'movies' ? '0 4px 14px -2px rgba(244,63,94,.55)' : '0 4px 14px -2px rgba(99,102,241,.55)';
+      }
+      const base = 'relative z-10 flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-full text-xs font-extrabold tracking-wide transition-colors duration-300 ';
+      const on = 'text-white';
+      const off = 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
       ['people', 'movies'].forEach(m => {
         const b = document.getElementById('mode-btn-' + m);
         if (!b) return;
-        b.className = base + (appMode === m ? on[m] : off);
+        b.className = base + (appMode === m ? on : off);
         b.setAttribute('aria-pressed', appMode === m ? 'true' : 'false');
       });
       document.querySelectorAll('[data-only]').forEach(el => el.classList.toggle('hidden', el.dataset.only !== appMode));
