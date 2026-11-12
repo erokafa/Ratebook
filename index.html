@@ -1942,6 +1942,7 @@
             <div class="flex justify-center sm:justify-start space-x-6 text-sm">
               <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : voteCount}</span> <span class="text-gray-500">Oy</span></div>
               <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
+              ${profMovies ? `<div><span class="font-bold text-orange-500">${profMovies.length}</span> <span class="text-gray-500">Film</span></div>` : ''}
             </div>
 
             <div>
@@ -1952,8 +1953,13 @@
           </div>
         </div>
 
-        ${appMode === 'movies' ? moviesBlock : ''}
-        <div class="pt-6 space-y-4">
+        ${profMovies ? `
+        <div id="prof-tabs" role="tablist" class="mt-5 grid grid-cols-2 gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark">
+          <button type="button" id="prof-tab-main" role="tab" onclick="setProfileTab('main')"></button>
+          <button type="button" id="prof-tab-movies" role="tab" onclick="setProfileTab('movies')"></button>
+        </div>` : ''}
+        <div id="prof-pane-main" class="pt-2">
+        <div class="pt-4 space-y-4">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
             <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-500">Yorumlar (${locked ? ic('lock') : comments.length})</h4>
@@ -1986,8 +1992,25 @@
             `).join('')}
           </div>
         </div>
-        ${appMode === 'movies' ? '' : moviesBlock}
+        </div>
+        ${profMovies ? `<div id="prof-pane-movies" class="hidden pt-2">${moviesBlock}</div>` : ''}
       `;
+      if (profMovies) setProfileTab(appMode === 'movies' ? 'movies' : 'main');
+    }
+
+    // Profil sekmeleri: Genel | Filmler
+    function setProfileTab(t) {
+      const main = document.getElementById('prof-pane-main'), mov = document.getElementById('prof-pane-movies');
+      if (!main || !mov) return;
+      main.classList.toggle('hidden', t !== 'main');
+      mov.classList.toggle('hidden', t !== 'movies');
+      const base = 'py-2.5 rounded-xl text-sm font-extrabold transition ';
+      const off = 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+      const bm = document.getElementById('prof-tab-main'), bv = document.getElementById('prof-tab-movies');
+      bm.className = base + (t === 'main' ? 'bg-indigo-600 text-white shadow' : off);
+      bv.className = base + (t === 'movies' ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow' : off);
+      bm.innerText = 'Genel'; bv.innerText = 'Filmler';
+      bm.setAttribute('aria-selected', t === 'main'); bv.setAttribute('aria-selected', t === 'movies');
     }
 
     // Profildeki "Puanladığı Filmler" bölümü
@@ -1997,7 +2020,6 @@
         <div class="flex items-center gap-2 flex-wrap">
           <svg class="w-4 h-4 text-orange-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
           <h4 class="text-sm font-bold uppercase tracking-wider text-orange-500">Puanladığı Filmler (${list.length})</h4>
-          ${list.length ? `<span class="ml-auto text-xs font-bold text-gray-500">Ortalama <span class="text-orange-500">${fmtAvg(avg)}</span></span>` : ''}
         </div>`;
       const body = list.length === 0
         ? `<p class="text-xs text-gray-500">${isMe ? 'Henüz hiçbir filmi puanlamadın.' : 'Henüz hiçbir filmi puanlamadı.'}</p>`
@@ -2010,7 +2032,10 @@
               </div>
               <span class="shrink-0 min-w-[48px] text-center px-3 py-1.5 rounded-xl text-lg leading-none font-black text-white shadow-md ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
             </button>`).join('')}</div>`;
-      return `<div class="pt-6 space-y-4">${head}${body}</div>`;
+      const best = list.length ? list.slice().sort((a, b) => Number(b.score) - Number(a.score))[0] : null;
+      const tile = (v, l, c) => `<div class="rounded-2xl bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark p-3 text-center min-w-0"><p class="text-xl font-black ${c} truncate">${v}</p><p class="text-[11px] text-gray-500 mt-0.5">${l}</p></div>`;
+      const tiles = list.length ? `<div class="grid grid-cols-3 gap-2.5">${tile(list.length, 'Film', 'text-orange-500')}${tile(fmtAvg(avg), 'Ortalama', 'text-orange-500')}${tile(fmtScore(best.score), 'En yüksek', 'text-orange-500')}</div>` : '';
+      return `<div class="pt-4 space-y-4">${head}${tiles}${body}</div>`;
     }
 
     async function handleAddComment(e, targetId) {
