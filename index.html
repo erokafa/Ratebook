@@ -742,6 +742,7 @@
         <button id="mod-tab-btn-reports" onclick="switchModTab('reports')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Bildirilen Mesajlar</button>
         <button id="mod-tab-btn-rules" onclick="switchModTab('rules')" class="px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Kurallar</button>
         <button id="mod-tab-btn-look" onclick="switchModTab('look')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Çerçeve & Arkaplan</button>
+        <button id="mod-tab-btn-titles" onclick="switchModTab('titles')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Unvanlar</button>
         <button id="mod-tab-btn-admins" onclick="switchModTab('admins')" class="hidden px-4 py-2 text-xs font-bold rounded-xl transition shrink-0">Moderatörler</button>
       </div>
 
@@ -880,6 +881,44 @@
       </div>
 
       <!-- ÇERÇEVE VE ARKAPLAN (sadece yönetici) -->
+      <!-- UNVANLAR (sadece yönetici) -->
+      <div id="mod-pane-titles" class="hidden space-y-6">
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
+          <h3 id="title-form-title" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Yeni Unvan</h3>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+            Unvanlar profillerde küçük ve silik bir etiket olarak görünür. Sadece yönetici ekleyebilir.
+            <b>Elle verilen</b> unvanı istediğin kişiye verirsin. <b>Otomatik</b> unvan ise kuralı sağlayan herkese kendiliğinden verilir (ör. 100 film puanlayana "Film Gurmesi").
+          </p>
+          <form onsubmit="saveTitleForm(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" id="title-name" maxlength="24" required oninput="renderTitlePreview()" placeholder="Unvan (ör. Film Gurmesi)"
+              class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+            <select id="title-tone" onchange="renderTitlePreview()" class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500"></select>
+            <select id="title-type" onchange="titleTypeChanged()" class="sm:col-span-2 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+              <option value="manual">Elle verilir (istediğin kişiye sen verirsin)</option>
+              <option value="auto">Otomatik verilir (kural sağlayana kendiliğinden)</option>
+            </select>
+            <div id="title-auto-row" class="hidden sm:col-span-2 flex flex-wrap items-center gap-2 text-xs font-medium">
+              <select id="title-metric" class="bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <option value="movies_rated">Puanladığı film sayısı</option>
+                <option value="movie_comments">Yorum yazdığı film sayısı</option>
+              </select>
+              en az
+              <input type="number" id="title-threshold" min="1" max="100000" value="100" class="w-24 bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-indigo-500">
+              olunca
+            </div>
+            <div class="sm:col-span-2 flex flex-wrap items-center gap-2">
+              <button type="submit" id="title-submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">Kaydet</button>
+              <button type="button" id="title-cancel" onclick="resetTitleForm()" class="hidden bg-gray-100 dark:bg-borderdark text-sm font-semibold px-5 py-2.5 rounded-xl">Vazgeç</button>
+              <span class="text-[11px] text-gray-500 ml-1">Önizleme:</span><span id="title-preview"></span>
+            </div>
+          </form>
+        </div>
+        <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3">
+          <h3 class="text-lg font-bold">Unvanlar</h3>
+          <div id="title-admin-list" class="space-y-3"></div>
+        </div>
+      </div>
+
       <div id="mod-pane-look" class="hidden space-y-6">
         <div class="bg-white dark:bg-carddark p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-4">
           <h3 id="cos-form-title" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">Yeni Çerçeve / Arkaplan</h3>
@@ -1895,6 +1934,194 @@
     const gDesc = g => isFilm() ? SORT_FILM_TEXT[g].desc : SORT_GAMES[g].desc;
     const gHow = g => isFilm() ? SORT_FILM_TEXT[g].how : SORT_GAMES[g].how;
 
+    // ===== UNVANLAR =====
+    // Profillerde küçük, silik etiketler. Sadece yönetici oluşturur / verir; otomatik olanlar kural sağlanınca kendiliğinden gelir.
+    const TITLE_TONES = {
+      gray:    { label: 'Gri',    cls: 'bg-gray-500/10 text-gray-500 dark:text-gray-400 border-gray-500/20' },
+      indigo:  { label: 'İndigo', cls: 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-300 border-indigo-500/20' },
+      amber:   { label: 'Amber',  cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25' },
+      emerald: { label: 'Zümrüt', cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+      rose:    { label: 'Gül',    cls: 'bg-rose-500/10 text-rose-500 dark:text-rose-300 border-rose-500/20' },
+      sky:     { label: 'Gök',    cls: 'bg-sky-500/10 text-sky-600 dark:text-sky-300 border-sky-500/20' },
+      purple:  { label: 'Mor',    cls: 'bg-purple-500/10 text-purple-500 dark:text-purple-300 border-purple-500/20' }
+    };
+    function titleChip(name, tone) {
+      const t = TITLE_TONES[tone] || TITLE_TONES.gray;
+      return `<span class="inline-flex items-center px-2 py-px rounded-full border text-[10px] font-semibold leading-4 ${t.cls}">${escapeHtml(name)}</span>`;
+    }
+    let titleMap = new Map();   // kullanıcı id -> unvanlar
+    async function loadTitles() {
+      try {
+        const { data, error } = await supabaseClient.rpc('get_all_user_titles');
+        if (error) return;   // unvanlar.sql çalıştırılmamışsa sessizce unvansız devam eder
+        const m = new Map();
+        (data || []).forEach(r => { if (!m.has(r.user_id)) m.set(r.user_id, []); m.get(r.user_id).push(r); });
+        m.forEach(a => a.sort((x, y) => (x.is_auto - y.is_auto) || ((y.threshold || 0) - (x.threshold || 0)) || x.name.localeCompare(y.name, 'tr')));
+        titleMap = m;
+      } catch (e) { /* unvan yoksa profil yine açılır */ }
+    }
+    function titleChipsHtml(uid) {
+      const a = titleMap.get(uid);
+      return a && a.length ? `<div class="flex flex-wrap justify-center sm:justify-start gap-1">${a.map(t => titleChip(t.name, t.tone)).join('')}</div>` : '';
+    }
+
+    // --- Yönetici: unvan yönetimi ---
+    const TITLE_ERR = {
+      NOT_ALLOWED: 'Bu işlem sadece yöneticiler içindir.', BAD_NAME: 'Unvan 1-24 karakter olmalı.', BAD_TONE: 'Geçersiz renk.',
+      BAD_RULE: 'Kural geçersiz: bir ölçüt seç ve sayı 1 veya daha büyük olsun.', DUPLICATE: 'Bu isimde bir unvan zaten var.',
+      NOT_MANUAL: 'Otomatik unvanlar elle verilemez.', NO_USER: 'Kişi bulunamadı.', NO_TITLE: 'Unvan bulunamadı.'
+    };
+    function titleErr(e) {
+      const m = (e && e.message) || '';
+      if (/could not find the function|schema cache/i.test(m)) return "Unvanlar kurulmamış: Supabase'de unvanlar.sql dosyası çalıştırılmalı.";
+      for (const k in TITLE_ERR) if (m.includes(k)) return TITLE_ERR[k];
+      return 'Bir hata oluştu: ' + m;
+    }
+    const TITLE_METRICS = { movies_rated: 'film puanlayan', movie_comments: 'filme yorum yazan' };
+    let adminTitles = [], titleEditId = null;
+    const titleHoldersOpen = new Set();
+
+    async function loadAdminTitles() {
+      const sel = document.getElementById('title-tone');
+      if (sel && !sel.options.length) sel.innerHTML = Object.entries(TITLE_TONES).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
+      const { data, error } = await supabaseClient.rpc('admin_list_titles');
+      if (error) { alert(titleErr(error)); return; }
+      adminTitles = data || [];
+      await loadTitles();
+      if (!modMembers.length) {
+        const r = await supabaseClient.rpc('mod_list_members');
+        if (!r.error) modMembers = r.data || [];
+      }
+      renderAdminTitles();
+      renderTitlePreview();
+    }
+
+    function renderTitlePreview() {
+      const el = document.getElementById('title-preview');
+      if (!el) return;
+      const n = document.getElementById('title-name').value.trim();
+      el.innerHTML = n ? titleChip(n, document.getElementById('title-tone').value) : '<span class="text-[11px] text-gray-400">-</span>';
+    }
+    function titleTypeChanged() {
+      document.getElementById('title-auto-row').classList.toggle('hidden', document.getElementById('title-type').value !== 'auto');
+    }
+    function resetTitleForm() {
+      titleEditId = null;
+      document.getElementById('title-name').value = '';
+      document.getElementById('title-tone').value = 'gray';
+      document.getElementById('title-type').value = 'manual';
+      document.getElementById('title-metric').value = 'movies_rated';
+      document.getElementById('title-threshold').value = '100';
+      document.getElementById('title-form-title').innerText = 'Yeni Unvan';
+      document.getElementById('title-submit').innerText = 'Kaydet';
+      document.getElementById('title-cancel').classList.add('hidden');
+      titleTypeChanged(); renderTitlePreview();
+    }
+    function editTitle(id) {
+      const t = adminTitles.find(x => x.id === id); if (!t) return;
+      titleEditId = id;
+      document.getElementById('title-name').value = t.name;
+      document.getElementById('title-tone').value = t.tone;
+      document.getElementById('title-type').value = t.auto_metric ? 'auto' : 'manual';
+      document.getElementById('title-metric').value = t.auto_metric || 'movies_rated';
+      document.getElementById('title-threshold').value = t.auto_threshold || 100;
+      document.getElementById('title-form-title').innerText = 'Unvanı Düzenle';
+      document.getElementById('title-submit').innerText = 'Güncelle';
+      document.getElementById('title-cancel').classList.remove('hidden');
+      titleTypeChanged(); renderTitlePreview();
+      document.getElementById('title-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    async function saveTitleForm(e) {
+      e.preventDefault();
+      const auto = document.getElementById('title-type').value === 'auto';
+      const { error } = await supabaseClient.rpc('admin_save_title', {
+        p_id: titleEditId,
+        p_name: document.getElementById('title-name').value.trim(),
+        p_tone: document.getElementById('title-tone').value,
+        p_metric: auto ? document.getElementById('title-metric').value : null,
+        p_threshold: auto ? parseInt(document.getElementById('title-threshold').value, 10) || null : null
+      });
+      if (error) { alert(titleErr(error)); return; }
+      resetTitleForm();
+      loadAdminTitles();
+    }
+    async function deleteTitle(id) {
+      const t = adminTitles.find(x => x.id === id);
+      if (!t || !confirm(`"${t.name}" unvanı herkesten kaldırılsın mı?`)) return;
+      const { error } = await supabaseClient.rpc('admin_delete_title', { p_id: id });
+      if (error) { alert(titleErr(error)); return; }
+      if (titleEditId === id) resetTitleForm();
+      loadAdminTitles();
+    }
+    function toggleTitleHolders(id) {
+      if (titleHoldersOpen.has(id)) titleHoldersOpen.delete(id); else titleHoldersOpen.add(id);
+      renderAdminTitles();
+    }
+    function titleHolders(titleId) {
+      const out = [];
+      titleMap.forEach((arr, uid) => { if (arr.some(t => t.title_id === titleId && !t.is_auto)) out.push(uid); });
+      return out;
+    }
+    const memberName = id => (modMembers.find(m => m.id === id) || allProfiles.find(p => p.id === id) || {}).full_name || 'Bilinmeyen';
+    async function grantTitle(titleId) {
+      const uid = document.getElementById(`title-add-${titleId}`).value;
+      if (!uid) return;
+      const { error } = await supabaseClient.rpc('admin_set_title', { p_user: uid, p_title: titleId, p_on: true });
+      if (error) { alert(titleErr(error)); return; }
+      loadAdminTitles();
+    }
+    async function revokeTitle(titleId, uid) {
+      const { error } = await supabaseClient.rpc('admin_set_title', { p_user: uid, p_title: titleId, p_on: false });
+      if (error) { alert(titleErr(error)); return; }
+      loadAdminTitles();
+    }
+
+    function renderAdminTitles() {
+      const el = document.getElementById('title-admin-list');
+      if (!el) return;
+      if (adminTitles.length === 0) { el.innerHTML = '<p class="text-xs text-gray-500 text-center py-3">Henüz unvan yok.</p>'; return; }
+      const btn = 'px-3 py-1.5 text-xs font-medium rounded-lg transition bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-700';
+      el.innerHTML = adminTitles.map(t => {
+        const auto = !!t.auto_metric;
+        const rule = auto ? `Otomatik · en az ${t.auto_threshold} ${TITLE_METRICS[t.auto_metric] || ''} · şu an ${t.holders} kişide`.trim()
+                          : `Elle verilir · ${t.holders} kişide`;
+        let holders = '';
+        if (!auto && titleHoldersOpen.has(t.id)) {
+          const have = new Set(titleHolders(t.id));
+          const options = modMembers.filter(m => !have.has(m.id)).map(m => `<option value="${m.id}">${escapeHtml(m.full_name)}</option>`).join('');
+          holders = `
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-borderdark space-y-2">
+              <div class="flex flex-wrap gap-1.5">${[...have].map(uid => `
+                <span class="inline-flex items-center gap-1 text-xs bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-full pl-2.5 pr-1 py-0.5">
+                  ${escapeHtml(memberName(uid))}
+                  <button type="button" onclick="revokeTitle('${t.id}','${uid}')" title="Geri al" class="h-5 w-5 rounded-full text-red-500 hover:bg-red-500/10 font-black leading-none">&times;</button>
+                </span>`).join('') || '<span class="text-xs text-gray-500">Henüz kimseye verilmedi.</span>'}</div>
+              <div class="flex gap-2">
+                <select id="title-add-${t.id}" class="flex-1 min-w-0 bg-white dark:bg-carddark border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                  <option value="">Kişi seç...</option>${options}
+                </select>
+                <button type="button" onclick="grantTitle('${t.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 rounded-xl">Ver</button>
+              </div>
+            </div>`;
+        }
+        return `
+        <div class="bg-gray-50 dark:bg-blackbg p-3 rounded-xl border border-gray-200 dark:border-borderdark">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div>${titleChip(t.name, t.tone)}</div>
+              <p class="text-[11px] text-gray-500 mt-1">${rule}</p>
+            </div>
+            <div class="flex gap-1.5 shrink-0 flex-wrap justify-end">
+              ${auto ? '' : `<button onclick="toggleTitleHolders('${t.id}')" class="${btn}">Kişiler</button>`}
+              <button onclick="editTitle('${t.id}')" class="${btn}">Düzenle</button>
+              <button onclick="deleteTitle('${t.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg transition bg-red-600/90 hover:bg-red-500 text-white">Sil</button>
+            </div>
+          </div>
+          ${holders}
+        </div>`;
+      }).join('');
+    }
+
     // ===== ARAMA =====
     function handleSearch() {
       if (appMode === 'movies') return movieSearch(document.getElementById('search-input').value);
@@ -1965,11 +2192,13 @@
       const avgScore = sc ? sc.avg.toFixed(1) : '0.0';
 
       let comments = [];
+      const titlesP = loadTitles();   // unvanlar (otomatik olanlar anlık hesaplanır)
       const moviesP = targetProfile.unclaimed ? Promise.resolve(null) : supabaseClient.rpc('get_user_movie_ratings', { p_user: userId });
       if (!locked) {
         const { data } = await supabaseClient.rpc('get_comments', { p_target: userId });
         comments = data || [];
       }
+      await titlesP;
       const mres = await moviesP;
       const profMovies = mres && !mres.error ? (mres.data || []) : null;   // null: bölüm yok (kurulmamış / kayıtsız kişi)
       const moviesBlock = profMovies ? profileMoviesHtml(profMovies, isMe) : '';
@@ -1987,6 +2216,7 @@
               ` : ''}
             </div>
 
+            ${titleChipsHtml(userId)}
             <div class="flex justify-center sm:justify-start space-x-6 text-sm">
               <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : voteCount}</span> <span class="text-gray-500">Oy</span></div>
               <div><span class="font-bold text-indigo-500">${locked ? ic('lock') : avgScore}</span> <span class="text-gray-500">Ortalama</span></div>
@@ -4318,20 +4548,22 @@
 
     // --- Moderatör: sekmeler, yorumlar, kurallar ---
     function switchModTab(tab) {
-      if ((tab === 'admins' || tab === 'look') && !isAdmin) tab = 'people';
+      if ((tab === 'admins' || tab === 'look' || tab === 'titles') && !isAdmin) tab = 'people';
       const on  = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-amber-600 text-white";
       const off = "px-4 py-2 text-xs font-bold rounded-xl transition shrink-0 bg-gray-100 dark:bg-borderdark text-gray-500 dark:text-gray-400 hover:text-amber-600";
-      ['people', 'members', 'categories', 'comments', 'reports', 'rules', 'look', 'admins'].forEach(t => {
+      ['people', 'members', 'categories', 'comments', 'reports', 'rules', 'look', 'titles', 'admins'].forEach(t => {
         document.getElementById(`mod-pane-${t}`).classList.toggle('hidden', t !== tab);
         document.getElementById(`mod-tab-btn-${t}`).className = t === tab ? on : off;
       });
       document.getElementById('mod-tab-btn-admins').classList.toggle('hidden', !isAdmin);
       document.getElementById('mod-tab-btn-look').classList.toggle('hidden', !isAdmin);
+      document.getElementById('mod-tab-btn-titles').classList.toggle('hidden', !isAdmin);
       if (tab === 'admins') loadAdmins();
       if (tab === 'people') loadModRoster();
       if (tab === 'members') loadModMembers();
       if (tab === 'categories') modLoadCategories();
       if (tab === 'look') loadAdminCosmetics();
+      if (tab === 'titles') loadAdminTitles();
       if (tab === 'comments') loadModComments();
       if (tab === 'rules') fillModRules();
       if (tab === 'reports') loadReports();
