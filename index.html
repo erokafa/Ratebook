@@ -576,24 +576,6 @@
 
     <!-- ===================== FİLMLER BÖLÜMÜ ===================== -->
     <section id="movies-section" class="space-y-5 hidden">
-      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 text-white shadow-2xl shadow-orange-500/25">
-        <div class="pointer-events-none absolute -top-10 -right-10 h-44 w-44 rounded-full bg-white/20 blur-2xl"></div>
-        <div class="pointer-events-none absolute -bottom-14 -left-8 h-40 w-40 rounded-full bg-yellow-200/25 blur-2xl"></div>
-        <div class="relative">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-white/75">Film Puanlama</p>
-          <h2 class="text-3xl font-black tracking-tight mt-1">Filmler</h2>
-          <p class="text-sm text-white/90 mt-2 max-w-xl">İzlediğin filmlere 1-10 arası puan ver, yorum bırak ve arkadaşlarının puanlarını gör.</p>
-          <div class="mt-4 max-w-md">
-            <div class="flex items-center justify-between text-xs font-bold text-white/90">
-              <span id="movie-prog-text"></span><span id="movie-prog-percent"></span>
-            </div>
-            <div class="mt-1.5 h-2.5 rounded-full bg-white/25 overflow-hidden"><div id="movie-prog-bar" class="h-full w-0 rounded-full bg-white transition-all duration-500"></div></div>
-          </div>
-          <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden mt-5 w-full sm:w-auto bg-white text-orange-700 hover:bg-orange-50 font-extrabold text-sm px-7 py-3 rounded-xl transition shadow-lg">+ Film Ekle</button>
-          <p id="movie-add-note" class="mt-5 text-xs font-semibold text-white/85">Filmleri moderatörler ekler. Eklenen her filme sen puan verebilirsin.</p>
-        </div>
-      </div>
-
       <form id="movie-add" onsubmit="submitMovie(event)" class="hidden bg-white dark:bg-carddark p-5 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3">
         <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Yeni film ekle</h3>
         <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
@@ -612,6 +594,7 @@
 
       <div class="flex flex-wrap items-center gap-2">
         <div id="movie-filters" class="flex flex-wrap gap-2 flex-1"></div>
+        <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Film Ekle</button>
         <select id="movie-sort" onchange="setMovieSort(this.value)" class="bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-orange-500">
           <option value="new">Yeni eklenen</option>
           <option value="top">En yüksek puan</option>
@@ -1668,10 +1651,6 @@
       if (!grid) return;
       syncMovieAdmin();
       const total = movies.length, done = movies.filter(m => m.my_score != null).length;
-      const pct = total ? Math.round(done / total * 100) : 0;
-      document.getElementById('movie-prog-text').innerText = moviesLoaded ? `${done} / ${total} filmi puanladın` : 'Yükleniyor...';
-      document.getElementById('movie-prog-percent').innerText = moviesLoaded ? `%${pct}` : '';
-      setBar('movie-prog-bar', pct);
 
       const chip = (f, label, n) => `<button type="button" onclick="setMovieFilter('${f}')" class="px-4 py-2 rounded-full text-xs font-bold transition ${movieFilter === f
         ? 'bg-orange-600 text-white shadow-md'
@@ -1724,6 +1703,8 @@
     function movieById(id) { return movies.find(m => m.id === id); }
 
     async function openMovie(id) {
+      // Profilden (Kişiler bölümünden) gelindiyse Filmler bölümüne geç
+      if (appMode !== 'movies') { appMode = 'movies'; try { localStorage.setItem('rb_mode', 'movies'); } catch (e) {} applyModeUi(); }
       movieOpenId = id; movieRatings = [];
       showSection('movie-detail-section');
       window.scrollTo({ top: 0 });
@@ -1936,10 +1917,14 @@
       const avgScore = sc ? sc.avg.toFixed(1) : '0.0';
 
       let comments = [];
+      const moviesP = targetProfile.unclaimed ? Promise.resolve(null) : supabaseClient.rpc('get_user_movie_ratings', { p_user: userId });
       if (!locked) {
         const { data } = await supabaseClient.rpc('get_comments', { p_target: userId });
         comments = data || [];
       }
+      const mres = await moviesP;
+      const profMovies = mres && !mres.error ? (mres.data || []) : null;   // null: bölüm yok (kurulmamış / kayıtsız kişi)
+      const moviesBlock = profMovies ? profileMoviesHtml(profMovies, isMe) : '';
 
       profileContainer.innerHTML = `
         <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 pb-6 border-b border-gray-200 dark:border-borderdark">
@@ -1967,6 +1952,7 @@
           </div>
         </div>
 
+        ${appMode === 'movies' ? moviesBlock : ''}
         <div class="pt-6 space-y-4">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
@@ -2000,7 +1986,31 @@
             `).join('')}
           </div>
         </div>
+        ${appMode === 'movies' ? '' : moviesBlock}
       `;
+    }
+
+    // Profildeki "Puanladığı Filmler" bölümü
+    function profileMoviesHtml(list, isMe) {
+      const avg = list.length ? list.reduce((a, r) => a + Number(r.score), 0) / list.length : 0;
+      const head = `
+        <div class="flex items-center gap-2 flex-wrap">
+          <svg class="w-4 h-4 text-orange-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
+          <h4 class="text-sm font-bold uppercase tracking-wider text-orange-500">Puanladığı Filmler (${list.length})</h4>
+          ${list.length ? `<span class="ml-auto text-xs font-bold text-gray-500">Ortalama <span class="text-orange-500">${fmtAvg(avg)}</span></span>` : ''}
+        </div>`;
+      const body = list.length === 0
+        ? `<p class="text-xs text-gray-500">${isMe ? 'Henüz hiçbir filmi puanlamadın.' : 'Henüz hiçbir filmi puanlamadı.'}</p>`
+        : `<div class="space-y-2.5">${list.map(r => `
+            <button type="button" onclick="openMovie('${r.movie_id}')" class="w-full text-left flex items-center gap-3 bg-gray-50 dark:bg-blackbg p-2.5 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-orange-400 transition">
+              <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt({ title: r.title, poster_url: r.poster_url }, 'text-xl')}</div>
+              <div class="min-w-0 flex-1">
+                <p class="font-bold text-sm truncate">${escapeHtml(r.title)}${r.year ? ` <span class="text-gray-400 font-medium">(${r.year})</span>` : ''}</p>
+                ${r.comment ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 break-words">${escapeHtml(r.comment)}</p>` : ''}
+              </div>
+              <span class="shrink-0 min-w-[48px] text-center px-3 py-1.5 rounded-xl text-lg leading-none font-black text-white shadow-md ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
+            </button>`).join('')}</div>`;
+      return `<div class="pt-6 space-y-4">${head}${body}</div>`;
     }
 
     async function handleAddComment(e, targetId) {
