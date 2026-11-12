@@ -2080,10 +2080,25 @@
               </div>
               <span class="shrink-0 min-w-[48px] text-center px-3 py-1.5 rounded-xl text-lg leading-none font-black text-white shadow-md ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
             </button>`).join('')}</div>`;
-      const best = list.length ? list.slice().sort((a, b) => Number(b.score) - Number(a.score))[0] : null;
+      // Top 3: en yüksek puan verdiği filmler (eşitlikte en son puanladığı önde). Oyunlardaki özel Top 3 kaydı gösterilmez.
+      const top = list.slice().sort((a, b) => Number(b.score) - Number(a.score)).slice(0, 3);
+      const MEDAL_BG = ['bg-yellow-400 text-yellow-950', 'bg-gray-300 text-gray-800', 'bg-amber-600 text-white'];
+      const podium3 = top.length ? `
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">${isMe ? 'En Yüksek Puan Verdiğin' : 'En Yüksek Puan Verdiği'} ${top.length} Film</p>
+          <div class="grid grid-cols-3 gap-2.5 sm:gap-4">${top.map((r, i) => `
+            <button type="button" onclick="openMovie('${r.movie_id}')" class="group text-left min-w-0">
+              <div class="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-lg ring-2 ${['ring-yellow-400', 'ring-gray-300 dark:ring-gray-400', 'ring-amber-600'][i]} group-hover:-translate-y-0.5 transition">
+                ${movieArt({ title: r.title, poster_url: r.poster_url }, 'text-4xl')}
+                <span class="absolute top-1.5 left-1.5 h-7 w-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg ${MEDAL_BG[i]}">${i + 1}</span>
+                <span class="absolute bottom-1.5 right-1.5 px-2 py-1 rounded-lg text-sm font-black text-white shadow-lg ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
+              </div>
+              <p class="mt-1.5 text-xs font-bold leading-snug line-clamp-2 break-words">${escapeHtml(r.title)}</p>
+            </button>`).join('')}</div>
+        </div>` : '';
       const tile = (v, l, c) => `<div class="rounded-2xl bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark p-3 text-center min-w-0"><p class="text-xl font-black ${c} truncate">${v}</p><p class="text-[11px] text-gray-500 mt-0.5">${l}</p></div>`;
-      const tiles = list.length ? `<div class="grid grid-cols-3 gap-2.5">${tile(list.length, 'Film', 'text-orange-500')}${tile(fmtAvg(avg), 'Ortalama', 'text-orange-500')}${tile(fmtScore(best.score), 'En yüksek', 'text-orange-500')}</div>` : '';
-      return `<div class="pt-4 space-y-4">${head}${tiles}${body}</div>`;
+      const tiles = list.length ? `<div class="grid grid-cols-2 gap-2.5">${tile(list.length, 'Film', 'text-orange-500')}${tile(fmtAvg(avg), 'Ortalama', 'text-orange-500')}</div>` : '';
+      return `<div class="pt-4 space-y-4">${head}${tiles}${podium3}${body}</div>`;
     }
 
     async function handleAddComment(e, targetId) {
@@ -2123,11 +2138,11 @@
 
     // Kayıt anahtarı: "top3" (herkes) ya da "top3:<kategori id>"
     // Film oyunlarının kayıtları "film_<oyun>" (ve sadece puanladıklarım için "film_<oyun>:rated") anahtarıyla ayrı tutulur
-    const sortKey = g => isFilm() ? (sortScope === 'rated' ? `film_${g}:rated` : `film_${g}`) : (sortScope ? `${g}:${sortScope}` : g);
+    const sortKey = g => isFilm() ? (sortScope === 'all' ? `film_${g}` : `film_${g}:rated`) : (sortScope ? `${g}:${sortScope}` : g);
 
     // Oynanabilecek kişiler: kendin hariç, kategori seçiliyse sadece o kategoridekiler
     function sortPool() {
-      if (isFilm()) return movies.filter(m => sortScope !== 'rated' || m.my_score != null).map(filmItem);
+      if (isFilm()) return movies.filter(m => sortScope === 'all' || m.my_score != null).map(filmItem);   // varsayılan: puanladıklarım
       const set = sortScope ? categoryMembers.get(sortScope) : null;
       return allProfiles.filter(p => p.id !== currentUser.id && (!set || set.has(p.id)));
     }
@@ -2235,7 +2250,7 @@
         const fchip = (id, label, n, active) => `
           <button type="button" onclick="setSortScope(${id ? `'${id}'` : 'null'})"
             class="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 dark:bg-blackbg text-gray-600 dark:text-gray-300 border-gray-200 dark:border-borderdark hover:border-purple-500'}">${label} <span class="opacity-70">${n}</span></button>`;
-        el.innerHTML = fchip(null, 'Hepsi', movies.length, !sortScope) + fchip('rated', 'Puanladıklarım', movies.filter(m => m.my_score != null).length, sortScope === 'rated');
+        el.innerHTML = fchip(null, 'Puanladıklarım', movies.filter(m => m.my_score != null).length, sortScope !== 'all') + fchip('all', 'Hepsi', movies.length, sortScope === 'all');
         return;
       }
       if (categories.length === 0) { wrap.classList.add('hidden'); return; }
@@ -2305,7 +2320,7 @@
     async function initSortPage() {
       showSection('sort-section');
       if (isFilm()) {
-        if (sortScope && sortScope !== 'rated') sortScope = null;
+        if (sortScope && sortScope !== 'all') sortScope = null;   // boş = puanladıklarım (varsayılan)
         await ensureMovies();
         await ensureSortLoaded();
         applySortScope();   // film kayıtlarını (filmler yüklendikten sonra) geri yükle
@@ -2387,7 +2402,7 @@
       const saved = !!sortSaved[sortKey(m.key)];
       const poolEl = document.getElementById('setup-pool');
       poolEl.innerText = isFilm()
-        ? (enough ? `${n} film oynanacak.` : `Bu seçimde yeterli film yok (en az ${m.min} film gerekiyor). "Hepsi"ni seç ya da daha fazla film puanla.`)
+        ? (enough ? `${n} film oynanacak.` : `Bu seçimde yeterli film yok (en az ${m.min} film gerekiyor). Daha fazla film puanla ya da "Hepsi"ni seç.`)
         : (enough ? `${n} kişi oynayacak.` : `Bu seçimde yeterli kişi yok (en az ${m.min} kişi gerekiyor). Başka bir kategori seç.`);
       poolEl.className = `text-xs font-semibold ${enough ? 'text-gray-500 dark:text-gray-400' : 'text-red-500'}`;
       const start = document.getElementById('setup-start-btn');
@@ -2402,7 +2417,7 @@
       setSortView('play');
       document.getElementById('play-title').innerText = m.title;
       const cat = !isFilm() && sortScope ? categories.find(c => c.id === sortScope) : null;
-      document.getElementById('play-scope').innerText = isFilm() ? (sortScope === 'rated' ? 'Puanladıklarım' : 'Tüm filmler') : (cat ? cat.name : 'Herkes');
+      document.getElementById('play-scope').innerText = isFilm() ? (sortScope === 'all' ? 'Tüm filmler' : 'Puanladıklarım') : (cat ? cat.name : 'Herkes');
       switchSortGame(g);
       if (fresh) {
         if (g === 'vs') resetAndStartTournament();
