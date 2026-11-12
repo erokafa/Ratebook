@@ -38,6 +38,10 @@
     }
     @keyframes modeGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(251,146,60,0); } 50% { box-shadow: 0 0 0 7px rgba(251,146,60,.22); } }
     .mode-attn { animation: modeGlow 1.8s ease-in-out infinite; }
+    /* Film oyunları: afişler dikey ve köşeli, menü başlığı film renkleri */
+    body[data-mode="movies"] #sort-play img.rounded-full { border-radius: .75rem; }
+    body[data-mode="movies"] #sort-play img.rounded-full:is(.mx-auto, .ring-4) { height: auto !important; aspect-ratio: 2 / 3; }
+    body[data-mode="movies"] #sort-hub > div:first-child { background-image: linear-gradient(135deg, #f59e0b, #f43f5e 55%, #be123c) !important; }
     /* Film bölümünde üst çubuğa sıcak bir vurgu rengi */
     body[data-mode="movies"] nav { border-bottom-color: #f59e0b; box-shadow: 0 1px 0 0 rgba(245,158,11,.35); }
   </style>
@@ -114,9 +118,9 @@
       </button>
 
       <!-- SIRALA SEKMESİ -->
-      <button title="Sırala" data-only="people" onclick="initSortPage()" class="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 px-3 py-2 rounded-xl text-xs font-medium text-purple-600 dark:text-purple-300 flex items-center gap-1.5">
+      <button id="nav-sort-btn" title="Sırala" onclick="initSortPage()" class="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 px-3 py-2 rounded-xl text-xs font-medium text-purple-600 dark:text-purple-300 flex items-center gap-1.5">
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-        <span class="hidden xl:inline">Sırala</span>
+        <span id="nav-sort-label" class="hidden xl:inline">Sırala</span>
       </button>
 
       <button title="Değerlendir" data-only="people" onclick="showSection('rate-section')" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
@@ -330,8 +334,8 @@
           <div class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
           <div class="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-pink-300/20 blur-2xl"></div>
           <div class="relative">
-            <h2 class="text-3xl font-black tracking-tight">Sıralama Oyunları</h2>
-            <p class="text-sm text-white/85 mt-2 max-w-lg">Bir oyun seç, arkadaşlarını sıraya diz. Seçimlerin sadece sana özel; profil ortalama puanlarını etkilemez.</p>
+            <h2 id="sort-hub-title" class="text-3xl font-black tracking-tight">Sıralama Oyunları</h2>
+            <p id="sort-hub-desc" class="text-sm text-white/85 mt-2 max-w-lg">Bir oyun seç, arkadaşlarını sıraya diz. Seçimlerin sadece sana özel; profil ortalama puanlarını etkilemez.</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3 sm:gap-4">
@@ -436,7 +440,7 @@
 
         <!-- OYUN ALANI 2: TOP 3 KÜRSÜ SEÇİMİ -->
         <div id="sort-game-top3" class="hidden space-y-6">
-          <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Kürsünü kur: aşağıdan kişileri 1., 2. ve 3. yap. Seçimin otomatik kaydedilir.</p>
+          <p data-fw class="text-xs text-gray-500 dark:text-gray-400 text-center">Kürsünü kur: aşağıdan kişileri 1., 2. ve 3. yap. Seçimin otomatik kaydedilir.</p>
           <div class="rounded-3xl bg-gradient-to-b from-amber-100/70 to-transparent dark:from-amber-500/10 dark:to-transparent px-3 pt-6 max-w-lg mx-auto">
             <div class="grid grid-cols-3 gap-2 sm:gap-3 items-end text-center">
             <div class="flex flex-col items-center justify-end">
@@ -456,7 +460,7 @@
 
           <div class="border-t border-gray-200 dark:border-borderdark pt-4">
             <div class="flex items-center justify-between gap-3 mb-3">
-              <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kişi Seç</h4>
+              <h4 data-fw class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kişi Seç</h4>
               <input id="top3-search" oninput="renderTop3Game()" type="search" placeholder="İsim ara..." class="w-40 bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-lg px-3 py-1.5 text-xs outline-none focus:border-amber-500">
             </div>
             <div id="top3-select-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto"></div>
@@ -494,7 +498,7 @@
             </div>
             <div class="mt-3 h-2 rounded-full bg-gray-200 dark:bg-borderdark overflow-hidden"><div id="rank-progress-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500"></div></div>
           </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Karşına çıkan ikiliden daha üstte olması gerekeni seç. Herkes sırayla yerini bulur, sonunda 1'den başlayan tam bir sıralaman olur. Seçimlerin otomatik kaydedilir.</p>
+          <p data-fw class="text-xs text-gray-500 dark:text-gray-400 text-center">Karşına çıkan ikiliden daha üstte olması gerekeni seç. Herkes sırayla yerini bulur, sonunda 1'den başlayan tam bir sıralaman olur. Seçimlerin otomatik kaydedilir.</p>
           <div id="rank-container" class="min-h-[45vh] flex flex-col justify-center"></div>
           <div id="rank-list-wrap" class="border-t border-gray-200 dark:border-borderdark pt-4">
             <h4 id="rank-list-title" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Şu Anki Sıralama</h4>
@@ -506,7 +510,7 @@
         <div id="sort-game-tier" class="hidden space-y-4">
           <div class="bg-gray-50 dark:bg-blackbg p-4 rounded-2xl border border-gray-200 dark:border-borderdark">
             <div class="flex justify-between items-center gap-3">
-              <span class="text-xs font-extrabold tracking-wide text-emerald-600 dark:text-emerald-400">Herkesi bir sınıfa yerleştir (otomatik kaydedilir)</span>
+              <span data-fw class="text-xs font-extrabold tracking-wide text-emerald-600 dark:text-emerald-400">Herkesi bir sınıfa yerleştir (otomatik kaydedilir)</span>
               <button onclick="resetTierGame()" class="shrink-0 text-xs bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 px-3 py-1.5 rounded-lg transition font-semibold">
                 Sıfırla
               </button>
@@ -592,6 +596,11 @@
         </div>
       </form>
 
+      <button type="button" onclick="initSortPage()" class="w-full flex items-center gap-4 p-4 rounded-2xl text-left text-white bg-gradient-to-r from-purple-600 via-fuchsia-600 to-rose-500 shadow-lg shadow-fuchsia-500/20 hover:shadow-xl transition active:scale-[0.99]">
+        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 00-3.9 3.1l-1.6 7A3 3 0 004.1 19a3 3 0 002.4-1.2L8 16h8l1.5 1.8A3 3 0 0019.9 19a3 3 0 002.9-3.9l-1.6-7A4 4 0 0017.3 5z"/></svg></span>
+        <span class="min-w-0"><span class="block font-extrabold">Film Oyunları</span><span class="block text-xs text-white/85">Turnuva, tier list, kör sıralama ve daha fazlası</span></span>
+        <svg class="ml-auto w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
       <div class="flex flex-wrap items-center gap-2">
         <div id="movie-filters" class="flex flex-wrap gap-2 flex-1"></div>
         <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Film Ekle</button>
@@ -1056,6 +1065,7 @@
     }
 
     function handleOf(p) {
+      if (p.isMovie) return p.year ? String(p.year) : '';
       return p.unclaimed ? 'Henüz üye değil' : '@' + escapeHtml(p.username);
     }
 
@@ -1496,6 +1506,12 @@
         b.setAttribute('aria-pressed', appMode === m ? 'true' : 'false');
       });
       syncMovieAdmin();
+      document.querySelectorAll('[data-fw]').forEach(el => {
+        if (el.dataset.orig === undefined) el.dataset.orig = el.textContent;
+        el.textContent = isFilm() ? fw(el.dataset.orig) : el.dataset.orig;
+      });
+      const sl = document.getElementById('nav-sort-label'); if (sl) sl.innerText = isFilm() ? 'Oyunlar' : 'Sırala';
+      const sb = document.getElementById('nav-sort-btn'); if (sb) sb.title = isFilm() ? 'Oyunlar' : 'Sırala';
       document.querySelectorAll('[data-only]').forEach(el => el.classList.toggle('hidden', el.dataset.only !== appMode));
       const ph = appMode === 'movies' ? 'Film ara...' : 'Kullanıcı ara...';
       ['search-input', 'mobile-search-input'].forEach(id => { const el = document.getElementById(id); if (el) el.placeholder = ph; });
@@ -1528,6 +1544,8 @@
         ['search-results', 'mobile-search-results'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
         movieQuery = '';
         movieOpenId = null;
+        sortScope = null;
+        if (sortLoadedFor && appMode === 'people') applySortScope();   // film kayıtları initSortPage'de yüklenir
       }
       applyModeUi();
       goHome();
@@ -1847,6 +1865,36 @@
     }
 
 
+    // ===== FİLM OYUNLARI (sıralama motorunu filmlerle kullanır) =====
+    const isFilm = () => appMode === 'movies';
+    // Oyun motoru "kişi" nesneleri bekler; filmleri aynı şekle sokarız (id, full_name, avatar_url, username)
+    const filmCache = new Map();
+    function filmItem(m) {
+      let o = filmCache.get(m.id);
+      if (!o) { o = { id: m.id, isMovie: true }; filmCache.set(m.id, o); }
+      o.full_name = m.title; o.avatar_url = m.poster_url || null; o.username = m.year ? String(m.year) : ''; o.year = m.year;
+      return o;
+    }
+    // Oyun metinlerindeki "kişi" dilini film diline çevirir
+    function fw(s) {
+      if (!isFilm()) return s;
+      return String(s)
+        .replace(/Başka bir kategori seç/g, 'Başka bir seçim yap')
+        .replace(/Bu kategoride sınıflandırılacak kimse yok/g, 'Bu seçimde sınıflandırılacak film yok')
+        .replace(/Herkesi bir sınıfa/g, 'Tüm filmleri bir sınıfa')
+        .replace(/kişinin/g, 'filmin').replace(/Kişileri/g, 'Filmleri').replace(/kişileri/g, 'filmleri')
+        .replace(/kişiler/g, 'filmler').replace(/Kişi/g, 'Film').replace(/kişi/g, 'film');
+    }
+    const SORT_FILM_TEXT = {
+      vs:   { desc: 'İkili düellolarla favori filmini bul.', how: 'Karşına çıkan iki filmden birini seç. Kazananlar bir üst tura çıkar, sonunda şampiyon film belli olur.' },
+      top3: { desc: 'Kürsüyü kur, en iyi 3 filmi seç.', how: 'Listeden filmleri seçip 1., 2. ve 3. sıraya yerleştir. İstediğin zaman değiştirebilirsin.' },
+      tier: { desc: 'Tüm filmleri S\'den E\'ye sınıflandır.', how: 'Sırayla gelen her filmi S (en iyi) ile E (en düşük) arasında bir sınıfa yerleştir.' },
+      rank: { desc: '1\'den N\'ye kesin film sıralaması çıkar.', how: 'İkili karşılaştırmalarla her film sırayla yerini bulur. Sonunda 1\'den başlayan tam bir film sıralaman olur.' },
+      blind:{ desc: 'Hangi film geleceğini bilmeden sıraya yerleştir.', how: 'Sırayla rastgele filmler gelir. Sadece sıradaki filmi görürsün, sonrakinin hangisi olduğunu bilmezsin. Her filmi numaralı bir sıraya yerleştir; 1. sıra en iyisi. Yerleştirdiğin yer kesindir, sadece son hamleni geri alabilirsin.' }
+    };
+    const gDesc = g => isFilm() ? SORT_FILM_TEXT[g].desc : SORT_GAMES[g].desc;
+    const gHow = g => isFilm() ? SORT_FILM_TEXT[g].how : SORT_GAMES[g].how;
+
     // ===== ARAMA =====
     function handleSearch() {
       if (appMode === 'movies') return movieSearch(document.getElementById('search-input').value);
@@ -2074,10 +2122,12 @@
     }
 
     // Kayıt anahtarı: "top3" (herkes) ya da "top3:<kategori id>"
-    const sortKey = g => sortScope ? `${g}:${sortScope}` : g;
+    // Film oyunlarının kayıtları "film_<oyun>" (ve sadece puanladıklarım için "film_<oyun>:rated") anahtarıyla ayrı tutulur
+    const sortKey = g => isFilm() ? (sortScope === 'rated' ? `film_${g}:rated` : `film_${g}`) : (sortScope ? `${g}:${sortScope}` : g);
 
     // Oynanabilecek kişiler: kendin hariç, kategori seçiliyse sadece o kategoridekiler
     function sortPool() {
+      if (isFilm()) return movies.filter(m => sortScope !== 'rated' || m.my_score != null).map(filmItem);
       const set = sortScope ? categoryMembers.get(sortScope) : null;
       return allProfiles.filter(p => p.id !== currentUser.id && (!set || set.has(p.id)));
     }
@@ -2178,6 +2228,16 @@
     function renderSortScope() {
       const wrap = document.getElementById('sort-scope-wrap'), el = document.getElementById('sort-scope');
       if (!wrap) return;
+      const lbl = wrap.querySelector('p');
+      if (lbl) lbl.innerText = isFilm() ? 'Hangi filmlerle oynansın?' : 'Kimlerle oynansın?';
+      if (isFilm()) {
+        wrap.classList.remove('hidden');
+        const fchip = (id, label, n, active) => `
+          <button type="button" onclick="setSortScope(${id ? `'${id}'` : 'null'})"
+            class="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-gray-50 dark:bg-blackbg text-gray-600 dark:text-gray-300 border-gray-200 dark:border-borderdark hover:border-purple-500'}">${label} <span class="opacity-70">${n}</span></button>`;
+        el.innerHTML = fchip(null, 'Hepsi', movies.length, !sortScope) + fchip('rated', 'Puanladıklarım', movies.filter(m => m.my_score != null).length, sortScope === 'rated');
+        return;
+      }
       if (categories.length === 0) { wrap.classList.add('hidden'); return; }
       wrap.classList.remove('hidden');
       const chip = (id, label, active) => `
@@ -2244,6 +2304,14 @@
 
     async function initSortPage() {
       showSection('sort-section');
+      if (isFilm()) {
+        if (sortScope && sortScope !== 'rated') sortScope = null;
+        await ensureMovies();
+        await ensureSortLoaded();
+        applySortScope();   // film kayıtlarını (filmler yüklendikten sonra) geri yükle
+        showSortHub();
+        return;
+      }
       await ensureSortLoaded();
       if (sortScope && !categories.some(c => c.id === sortScope)) { sortScope = null; applySortScope(); }   // kategori silinmişse
       showSortHub();
@@ -2278,13 +2346,18 @@
       if (nav) nav.style.display = v === 'play' ? 'none' : '';   // oyun tam ekran: arkada menü görünmesin
     }
 
-    const hasSavedAnywhere = key => Object.keys(sortSaved).some(k => k === key || k.startsWith(key + ':'));
+    const hasSavedAnywhere = key0 => { const key = isFilm() ? 'film_' + key0 : key0; return Object.keys(sortSaved).some(k => k === key || k.startsWith(key + ':')); };
 
     function showSortHub(noScroll) {
       setSortView('hub');
       Object.keys(SORT_GAMES).forEach(g => {
         document.getElementById(`game-badge-${g}`)?.classList.toggle('hidden', !hasSavedAnywhere(SORT_GAMES[g].key));
+        const d = document.querySelector(`#game-card-${g} .text-xs`); if (d) d.innerText = gDesc(g);
       });
+      document.getElementById('sort-hub-title').innerText = isFilm() ? 'Film Oyunları' : 'Sıralama Oyunları';
+      document.getElementById('sort-hub-desc').innerText = isFilm()
+        ? 'Bir oyun seç, filmleri sıraya diz. Seçimlerin sadece sana özel; filmlerin puanlarını etkilemez.'
+        : 'Bir oyun seç, arkadaşlarını sıraya diz. Seçimlerin sadece sana özel; profil ortalama puanlarını etkilemez.';
       if (!noScroll) window.scrollTo({ top: 0 });
     }
 
@@ -2296,8 +2369,8 @@
       document.getElementById('setup-icon').className = `flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg bg-gradient-to-br ${m.grad}`;
       document.getElementById('setup-icon').innerHTML = `<svg class="w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${m.icon}</svg>`;
       document.getElementById('setup-title').innerText = m.title;
-      document.getElementById('setup-desc').innerText = m.desc;
-      document.getElementById('setup-how').innerText = m.how;
+      document.getElementById('setup-desc').innerText = gDesc(g);
+      document.getElementById('setup-how').innerText = gHow(g);
       document.getElementById('setup-start-btn').className = `w-full text-white font-black text-base py-4 rounded-2xl shadow-xl transition active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r ${m.grad}`;
       renderSortScope();
       refreshSetup();
@@ -2313,7 +2386,9 @@
       const enough = n >= m.min;
       const saved = !!sortSaved[sortKey(m.key)];
       const poolEl = document.getElementById('setup-pool');
-      poolEl.innerText = enough ? `${n} kişi oynayacak.` : `Bu seçimde yeterli kişi yok (en az ${m.min} kişi gerekiyor). Başka bir kategori seç.`;
+      poolEl.innerText = isFilm()
+        ? (enough ? `${n} film oynanacak.` : `Bu seçimde yeterli film yok (en az ${m.min} film gerekiyor). "Hepsi"ni seç ya da daha fazla film puanla.`)
+        : (enough ? `${n} kişi oynayacak.` : `Bu seçimde yeterli kişi yok (en az ${m.min} kişi gerekiyor). Başka bir kategori seç.`);
       poolEl.className = `text-xs font-semibold ${enough ? 'text-gray-500 dark:text-gray-400' : 'text-red-500'}`;
       const start = document.getElementById('setup-start-btn');
       start.disabled = !enough;
@@ -2326,8 +2401,8 @@
       if (!m || sortPool().length < m.min) return;
       setSortView('play');
       document.getElementById('play-title').innerText = m.title;
-      const cat = sortScope ? categories.find(c => c.id === sortScope) : null;
-      document.getElementById('play-scope').innerText = cat ? cat.name : 'Herkes';
+      const cat = !isFilm() && sortScope ? categories.find(c => c.id === sortScope) : null;
+      document.getElementById('play-scope').innerText = isFilm() ? (sortScope === 'rated' ? 'Puanladıklarım' : 'Tüm filmler') : (cat ? cat.name : 'Herkes');
       switchSortGame(g);
       if (fresh) {
         if (g === 'vs') resetAndStartTournament();
@@ -2387,7 +2462,7 @@
         currentRoundParticipants = []; nextRoundParticipants = []; currentMatchIndex = 0;
         document.getElementById('tournament-status-text').innerText = 'Turnuva başlatılamadı';
         setBar('tournament-progress-bar', 0);
-        document.getElementById('tournament-container').innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Turnuva için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>';
+        document.getElementById('tournament-container').innerHTML = fw('<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Turnuva için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>');
         return;
       }
 
@@ -2647,7 +2722,7 @@
 
       if (n < 3) {
         status.innerText = 'Başlatılamadı'; setBar('blind-progress-bar', 0);
-        cur.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Kör sıralama için en az 3 kişi gerekiyor. Başka bir kategori seç.</p>';
+        cur.innerHTML = fw('<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Kör sıralama için en az 3 kişi gerekiyor. Başka bir kategori seç.</p>');
         slotsEl.innerHTML = ''; document.getElementById('blind-slots-title').classList.add('hidden');
         return;
       }
@@ -2659,7 +2734,7 @@
         status.innerText = `Yerleştirilen: ${filled} / ${n}`;
         cur.innerHTML = `
           <div class="relative overflow-hidden text-center rounded-3xl p-6 bg-gradient-to-br from-fuchsia-500/15 to-pink-500/10 border-2 border-fuchsia-500/40">
-            <p class="text-[11px] font-bold uppercase tracking-widest text-fuchsia-600 dark:text-fuchsia-300">Sıradaki kişi</p>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-fuchsia-600 dark:text-fuchsia-300">${fw('Sıradaki kişi')}</p>
             <img src="${avatarOf(blindCur)}" class="w-28 h-28 rounded-full mx-auto mt-3 object-cover ring-4 ring-fuchsia-400/60 shadow-xl">
             <p class="font-black text-lg mt-3 break-words">${escapeHtml(blindCur.full_name)}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">${handleOf(blindCur)}</p>
@@ -2790,7 +2865,7 @@
       if (total < 2) {
         status.innerText = 'Başlatılamadı';
         setBar('rank-progress-bar', 0);
-        box.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Sıralama için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>';
+        box.innerHTML = fw('<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Sıralama için en az 2 kişi gerekiyor. Başka bir kategori seç.</p>');
         document.getElementById('rank-list-wrap').classList.add('hidden');
         return;
       }
@@ -2801,19 +2876,19 @@
         box.innerHTML = `<div class="text-center py-4 space-y-1">
           <div class="flex justify-center text-yellow-500">${ic('trophy', 'w-10 h-10')}</div>
           <p class="text-sm font-bold">Tam sıralaman hazır!</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Aşağıda ${total} kişinin sıralamasını görüyorsun. Bu sıralama sadece sana özel, kimse görmez.</p></div>`;
+          <p class="text-xs text-gray-500 dark:text-gray-400">Aşağıda ${total} ${fw('kişinin')} sıralamasını görüyorsun. Bu sıralama sadece sana özel, kimse görmez.</p></div>`;
       } else {
         const mid = Math.floor((rankLo + rankHi) / 2);
         const other = rankSorted[mid];
         const curFirst = (rankSorted.length + rankLo + rankHi) % 2 === 0;   // sağ/sol hep aynı tarafta olmasın
         const curFn = 'rankPick(true)', otherFn = 'rankPick(false)';
-        status.innerText = `Sıralanan: ${rankSorted.length} / ${total} kişi`;
+        status.innerText = `Sıralanan: ${rankSorted.length} / ${total} ${fw('kişi')}`;
         box.innerHTML = curFirst
           ? duelHtml(rankCur, curFn, other, otherFn, 'Hangisi daha üstte olmalı?')
           : duelHtml(other, otherFn, rankCur, curFn, 'Hangisi daha üstte olmalı?');
       }
 
-      document.getElementById('rank-list-title').innerText = rankCur ? `Şu Anki Sıralama (${rankSorted.length} kişi)` : 'Sıralaman';
+      document.getElementById('rank-list-title').innerText = rankCur ? `Şu Anki Sıralama (${rankSorted.length} ${fw('kişi')})` : 'Sıralaman';
       listEl.innerHTML = rankSorted.map((p, i) => {
         const medal = i === 0 ? 'bg-yellow-400 text-yellow-950' : i === 1 ? 'bg-gray-300 text-gray-800' : i === 2 ? 'bg-amber-600 text-white' : 'bg-gray-200 dark:bg-borderdark text-gray-600 dark:text-gray-300';
         return `<li class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
@@ -2857,7 +2932,7 @@
 
       if (totalTierPeopleCount === 0) {
         if (progressEl) progressEl.innerText = "Sıralanacak kimse yok";
-        activeEl.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Bu kategoride sınıflandırılacak kimse yok. Başka bir kategori seç.</p>';
+        activeEl.innerHTML = fw('<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Bu kategoride sınıflandırılacak kimse yok. Başka bir kategori seç.</p>');
         return;
       }
 
@@ -2865,7 +2940,7 @@
         if (progressEl) progressEl.innerText = "Sınıflandırma Tamamlandı!";
         activeEl.innerHTML = `
           <div class="text-center p-6 bg-gray-50 dark:bg-blackbg rounded-xl border border-gray-200 dark:border-borderdark">
-            <p class="text-xs font-bold text-green-600 dark:text-green-400 mb-2">Tüm kişileri başarıyla sınıflandırdın!</p>
+            <p class="text-xs font-bold text-green-600 dark:text-green-400 mb-2">${fw('Tüm kişileri')} başarıyla sınıflandırdın!</p>
             <button onclick="resetTierGame()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl transition font-medium">
               Yeniden Başlat
             </button>
@@ -2875,7 +2950,7 @@
       }
 
       const currentIndex = totalTierPeopleCount - tierQueue.length + 1;
-      if (progressEl) progressEl.innerText = `Sıralanacak Kişi (${currentIndex} / ${totalTierPeopleCount}):`;
+      if (progressEl) progressEl.innerText = `${fw('Sıralanacak Kişi')} (${currentIndex} / ${totalTierPeopleCount}):`;
 
       const currentPerson = tierQueue[0];
       const tierBtn = (t, c) => `<button onclick="assignTier('${t}')" class="h-12 rounded-xl text-lg font-black text-white shadow-md transition active:scale-90 hover:-translate-y-0.5 hover:brightness-110 ${c}">${t}</button>`;
