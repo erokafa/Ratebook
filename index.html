@@ -103,7 +103,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kişi ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -626,6 +626,8 @@
           <option value="top">En yüksek puan</option>
           <option value="low">En düşük puan</option>
           <option value="many">En çok oy alan</option>
+          <option value="ynew">Çıkış yılı: yeniden eskiye</option>
+          <option value="yold">Çıkış yılı: eskiden yeniye</option>
           <option value="az">A - Z</option>
         </select>
       </div>
@@ -1827,6 +1829,9 @@
         top: (a, b) => avg(b) - avg(a) || b.rating_count - a.rating_count,
         low: (a, b) => (avg(a) < 0 ? 99 : avg(a)) - (avg(b) < 0 ? 99 : avg(b)) || b.rating_count - a.rating_count,
         many: (a, b) => b.rating_count - a.rating_count || avg(b) - avg(a),
+        // Yılı girilmemiş yapımlar her iki yönde de sona gider
+        ynew: (a, b) => (a.year == null) - (b.year == null) || (b.year || 0) - (a.year || 0) || (a.title || '').localeCompare(b.title || '', 'tr'),
+        yold: (a, b) => (a.year == null) - (b.year == null) || (a.year || 0) - (b.year || 0) || (a.title || '').localeCompare(b.title || '', 'tr'),
         az: (a, b) => (a.title || '').localeCompare(b.title || '', 'tr')
       }[movieSort] || (() => 0);
       list = list.slice().sort(cmp);
