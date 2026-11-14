@@ -103,7 +103,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kişi ara..."
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -683,6 +683,10 @@
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l2.5 5.5L20 9.5l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1z"/></svg>
             Çerçeve & Arkaplan
           </button>
+          <button onclick="switchSettingsTab('names')" id="tab-btn-names" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
+            Film &amp; Dizi Adları
+          </button>
           <button onclick="switchSettingsTab('notif')" id="tab-btn-notif" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
             Bildirimler
@@ -719,6 +723,14 @@
             <div id="push-status" class="text-sm font-bold"></div>
             <button id="push-toggle-btn" onclick="togglePush()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition disabled:opacity-50">Bildirimleri Aç</button>
             <p id="push-note" class="text-xs text-gray-500 dark:text-gray-400 max-w-md leading-relaxed"></p>
+          </div>
+
+          <div id="settings-tab-names" class="space-y-5 hidden">
+            <h4 class="text-xl font-bold border-b border-gray-200 dark:border-borderdark pb-3">Film ve Dizi Adları</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-300 max-w-md">Filmlerin ve dizilerin her yerde hangi adla görüneceğini seç: listeler, seriler, profiller ve oyunlar. Arama her iki adla da çalışır. Bu ayar sadece senin için geçerli ve bu cihazda saklanır.</p>
+            <div id="names-cards" class="grid grid-cols-2 gap-4 max-w-md"></div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 max-w-md leading-relaxed">Orijinal adı girilmemiş yapımlarda her zaman Türkçe ad görünür. Bir filmin ya da dizinin sayfasındaki "Türkçe | Orijinal" düğmesiyle sadece o yapım için farklı bir ad seçebilirsin.</p>
+            <div id="names-reset"></div>
           </div>
 
           <div id="settings-tab-theme" class="space-y-6 hidden">
@@ -1249,13 +1261,14 @@
     }
 
     function switchSettingsTab(tabName) {
-      ['profile', 'theme', 'look', 'notif'].forEach(t => {
+      ['profile', 'theme', 'look', 'names', 'notif'].forEach(t => {
         document.getElementById(`settings-tab-${t}`).classList.add('hidden');
         document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-borderdark transition flex items-center gap-2";
       });
       document.getElementById(`settings-tab-${tabName}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${tabName}`).className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 flex items-center gap-2";
       if (tabName === 'look') loadLookTab();
+      if (tabName === 'names') renderNamesTab();
       if (tabName === 'notif') renderNotifTab();
     }
 
@@ -1640,6 +1653,43 @@
       if (a) return a + ' – devam';
       return b ? '– ' + b : '';
     }
+    // ----- Film / dizi adı tercihi: 'tr' (Türkçe ad) ya da 'orig' (orijinal ad) -----
+    // Genel tercih Ayarlar'dan, tek tek yapım tercihi yapımın sayfasından seçilir. Bu cihazda saklanır.
+    let namePref = 'tr', nameOver = {};
+    try {
+      namePref = localStorage.getItem('rb_name_pref') === 'orig' ? 'orig' : 'tr';
+      const o = JSON.parse(localStorage.getItem('rb_name_over') || '{}');
+      if (o && typeof o === 'object') for (const k in o) if (o[k] === 'tr' || o[k] === 'orig') nameOver[k] = o[k];
+    } catch (e) {}
+    const hasOrig = m => !!(m && m.original_title && foldTr(m.original_title) !== foldTr(m.title));
+    const namePrefOf = m => (m && nameOver[m.id]) || namePref;
+    // m: {id, title, original_title}. Orijinal ad yoksa her zaman Türkçe ad.
+    const nameOf = m => (!m ? '' : (hasOrig(m) && namePrefOf(m) === 'orig' ? m.original_title : m.title));
+    const altNameOf = m => (hasOrig(m) ? (nameOf(m) === m.title ? m.original_title : m.title) : '');
+    // Profil gibi yerlerde sadece id + Türkçe ad gelir; film listesi yüklüyse oradan bulunur
+    const nameById = (id, fallback) => { const m = typeof movies !== 'undefined' && movies.find(x => x.id === id); return m ? nameOf(m) : fallback; };
+    function saveNamePrefs() { try { localStorage.setItem('rb_name_pref', namePref); localStorage.setItem('rb_name_over', JSON.stringify(nameOver)); } catch (e) {} }
+    function refreshNames() {
+      renderMovies();
+      if (movieOpenId) { renderMovieHead(); renderMovieMine(); }
+      if (seriesOpenId) renderSeriesDetail();
+      if (!document.getElementById('settings-tab-names').classList.contains('hidden')) renderNamesTab();
+    }
+    function setNamePref(v) { namePref = v === 'orig' ? 'orig' : 'tr'; saveNamePrefs(); refreshNames(); }
+    // v: 'tr' | 'orig' | null (genel tercihe dön)
+    function setNameOver(id, v) { if (v === 'tr' || v === 'orig') nameOver[id] = v; else delete nameOver[id]; saveNamePrefs(); refreshNames(); }
+    function resetNameOvers() { nameOver = {}; saveNamePrefs(); refreshNames(); }
+    function renderNamesTab() {
+      const el = document.getElementById('names-cards'); if (!el) return;
+      const card = (v, title, ex) => `<button type="button" onclick="setNamePref('${v}')" class="p-4 rounded-2xl border-2 text-center space-y-1 transition ${namePref === v
+        ? 'border-indigo-500 bg-indigo-500/10' : 'border-gray-200 dark:border-borderdark hover:border-indigo-400'}">
+          <div class="font-bold text-sm">${title}</div><div class="text-xs text-gray-500 dark:text-gray-400">${ex}</div>
+          ${namePref === v ? '<div class="text-[11px] font-bold text-indigo-500">Seçili</div>' : ''}</button>`;
+      el.innerHTML = card('tr', 'Türkçe adlar', 'Kayıp Balık') + card('orig', 'Orijinal adlar', 'Finding Nemo');
+      const n = Object.keys(nameOver).length;
+      document.getElementById('names-reset').innerHTML = n
+        ? `<button type="button" onclick="resetNameOvers()" class="text-xs font-bold text-indigo-600 dark:text-indigo-300 hover:underline">Tek tek seçtiğim ${n} yapımı genel ayara döndür</button>` : '';
+    }
     const epsTotal = m => (m && Array.isArray(m.season_episodes) ? m.season_episodes.reduce((a, b) => a + b, 0) : 0);
     // "10, 12, 8" -> [10,12,8]; boşsa null; geçersizse false
     function parseEps(str) {
@@ -1696,7 +1746,7 @@
     const fmtAvg = v => (Math.round(Number(v) * 10) / 10).toFixed(1).replace('.', ',');
 
     function movieArt(m, textSize) {
-      const letter = escapeHtml((m.title || '?').trim().charAt(0).toLocaleUpperCase('tr-TR'));
+      const letter = escapeHtml(((m.id ? nameOf(m) : m.title) || '?').trim().charAt(0).toLocaleUpperCase('tr-TR'));
       const img = m.poster_url
         ? `<img src="${escapeHtml(m.poster_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" class="absolute inset-0 w-full h-full object-cover">`
         : '';
@@ -1830,9 +1880,9 @@
         low: (a, b) => (avg(a) < 0 ? 99 : avg(a)) - (avg(b) < 0 ? 99 : avg(b)) || b.rating_count - a.rating_count,
         many: (a, b) => b.rating_count - a.rating_count || avg(b) - avg(a),
         // Yılı girilmemiş yapımlar her iki yönde de sona gider
-        ynew: (a, b) => (a.year == null) - (b.year == null) || (b.year || 0) - (a.year || 0) || (a.title || '').localeCompare(b.title || '', 'tr'),
-        yold: (a, b) => (a.year == null) - (b.year == null) || (a.year || 0) - (b.year || 0) || (a.title || '').localeCompare(b.title || '', 'tr'),
-        az: (a, b) => (a.title || '').localeCompare(b.title || '', 'tr')
+        ynew: (a, b) => (a.year == null) - (b.year == null) || (b.year || 0) - (a.year || 0) || nameOf(a).localeCompare(nameOf(b), 'tr'),
+        yold: (a, b) => (a.year == null) - (b.year == null) || (a.year || 0) - (b.year || 0) || nameOf(a).localeCompare(nameOf(b), 'tr'),
+        az: (a, b) => nameOf(a).localeCompare(nameOf(b), 'tr')
       }[movieSort] || (() => 0);
       list = list.slice().sort(cmp);
 
@@ -1855,7 +1905,7 @@
         <button type="button" onclick="openMovie('${m.id}')" class="group text-left rounded-2xl overflow-hidden bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark shadow-md hover:shadow-xl hover:-translate-y-0.5 hover:border-orange-400 transition">
           <div class="relative aspect-[2/3] overflow-hidden">${movieArt(m)}${rank}${badge}${mine}</div>
           <div class="p-3">
-            <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(m.title)}</p>
+            <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(nameOf(m))}</p>
             <p class="text-[11px] text-gray-500 mt-0.5">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${yearsLabel(m) ? yearsLabel(m) + ' · ' : ''}${m.rating_count} oy</p>
           </div>
         </button>`;
@@ -1894,6 +1944,16 @@
       renderMovieHead(); renderMovieList();
     }
 
+    // Sağ üstteki küçük "Türkçe | Orijinal" düğmesi: sadece bu yapımın adını değiştirir
+    function nameToggleHtml(m) {
+      const cur = namePrefOf(m), own = !!nameOver[m.id];
+      const b = (v, l) => `<button type="button" onclick="setNameOver('${m.id}', '${v}')" class="px-2.5 py-1 text-[11px] font-bold rounded-full transition ${cur === v
+        ? 'bg-orange-600 text-white shadow' : 'text-gray-500 dark:text-gray-400 hover:text-orange-500'}">${l}</button>`;
+      return `<div class="shrink-0 flex flex-col items-end gap-1">
+        <div class="inline-flex p-0.5 rounded-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark" title="Bu yapımın hangi adla görüneceği">${b('tr', 'Türkçe')}${b('orig', 'Orijinal')}</div>
+        ${own ? `<button type="button" onclick="setNameOver('${m.id}', null)" class="text-[10px] font-semibold text-gray-400 hover:text-orange-500">genel ayara dön</button>` : ''}</div>`;
+    }
+
     function renderMovieHead() {
       const m = movieById(movieOpenId), el = document.getElementById('mv-head');
       if (!m || !el) return;
@@ -1913,8 +1973,11 @@
           <div class="flex gap-4 sm:gap-6">
             <div class="relative shrink-0 w-28 sm:w-40 aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">${movieArt(m, 'text-6xl')}</div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(m.title)}</h2>
-              ${m.original_title && foldTr(m.original_title) !== foldTr(m.title) ? `<p class="text-sm text-gray-500 italic mt-0.5 break-words">${escapeHtml(m.original_title)}</p>` : ''}
+              <div class="flex items-start gap-2">
+                <h2 class="min-w-0 flex-1 text-xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(nameOf(m))}</h2>
+                ${hasOrig(m) ? nameToggleHtml(m) : ''}
+              </div>
+              ${hasOrig(m) ? `<p class="text-sm text-gray-500 italic mt-0.5 break-words">${escapeHtml(altNameOf(m))}</p>` : ''}
               <p class="text-xs text-gray-500 mt-1">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${yearsLabel(m) ? yearsLabel(m) + ' · ' : ''}${epsTotal(m) ? m.season_episodes.length + ' sezon · ' + epsTotal(m) + ' bölüm · ' : ''}${m.added_by_name ? escapeHtml(m.added_by_name) + ' ekledi' : 'Ekleyen yok'}</p>
               ${m.collection_id ? `<button type="button" onclick="openSeries('${m.collection_id}')" class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">${escapeHtml(m.collection_name || 'Seri')}${m.part_no ? ' · ' + m.part_no + '. yapım' : ''} &rsaquo;</button>` : ''}
               <div class="mt-3 flex items-center gap-3">
@@ -2125,7 +2188,7 @@
     function filmItem(m) {
       let o = filmCache.get(m.id);
       if (!o) { o = { id: m.id, isMovie: true }; filmCache.set(m.id, o); }
-      o.full_name = m.title; o.avatar_url = m.poster_url || null; o.username = yearsLabel(m); o.year = m.year;
+      o.full_name = nameOf(m); o.avatar_url = m.poster_url || null; o.username = yearsLabel(m); o.year = m.year;
       return o;
     }
     // Oyun metinlerindeki "kişi" dilini film diline çevirir
@@ -2361,7 +2424,7 @@
 
     function seriesItems(cid) {
       return movies.filter(m => m.collection_id === cid).sort((a, b) =>
-        (a.part_no == null) - (b.part_no == null) || (a.part_no || 0) - (b.part_no || 0) || (a.year || 9999) - (b.year || 9999) || (a.title || '').localeCompare(b.title || '', 'tr'));
+        (a.part_no == null) - (b.part_no == null) || (a.part_no || 0) - (b.part_no || 0) || (a.year || 9999) - (b.year || 9999) || nameOf(a).localeCompare(nameOf(b), 'tr'));
     }
     // Serinin ortalaması: puanı olan yapımların ortalamalarının ortalaması
     function seriesAvg(items) {
@@ -2440,7 +2503,7 @@
             <span class="shrink-0 h-8 w-8 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-sm font-black flex items-center justify-center">${m.part_no || i + 1}</span>
             <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt(m, 'text-xl')}</div>
             <div class="min-w-0 flex-1">
-              <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(m.title)}</p>
+              <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(nameOf(m))}</p>
               <p class="text-[11px] text-gray-500 mt-0.5">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${yearsLabel(m) ? yearsLabel(m) + ' · ' : ''}${m.rating_count} oy</p>
             </div>
             <div class="shrink-0 flex flex-col items-end gap-1">
@@ -2620,6 +2683,8 @@
       await titlesP;
       const mres = await moviesP;
       const profMovies = mres && !mres.error ? (mres.data || []) : null;   // null: bölüm yok (kurulmamış / kayıtsız kişi)
+      // Orijinal adlar seçiliyse, adları bulabilmek için film listesi de yüklenir
+      if (profMovies && profMovies.length && !moviesLoaded && (namePref === 'orig' || Object.keys(nameOver).length)) { try { await loadMovies(); } catch (e) {} }
       const moviesBlock = profMovies ? profileMoviesHtml(profMovies, isMe) : '';
 
       profileContainer.innerHTML = `
@@ -2722,9 +2787,9 @@
         ? `<p class="text-xs text-gray-500">${isMe ? 'Henüz hiçbir filmi puanlamadın.' : 'Henüz hiçbir filmi puanlamadı.'}</p>`
         : `<div class="space-y-2.5">${list.map(r => `
             <button type="button" onclick="openMovie('${r.movie_id}')" class="w-full text-left flex items-center gap-3 bg-gray-50 dark:bg-blackbg p-2.5 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-orange-400 transition">
-              <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt({ title: r.title, poster_url: r.poster_url }, 'text-xl')}</div>
+              <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt({ title: nameById(r.movie_id, r.title), poster_url: r.poster_url }, 'text-xl')}</div>
               <div class="min-w-0 flex-1">
-                <p class="font-bold text-sm truncate">${escapeHtml(r.title)}${r.year ? ` <span class="text-gray-400 font-medium">(${r.year})</span>` : ''}${r.kind === 'dizi' ? ' <span class="text-orange-500 text-[10px] font-bold uppercase">Dizi</span>' : ''}</p>
+                <p class="font-bold text-sm truncate">${escapeHtml(nameById(r.movie_id, r.title))}${r.year ? ` <span class="text-gray-400 font-medium">(${r.year})</span>` : ''}${r.kind === 'dizi' ? ' <span class="text-orange-500 text-[10px] font-bold uppercase">Dizi</span>' : ''}</p>
                 ${r.comment ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 break-words">${escapeHtml(r.comment)}</p>` : ''}
               </div>
               <span class="shrink-0 min-w-[48px] text-center px-3 py-1.5 rounded-xl text-lg leading-none font-black text-white shadow-md ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
@@ -2738,11 +2803,11 @@
           <div class="grid grid-cols-3 gap-2.5 sm:gap-4">${top.map((r, i) => `
             <button type="button" onclick="openMovie('${r.movie_id}')" class="group text-left min-w-0">
               <div class="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-lg ring-2 ${['ring-yellow-400', 'ring-gray-300 dark:ring-gray-400', 'ring-amber-600'][i]} group-hover:-translate-y-0.5 transition">
-                ${movieArt({ title: r.title, poster_url: r.poster_url }, 'text-4xl')}
+                ${movieArt({ title: nameById(r.movie_id, r.title), poster_url: r.poster_url }, 'text-4xl')}
                 <span class="absolute top-1.5 left-1.5 h-7 w-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg ${MEDAL_BG[i]}">${i + 1}</span>
                 <span class="absolute bottom-1.5 right-1.5 px-2 py-1 rounded-lg text-sm font-black text-white shadow-lg ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
               </div>
-              <p class="mt-1.5 text-xs font-bold leading-snug line-clamp-2 break-words">${escapeHtml(r.title)}</p>
+              <p class="mt-1.5 text-xs font-bold leading-snug line-clamp-2 break-words">${escapeHtml(nameById(r.movie_id, r.title))}</p>
             </button>`).join('')}</div>
         </div>` : '';
       const tile = (v, l, c) => `<div class="rounded-2xl bg-gray-50 dark:bg-blackbg border border-gray-200 dark:border-borderdark p-3 text-center min-w-0"><p class="text-xl font-black ${c} truncate">${v}</p><p class="text-[11px] text-gray-500 mt-0.5">${l}</p></div>`;
