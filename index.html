@@ -581,10 +581,17 @@
     <!-- ===================== FİLMLER BÖLÜMÜ ===================== -->
     <section id="movies-section" class="space-y-5 hidden">
       <form id="movie-add" onsubmit="submitMovie(event)" class="hidden bg-white dark:bg-carddark p-5 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3">
-        <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Yeni film ekle</h3>
+        <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Yeni film / dizi ekle</h3>
         <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
-          <input id="mv-title" type="text" required maxlength="120" placeholder="Film adı" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
+          <input id="mv-title" type="text" required maxlength="120" placeholder="Ad (film ya da dizi)" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
           <input id="mv-year" type="number" inputmode="numeric" min="1888" max="2100" placeholder="Yıl" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
+        </div>
+        <div class="grid gap-3 sm:grid-cols-[140px_1fr_120px]">
+          <select id="mv-kind" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500">
+            <option value="film">Film</option><option value="dizi">Dizi</option>
+          </select>
+          <select id="mv-coll" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500"><option value="">Seri yok</option></select>
+          <input id="mv-part" type="number" inputmode="numeric" min="1" max="999" placeholder="Sıra" title="Seri içindeki sırası (1, 2, 3...)" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
         </div>
         <div>
           <input id="mv-poster" type="url" maxlength="500" placeholder="Afiş linki (isteğe bağlı, https:// ile başlamalı)" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
@@ -596,12 +603,14 @@
         </div>
       </form>
 
+      <div id="movie-kinds" role="tablist" class="flex gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark overflow-x-auto"></div>
+
       <button type="button" onclick="initSortPage()" class="w-full flex items-center gap-4 p-4 rounded-2xl text-left text-white bg-gradient-to-r from-purple-600 via-fuchsia-600 to-rose-500 shadow-lg shadow-fuchsia-500/20 hover:shadow-xl transition active:scale-[0.99]">
         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20"><svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 00-3.9 3.1l-1.6 7A3 3 0 004.1 19a3 3 0 002.4-1.2L8 16h8l1.5 1.8A3 3 0 0019.9 19a3 3 0 002.9-3.9l-1.6-7A4 4 0 0017.3 5z"/></svg></span>
         <span class="min-w-0"><span class="block font-extrabold">Film Oyunları</span><span class="block text-xs text-white/85">Turnuva, tier list, kör sıralama ve daha fazlası</span></span>
         <svg class="ml-auto w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
-      <div class="flex flex-wrap items-center gap-2">
+      <div id="movie-controls" class="flex flex-wrap items-center gap-2">
         <div id="movie-filters" class="flex flex-wrap gap-2 flex-1"></div>
         <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Film Ekle</button>
         <select id="movie-sort" onchange="setMovieSort(this.value)" class="bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-orange-500">
@@ -613,11 +622,27 @@
         </select>
       </div>
       <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"></div>
+
+      <!-- SERİLER -->
+      <div id="series-view" class="hidden space-y-4">
+        <div class="flex items-center gap-3">
+          <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">Birden çok yapımı olan seriler burada, sırasıyla görünür.</p>
+          <button type="button" id="series-add-btn" onclick="addSeries()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Seri Ekle</button>
+        </div>
+        <div id="series-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"></div>
+      </div>
+    </section>
+
+    <section id="series-detail-section" class="space-y-5 hidden">
+      <button type="button" onclick="closeSeries()" class="text-sm font-bold text-orange-600 dark:text-orange-400 hover:underline">&larr; Seriler</button>
+      <div id="series-head"></div>
+      <div id="series-items" class="space-y-3"></div>
     </section>
 
     <section id="movie-detail-section" class="space-y-5 hidden">
-      <button type="button" onclick="closeMovie()" class="text-sm font-bold text-orange-600 dark:text-orange-400 hover:underline">&larr; Filmler</button>
+      <button type="button" id="mv-back-btn" onclick="closeMovie()" class="text-sm font-bold text-orange-600 dark:text-orange-400 hover:underline">&larr; Filmler</button>
       <div id="mv-head"></div>
+      <div id="mv-admin"></div>
       <div id="mv-mine"></div>
       <div id="mv-list"></div>
     </section>
@@ -1552,7 +1577,7 @@
       const sl = document.getElementById('nav-sort-label'); if (sl) sl.innerText = isFilm() ? 'Oyunlar' : 'Sırala';
       const sb = document.getElementById('nav-sort-btn'); if (sb) sb.title = isFilm() ? 'Oyunlar' : 'Sırala';
       document.querySelectorAll('[data-only]').forEach(el => el.classList.toggle('hidden', el.dataset.only !== appMode));
-      const ph = appMode === 'movies' ? 'Film ara...' : 'Kullanıcı ara...';
+      const ph = appMode === 'movies' ? 'Film veya dizi ara...' : 'Kullanıcı ara...';
       ['search-input', 'mobile-search-input'].forEach(id => { const el = document.getElementById(id); if (el) el.placeholder = ph; });
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', appMode === 'movies' ? '#1a0f05' : '#050505');
@@ -1593,11 +1618,14 @@
     // ===== FİLMLER =====
     let movies = [], moviesLoaded = false, moviesLoading = null, moviesAt = 0;
     let movieFilter = 'all', movieSort = 'new', movieQuery = '', movieOpenId = null, movieRatings = [];
+    let collections = [], movieKind = 'all', seriesOpenId = null, movieBack = 'movies', movieEditOpen = false;
+    const kindOf = m => (m && m.kind === 'dizi' ? 'dizi' : 'film');
 
     const MOVIE_ERR = {
-      BAD_TITLE: 'Film adı 1-120 karakter olmalı.', BAD_YEAR: 'Yıl 1888 ile 2100 arasında olmalı.',
+      BAD_NAME: 'Seri adı 1-80 karakter olmalı.', BAD_KIND: 'Tür film ya da dizi olmalı.', BAD_PART: 'Sıra 1 ile 999 arasında olmalı.', NO_COLLECTION: 'Bu seri artık yok.',
+      BAD_TITLE: 'Ad 1-120 karakter olmalı.', BAD_YEAR: 'Yıl 1888 ile 2100 arasında olmalı.',
       BAD_POSTER: 'Afiş linki https:// ile başlamalı ve boşluk içermemeli.', TOO_MANY: 'Bugün çok fazla film ekledin, yarın tekrar dene.',
-      DUPLICATE: 'Bu film zaten listede.', BAD_SCORE: 'Puan 1 ile 10 arasında, 0,5 adımlarla olmalı.',
+      DUPLICATE: 'Bu yapım zaten listede (ya da bu isimde bir kayıt var).', BAD_SCORE: 'Puan 1 ile 10 arasında, 0,5 adımlarla olmalı.',
       COMMENT_TOO_LONG: 'Yorum en fazla 500 karakter olabilir.', BLOCKED: 'Hesabın engellenmiş. Yönetici ile iletişime geç.',
       NO_MOVIE: 'Bu film artık yok.', NOT_ALLOWED: 'Bu işlem için yetkin yok.', NOT_AUTH: 'Oturumun kapanmış, tekrar giriş yap.'
     };
@@ -1638,8 +1666,9 @@
       if (moviesLoading) return moviesLoading;
       if (!moviesLoaded) renderMovies();   // "Yükleniyor..." iskeleti
       moviesLoading = (async () => {
-        const { data, error } = await supabaseClient.rpc('get_movies');
+        const [{ data, error }, cres] = await Promise.all([supabaseClient.rpc('get_movies'), supabaseClient.rpc('get_collections')]);
         moviesLoading = null;
+        collections = cres && !cres.error ? (cres.data || []) : [];   // diziler_seriler.sql yoksa seriler boş kalır
         if (error) {
           const g = document.getElementById('movie-grid');
           if (g) g.innerHTML = `<p class="col-span-full text-sm text-red-500">${escapeHtml(movieErr(error))}</p>`;
@@ -1648,7 +1677,8 @@
         movies = data || [];
         moviesLoaded = true; moviesAt = Date.now();
         renderMovies();
-        if (movieOpenId) { renderMovieHead(); renderMovieMine(); }
+        if (movieOpenId) { renderMovieHead(); renderMovieMine(); renderMovieAdmin(); }
+        if (seriesOpenId) renderSeriesDetail();
       })();
       return moviesLoading;
     }
@@ -1694,7 +1724,12 @@
       if (poster && !/^https:\/\/\S+$/i.test(poster)) { alert(MOVIE_ERR.BAD_POSTER); return; }
       const btn = document.getElementById('mv-submit');
       btn.disabled = true; btn.innerText = 'Ekleniyor...';
-      const { data, error } = await supabaseClient.rpc('add_movie', { p_title: title, p_year: yearRaw ? parseInt(yearRaw, 10) : null, p_poster: poster || null });
+      const { data, error } = await supabaseClient.rpc('add_movie', {
+        p_title: title, p_year: yearRaw ? parseInt(yearRaw, 10) : null, p_poster: poster || null,
+        p_kind: document.getElementById('mv-kind').value,
+        p_collection: document.getElementById('mv-coll').value || null,
+        p_part: document.getElementById('mv-part').value ? parseInt(document.getElementById('mv-part').value, 10) : null
+      });
       btn.disabled = false; btn.innerText = 'Ekle';
       if (error) { alert(movieErr(error)); return; }
       document.getElementById('movie-add').reset();
@@ -1707,7 +1742,15 @@
       const grid = document.getElementById('movie-grid');
       if (!grid) return;
       syncMovieAdmin();
-      const total = movies.length, done = movies.filter(m => m.my_score != null).length;
+      fillCollectionSelects();
+      renderMovieKinds();
+      const isSeries = movieKind === 'series';
+      document.getElementById('series-view').classList.toggle('hidden', !isSeries);
+      document.getElementById('movie-controls').classList.toggle('hidden', isSeries);
+      grid.classList.toggle('hidden', isSeries);
+      if (isSeries) { renderSeriesGrid(); return; }
+      const pool = movies.filter(m => movieKind === 'all' || kindOf(m) === movieKind);
+      const total = pool.length, done = pool.filter(m => m.my_score != null).length;
 
       const chip = (f, label, n) => `<button type="button" onclick="setMovieFilter('${f}')" class="px-4 py-2 rounded-full text-xs font-bold transition ${movieFilter === f
         ? 'bg-orange-600 text-white shadow-md'
@@ -1718,8 +1761,8 @@
 
       if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
 
-      let list = movies.filter(m => movieFilter === 'all' || (movieFilter === 'todo' ? m.my_score == null : m.my_score != null));
-      if (movieQuery) list = list.filter(m => foldTr(m.title).includes(movieQuery) || String(m.year || '').includes(movieQuery));
+      let list = pool.filter(m => movieFilter === 'all' || (movieFilter === 'todo' ? m.my_score == null : m.my_score != null));
+      if (movieQuery) list = list.filter(m => foldTr(m.title).includes(movieQuery) || foldTr(m.collection_name).includes(movieQuery) || String(m.year || '').includes(movieQuery));
       const avg = m => (m.avg_score == null ? -1 : Number(m.avg_score));
       const cmp = {
         new: (a, b) => new Date(b.created_at) - new Date(a.created_at),
@@ -1732,8 +1775,8 @@
 
       if (list.length === 0) {
         grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${total === 0
-          ? (isModerator ? 'Henüz hiç film yok. <b>+ Film Ekle</b> ile ilk filmi sen ekle!' : 'Henüz hiç film eklenmedi. Moderatörler film ekleyince burada görünecek.')
-          : 'Bu filtrede film bulunamadı.'}</div>`;
+          ? (isModerator ? 'Henüz burada hiçbir şey yok. <b>+ Film Ekle</b> ile ilkini sen ekle!' : 'Henüz hiçbir şey eklenmedi. Moderatörler ekleyince burada görünecek.')
+          : 'Bu filtrede sonuç bulunamadı.'}</div>`;
         return;
       }
       grid.innerHTML = list.map((m, i) => {
@@ -1750,7 +1793,7 @@
           <div class="relative aspect-[2/3] overflow-hidden">${movieArt(m)}${rank}${badge}${mine}</div>
           <div class="p-3">
             <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(m.title)}</p>
-            <p class="text-[11px] text-gray-500 mt-0.5">${m.year ? m.year + ' · ' : ''}${m.rating_count} oy</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${m.year ? m.year + ' · ' : ''}${m.rating_count} oy</p>
           </div>
         </button>`;
       }).join('');
@@ -1759,7 +1802,9 @@
     // ----- Film detayı -----
     function movieById(id) { return movies.find(m => m.id === id); }
 
-    async function openMovie(id) {
+    async function openMovie(id, back) {
+      movieBack = back === 'series' ? 'series' : 'movies'; movieEditOpen = false;
+      document.getElementById('mv-back-btn').innerHTML = movieBack === 'series' ? '&larr; Seri' : '&larr; Filmler';
       // Profilden (Kişiler bölümünden) gelindiyse Filmler bölümüne geç
       if (appMode !== 'movies') { appMode = 'movies'; try { localStorage.setItem('rb_mode', 'movies'); } catch (e) {} applyModeUi(); }
       movieOpenId = id; movieRatings = [];
@@ -1767,11 +1812,15 @@
       window.scrollTo({ top: 0 });
       if (!movieById(id)) { await loadMovies(); }
       if (!movieById(id)) { closeMovie(); return; }
-      renderMovieHead(); renderMovieMine();
+      renderMovieHead(); renderMovieAdmin(); renderMovieMine();
       document.getElementById('mv-list').innerHTML = '<p class="text-sm text-gray-500">Yükleniyor...</p>';
       await loadMovieRatings();
     }
-    function closeMovie() { movieOpenId = null; showSection('movies-section'); }
+    function closeMovie() {
+      movieOpenId = null; movieEditOpen = false;
+      if (movieBack === 'series' && seriesOpenId) { showSection('series-detail-section'); renderSeriesDetail(); return; }
+      showSection('movies-section');
+    }
 
     async function loadMovieRatings() {
       const id = movieOpenId; if (!id) return;
@@ -1802,12 +1851,13 @@
             <div class="relative shrink-0 w-28 sm:w-40 aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">${movieArt(m, 'text-6xl')}</div>
             <div class="min-w-0 flex-1">
               <h2 class="text-xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(m.title)}</h2>
-              <p class="text-xs text-gray-500 mt-1">${m.year ? m.year + ' · ' : ''}${m.added_by_name ? escapeHtml(m.added_by_name) + ' ekledi' : 'Ekleyen yok'}</p>
+              <p class="text-xs text-gray-500 mt-1">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${m.year ? m.year + ' · ' : ''}${m.added_by_name ? escapeHtml(m.added_by_name) + ' ekledi' : 'Ekleyen yok'}</p>
+              ${m.collection_id ? `<button type="button" onclick="openSeries('${m.collection_id}')" class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">${escapeHtml(m.collection_name || 'Seri')}${m.part_no ? ' · ' + m.part_no + '. yapım' : ''} &rsaquo;</button>` : ''}
               <div class="mt-3 flex items-center gap-3">
                 <span class="px-3 py-2 rounded-xl text-xl font-black text-white shadow-lg ${hasAvg ? movieScoreBg(m.avg_score) : 'bg-gray-400 dark:bg-borderdark'}">${hasAvg ? fmtAvg(m.avg_score) : '-'}</span>
                 <span class="text-xs text-gray-500 leading-tight">${m.rating_count} kişi<br>puanladı</span>
               </div>
-              ${canDelete ? `<button type="button" onclick="deleteMovie()" class="mt-3 text-[11px] font-bold text-red-500 hover:text-red-400">Filmi sil</button>` : ''}
+              ${canDelete ? `<div class="mt-3 flex gap-4"><button type="button" onclick="toggleMovieEdit()" class="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">Düzenle</button><button type="button" onclick="deleteMovie()" class="text-[11px] font-bold text-red-500 hover:text-red-400">Sil</button></div>` : ''}
             </div>
           </div>
           ${hist}
@@ -2122,6 +2172,193 @@
       }).join('');
     }
 
+    // ===== DİZİLER ve SERİLER =====
+    const KIND_TABS = [['all', 'Tümü'], ['film', 'Filmler'], ['dizi', 'Diziler'], ['series', 'Seriler']];
+    function renderMovieKinds() {
+      const el = document.getElementById('movie-kinds'); if (!el) return;
+      const n = { all: movies.length, film: movies.filter(m => kindOf(m) === 'film').length, dizi: movies.filter(m => kindOf(m) === 'dizi').length, series: collections.length };
+      el.innerHTML = KIND_TABS.map(([k, label]) => `
+        <button type="button" role="tab" aria-selected="${movieKind === k}" onclick="setMovieKind('${k}')"
+          class="flex-1 min-w-[84px] px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition ${movieKind === k
+            ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">${label} <span class="opacity-70 font-bold">${n[k]}</span></button>`).join('');
+    }
+    function setMovieKind(k) { movieKind = k; renderMovies(); }
+
+    // Form açılır listelerini güncel serilerle doldurur (seçili değeri korur)
+    function fillCollectionSelects() {
+      ['mv-coll', 'mv-edit-coll'].forEach(id => {
+        const sel = document.getElementById(id); if (!sel) return;
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">Seri yok</option>' + collections.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+        if (cur && collections.some(c => c.id === cur)) sel.value = cur;
+      });
+    }
+
+    function seriesItems(cid) {
+      return movies.filter(m => m.collection_id === cid).sort((a, b) =>
+        (a.part_no == null) - (b.part_no == null) || (a.part_no || 0) - (b.part_no || 0) || (a.year || 9999) - (b.year || 9999) || (a.title || '').localeCompare(b.title || '', 'tr'));
+    }
+    // Serinin ortalaması: puanı olan yapımların ortalamalarının ortalaması
+    function seriesAvg(items) {
+      const v = items.filter(m => m.avg_score != null).map(m => Number(m.avg_score));
+      return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+    }
+
+    function renderSeriesGrid() {
+      const grid = document.getElementById('series-grid'); if (!grid) return;
+      document.getElementById('series-add-btn').classList.toggle('hidden', !isModerator);
+      if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
+      let list = collections.slice();
+      if (movieQuery) list = list.filter(c => foldTr(c.name).includes(movieQuery) || seriesItems(c.id).some(m => foldTr(m.title).includes(movieQuery)));
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${collections.length === 0
+          ? (isModerator ? 'Henüz seri yok. <b>+ Seri Ekle</b> ile bir seri oluştur, sonra yapımları seriye ekle.' : 'Henüz seri eklenmedi.')
+          : 'Aramana uyan seri bulunamadı.'}</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(c => {
+        const items = seriesItems(c.id), avg = seriesAvg(items), mineN = items.filter(m => m.my_score != null).length;
+        const fan = items.slice(0, 3).map((m, i, a) => {
+          const off = (i - (a.length - 1) / 2) * 2.2;
+          return `<div class="absolute top-1/2 left-1/2 h-36 aspect-[2/3] rounded-xl overflow-hidden shadow-xl ring-2 ring-white dark:ring-carddark" style="transform:translate(calc(-50% + ${off}rem),-50%) rotate(${(i - (a.length - 1) / 2) * 6}deg);z-index:${10 - i}">${movieArt(m, 'text-3xl')}</div>`;
+        }).join('') || '<span class="absolute inset-0 flex items-center justify-center text-xs text-gray-400">Henüz yapım yok</span>';
+        return `
+        <button type="button" onclick="openSeries('${c.id}')" class="group text-left rounded-2xl overflow-hidden bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark shadow-md hover:shadow-xl hover:-translate-y-0.5 hover:border-orange-400 transition">
+          <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-borderdark dark:to-blackbg overflow-hidden">${fan}
+            ${avg != null ? `<span class="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg text-xs font-black text-white shadow-lg ${movieScoreBg(avg)}">&#9733; ${fmtAvg(avg)}</span>` : ''}
+          </div>
+          <div class="p-3">
+            <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(c.name)}</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">${items.length} yapım${items.length ? ` · sen ${mineN}/${items.length}` : ''}</p>
+          </div>
+        </button>`;
+      }).join('');
+    }
+
+    function openSeries(id) {
+      if (appMode !== 'movies') { appMode = 'movies'; try { localStorage.setItem('rb_mode', 'movies'); } catch (e) {} applyModeUi(); }
+      seriesOpenId = id; movieOpenId = null;
+      showSection('series-detail-section');
+      window.scrollTo({ top: 0 });
+      if (!moviesLoaded) { loadMovies(); return; }
+      renderSeriesDetail();
+    }
+    function closeSeries() { seriesOpenId = null; movieKind = 'series'; showSection('movies-section'); renderMovies(); }
+
+    function renderSeriesDetail() {
+      const c = collections.find(x => x.id === seriesOpenId);
+      const head = document.getElementById('series-head'), list = document.getElementById('series-items');
+      if (!head || !list) return;
+      if (!c) { head.innerHTML = '<p class="text-sm text-gray-500">Bu seri bulunamadı.</p>'; list.innerHTML = ''; return; }
+      const items = seriesItems(c.id), avg = seriesAvg(items), mineN = items.filter(m => m.my_score != null).length;
+      const pct = items.length ? Math.round(mineN / items.length * 100) : 0;
+      head.innerHTML = `
+        <div class="bg-white dark:bg-carddark rounded-3xl border border-gray-200 dark:border-borderdark shadow-xl p-5 sm:p-6">
+          <div class="flex items-start gap-4">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-bold uppercase tracking-widest text-orange-500">Seri</p>
+              <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(c.name)}</h2>
+              <p class="text-xs text-gray-500 mt-1">${items.length} yapım · ${mineN} tanesini puanladın</p>
+              ${isModerator ? `<div class="mt-3 flex gap-4"><button type="button" onclick="renameSeries()" class="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">Adını değiştir</button><button type="button" onclick="deleteSeries()" class="text-[11px] font-bold text-red-500 hover:text-red-400">Seriyi sil</button></div>` : ''}
+            </div>
+            <div class="text-center shrink-0">
+              <span class="block px-3.5 py-2 rounded-xl text-2xl font-black text-white shadow-lg ${avg != null ? movieScoreBg(avg) : 'bg-gray-400 dark:bg-borderdark'}">${avg != null ? fmtAvg(avg) : '-'}</span>
+              <span class="block text-[10px] text-gray-500 mt-1">seri ortalaması</span>
+            </div>
+          </div>
+          ${items.length ? `<div class="mt-4 h-2 rounded-full bg-gray-200 dark:bg-borderdark overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-amber-500 to-rose-500" style="width:${pct}%"></div></div>` : ''}
+        </div>`;
+      list.innerHTML = items.length === 0
+        ? `<p class="text-sm text-gray-500 text-center py-6">${isModerator ? 'Bu seride henüz yapım yok. Bir filmin sayfasında <b>Düzenle</b> diyerek bu seriye ekleyebilirsin.' : 'Bu seride henüz yapım yok.'}</p>`
+        : items.map((m, i) => `
+          <button type="button" onclick="openMovie('${m.id}','series')" class="w-full text-left flex items-center gap-3 bg-white dark:bg-carddark p-3 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-orange-400 hover:shadow-lg transition">
+            <span class="shrink-0 h-8 w-8 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-sm font-black flex items-center justify-center">${m.part_no || i + 1}</span>
+            <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt(m, 'text-xl')}</div>
+            <div class="min-w-0 flex-1">
+              <p class="font-bold text-sm leading-snug line-clamp-2">${escapeHtml(m.title)}</p>
+              <p class="text-[11px] text-gray-500 mt-0.5">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${m.year ? m.year + ' · ' : ''}${m.rating_count} oy</p>
+            </div>
+            <div class="shrink-0 flex flex-col items-end gap-1">
+              ${m.avg_score != null ? `<span class="px-2.5 py-1 rounded-lg text-sm font-black text-white ${movieScoreBg(m.avg_score)}">${fmtAvg(m.avg_score)}</span>` : '<span class="text-[11px] text-gray-400">-</span>'}
+              <span class="text-[10px] font-bold ${m.my_score != null ? 'text-gray-500' : 'text-orange-500'}">${m.my_score != null ? 'Sen: ' + fmtScore(m.my_score) : 'Puanla'}</span>
+            </div>
+          </button>`).join('');
+    }
+
+    const seriesErr = e => ((e && e.message) || '').includes('DUPLICATE') ? 'Bu isimde bir seri zaten var.' : movieErr(e);
+    async function addSeries() {
+      if (!isModerator) return;
+      const name = (prompt('Seri adı (ör. Matrix)') || '').trim(); if (!name) return;
+      const { data, error } = await supabaseClient.rpc('save_collection', { p_id: null, p_name: name });
+      if (error) { alert(seriesErr(error)); return; }
+      await loadMovies(); if (data) openSeries(data);
+    }
+    async function renameSeries() {
+      const c = collections.find(x => x.id === seriesOpenId); if (!c || !isModerator) return;
+      const name = (prompt('Seri adı', c.name) || '').trim(); if (!name || name === c.name) return;
+      const { error } = await supabaseClient.rpc('save_collection', { p_id: c.id, p_name: name });
+      if (error) { alert(seriesErr(error)); return; }
+      await loadMovies();
+    }
+    async function deleteSeries() {
+      const c = collections.find(x => x.id === seriesOpenId); if (!c || !isModerator) return;
+      if (!confirm(`"${c.name}" serisi silinsin mi? İçindeki filmler silinmez, sadece seriden çıkar.`)) return;
+      const { error } = await supabaseClient.rpc('delete_collection', { p_id: c.id });
+      if (error) { alert(seriesErr(error)); return; }
+      seriesOpenId = null; movieKind = 'series';
+      await loadMovies(); showSection('movies-section'); renderMovies();
+    }
+
+    // --- Yapım düzenleme (moderatör): ad, yıl, afiş, tür, seri ve sırası ---
+    function toggleMovieEdit() { if (!isModerator) return; movieEditOpen = !movieEditOpen; renderMovieAdmin(); }
+    function renderMovieAdmin() {
+      const el = document.getElementById('mv-admin'), m = movieById(movieOpenId);
+      if (!el) return;
+      if (!m || !isModerator || !movieEditOpen) { el.innerHTML = ''; return; }
+      const inp = 'w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500';
+      el.innerHTML = `
+        <form onsubmit="saveMovieEdit(event)" class="bg-white dark:bg-carddark p-4 sm:p-5 rounded-2xl border border-orange-400/50 shadow-lg space-y-3">
+          <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Düzenle</h3>
+          <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
+            <input id="mv-edit-title" type="text" required maxlength="120" value="${escapeHtml(m.title)}" placeholder="Ad" class="${inp}">
+            <input id="mv-edit-year" type="number" inputmode="numeric" min="1888" max="2100" value="${m.year || ''}" placeholder="Yıl" class="${inp}">
+          </div>
+          <input id="mv-edit-poster" type="url" maxlength="500" value="${escapeHtml(m.poster_url || '')}" placeholder="Afiş linki (https://...)" class="${inp}">
+          <div class="grid gap-3 sm:grid-cols-[140px_1fr_120px]">
+            <select id="mv-edit-kind" class="${inp}"><option value="film" ${kindOf(m) === 'film' ? 'selected' : ''}>Film</option><option value="dizi" ${kindOf(m) === 'dizi' ? 'selected' : ''}>Dizi</option></select>
+            <select id="mv-edit-coll" class="${inp}"><option value="">Seri yok</option></select>
+            <input id="mv-edit-part" type="number" inputmode="numeric" min="1" max="999" value="${m.part_no || ''}" placeholder="Sıra" class="${inp}">
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" id="mv-edit-save" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">Kaydet</button>
+            <button type="button" onclick="toggleMovieEdit()" class="bg-gray-100 dark:bg-borderdark text-sm font-semibold px-5 py-2.5 rounded-xl">Vazgeç</button>
+          </div>
+        </form>`;
+      fillCollectionSelects();
+      document.getElementById('mv-edit-coll').value = m.collection_id || '';
+    }
+    async function saveMovieEdit(e) {
+      e.preventDefault();
+      const id = movieOpenId; if (!id || !isModerator) return;
+      const poster = document.getElementById('mv-edit-poster').value.trim();
+      if (poster && !/^https:\/\/\S+$/i.test(poster)) { alert(MOVIE_ERR.BAD_POSTER); return; }
+      const yearRaw = document.getElementById('mv-edit-year').value.trim();
+      const coll = document.getElementById('mv-edit-coll').value || null;
+      const part = document.getElementById('mv-edit-part').value;
+      const btn = document.getElementById('mv-edit-save'); btn.disabled = true;
+      let r = await supabaseClient.rpc('update_movie', {
+        p_id: id, p_title: document.getElementById('mv-edit-title').value.trim(), p_year: yearRaw ? parseInt(yearRaw, 10) : null,
+        p_poster: poster || null, p_kind: document.getElementById('mv-edit-kind').value
+      });
+      if (!r.error) r = await supabaseClient.rpc('set_movie_collection', { p_movie: id, p_collection: coll, p_part: coll && part ? parseInt(part, 10) : null });
+      btn.disabled = false;
+      if (r.error) { alert(movieErr(r.error)); return; }
+      movieEditOpen = false;
+      await loadMovies();
+      renderMovieAdmin(); renderMovieHead();
+    }
+
     // ===== ARAMA =====
     function handleSearch() {
       if (appMode === 'movies') return movieSearch(document.getElementById('search-input').value);
@@ -2297,7 +2534,7 @@
       const head = `
         <div class="flex items-center gap-2 flex-wrap">
           <svg class="w-4 h-4 text-orange-500 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
-          <h4 class="text-sm font-bold uppercase tracking-wider text-orange-500">Puanladığı Filmler (${list.length})</h4>
+          <h4 class="text-sm font-bold uppercase tracking-wider text-orange-500">Puanladığı Film ve Diziler (${list.length})</h4>
         </div>`;
       const body = list.length === 0
         ? `<p class="text-xs text-gray-500">${isMe ? 'Henüz hiçbir filmi puanlamadın.' : 'Henüz hiçbir filmi puanlamadı.'}</p>`
@@ -2305,7 +2542,7 @@
             <button type="button" onclick="openMovie('${r.movie_id}')" class="w-full text-left flex items-center gap-3 bg-gray-50 dark:bg-blackbg p-2.5 rounded-2xl border border-gray-200 dark:border-borderdark hover:border-orange-400 transition">
               <div class="relative shrink-0 w-12 aspect-[2/3] rounded-lg overflow-hidden">${movieArt({ title: r.title, poster_url: r.poster_url }, 'text-xl')}</div>
               <div class="min-w-0 flex-1">
-                <p class="font-bold text-sm truncate">${escapeHtml(r.title)}${r.year ? ` <span class="text-gray-400 font-medium">(${r.year})</span>` : ''}</p>
+                <p class="font-bold text-sm truncate">${escapeHtml(r.title)}${r.year ? ` <span class="text-gray-400 font-medium">(${r.year})</span>` : ''}${r.kind === 'dizi' ? ' <span class="text-orange-500 text-[10px] font-bold uppercase">Dizi</span>' : ''}</p>
                 ${r.comment ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 break-words">${escapeHtml(r.comment)}</p>` : ''}
               </div>
               <span class="shrink-0 min-w-[48px] text-center px-3 py-1.5 rounded-xl text-lg leading-none font-black text-white shadow-md ${movieScoreBg(r.score)}">${fmtScore(r.score)}</span>
