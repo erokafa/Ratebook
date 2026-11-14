@@ -583,9 +583,10 @@
       <form id="movie-add" onsubmit="submitMovie(event)" class="hidden bg-white dark:bg-carddark p-5 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3">
         <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Yeni film / dizi ekle</h3>
         <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
-          <input id="mv-title" type="text" required maxlength="120" placeholder="Ad (film ya da dizi)" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
+          <input id="mv-title" type="text" required maxlength="120" placeholder="Türkçe ad (film ya da dizi)" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
           <input id="mv-year" type="number" inputmode="numeric" min="1888" max="2100" placeholder="Yıl" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
         </div>
+        <input id="mv-orig" type="text" maxlength="120" placeholder="Orijinal ad (isteğe bağlı) — arama ikisiyle de bulur" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-orange-500">
         <div class="grid gap-3 sm:grid-cols-[140px_1fr_120px]">
           <select id="mv-kind" onchange="syncKindFields('mv')" class="w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500">
             <option value="film">Film</option><option value="dizi">Dizi</option>
@@ -1773,6 +1774,8 @@
         p_collection: document.getElementById('mv-coll').value || null,
         p_part: document.getElementById('mv-part').value ? parseInt(document.getElementById('mv-part').value, 10) : null
       };
+      const orig = document.getElementById('mv-orig').value.trim();
+      if (orig) args.p_original = orig;
       if (kind === 'dizi') {
         const endRaw = document.getElementById('mv-end').value.trim();
         const eps = parseEps(document.getElementById('mv-eps').value);
@@ -1817,7 +1820,7 @@
       if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
 
       let list = pool.filter(m => movieFilter === 'all' || (movieFilter === 'todo' ? m.my_score == null : m.my_score != null));
-      if (movieQuery) list = list.filter(m => foldTr(m.title).includes(movieQuery) || foldTr(m.collection_name).includes(movieQuery) || String(m.year || '').includes(movieQuery));
+      if (movieQuery) list = list.filter(m => foldTr(m.title).includes(movieQuery) || foldTr(m.original_title).includes(movieQuery) || foldTr(m.collection_name).includes(movieQuery) || String(m.year || '').includes(movieQuery));
       const avg = m => (m.avg_score == null ? -1 : Number(m.avg_score));
       const cmp = {
         new: (a, b) => new Date(b.created_at) - new Date(a.created_at),
@@ -1906,6 +1909,7 @@
             <div class="relative shrink-0 w-28 sm:w-40 aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">${movieArt(m, 'text-6xl')}</div>
             <div class="min-w-0 flex-1">
               <h2 class="text-xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(m.title)}</h2>
+              ${m.original_title && foldTr(m.original_title) !== foldTr(m.title) ? `<p class="text-sm text-gray-500 italic mt-0.5 break-words">${escapeHtml(m.original_title)}</p>` : ''}
               <p class="text-xs text-gray-500 mt-1">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${yearsLabel(m) ? yearsLabel(m) + ' · ' : ''}${epsTotal(m) ? m.season_episodes.length + ' sezon · ' + epsTotal(m) + ' bölüm · ' : ''}${m.added_by_name ? escapeHtml(m.added_by_name) + ' ekledi' : 'Ekleyen yok'}</p>
               ${m.collection_id ? `<button type="button" onclick="openSeries('${m.collection_id}')" class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">${escapeHtml(m.collection_name || 'Seri')}${m.part_no ? ' · ' + m.part_no + '. yapım' : ''} &rsaquo;</button>` : ''}
               <div class="mt-3 flex items-center gap-3">
@@ -2365,7 +2369,7 @@
       document.getElementById('series-add-btn').classList.toggle('hidden', !isModerator);
       if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
       let list = collections.slice();
-      if (movieQuery) list = list.filter(c => foldTr(c.name).includes(movieQuery) || seriesItems(c.id).some(m => foldTr(m.title).includes(movieQuery)));
+      if (movieQuery) list = list.filter(c => foldTr(c.name).includes(movieQuery) || seriesItems(c.id).some(m => foldTr(m.title).includes(movieQuery) || foldTr(m.original_title).includes(movieQuery)));
       if (list.length === 0) {
         grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${collections.length === 0
           ? (isModerator ? 'Henüz seri yok. <b>+ Seri Ekle</b> ile bir seri oluştur, sonra yapımları seriye ekle.' : 'Henüz seri eklenmedi.')
@@ -2476,9 +2480,10 @@
         <form onsubmit="saveMovieEdit(event)" class="bg-white dark:bg-carddark p-4 sm:p-5 rounded-2xl border border-orange-400/50 shadow-lg space-y-3">
           <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Düzenle</h3>
           <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
-            <input id="mv-edit-title" type="text" required maxlength="120" value="${escapeHtml(m.title)}" placeholder="Ad" class="${inp}">
+            <input id="mv-edit-title" type="text" required maxlength="120" value="${escapeHtml(m.title)}" placeholder="Türkçe ad" class="${inp}">
             <input id="mv-edit-year" type="number" inputmode="numeric" min="1888" max="2100" value="${m.year || ''}" placeholder="Yıl" class="${inp}">
           </div>
+          <input id="mv-edit-orig" type="text" maxlength="120" value="${escapeHtml(m.original_title || '')}" placeholder="Orijinal ad (isteğe bağlı)" class="${inp}">
           <input id="mv-edit-poster" type="url" maxlength="500" value="${escapeHtml(m.poster_url || '')}" placeholder="Afiş linki (https://...)" class="${inp}">
           <div class="grid gap-3 sm:grid-cols-[140px_1fr_120px]">
             <select id="mv-edit-kind" onchange="syncKindFields('mv-edit')" class="${inp}"><option value="film" ${kindOf(m) === 'film' ? 'selected' : ''}>Film</option><option value="dizi" ${kindOf(m) === 'dizi' ? 'selected' : ''}>Dizi</option></select>
@@ -2506,7 +2511,8 @@
       const m0 = movieById(id), kind = document.getElementById('mv-edit-kind').value;
       const args = {
         p_id: id, p_title: document.getElementById('mv-edit-title').value.trim(), p_year: yearRaw ? parseInt(yearRaw, 10) : null,
-        p_poster: poster || null, p_kind: kind
+        p_poster: poster || null, p_kind: kind,
+        p_original: document.getElementById('mv-edit-orig').value.trim() || null
       };
       if (kind === 'dizi') {
         const endRaw = document.getElementById('mv-edit-end').value.trim();
