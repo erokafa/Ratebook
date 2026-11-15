@@ -44,6 +44,18 @@
     body[data-mode="movies"] #sort-hub > div:first-child { background-image: linear-gradient(135deg, #f59e0b, #f43f5e 55%, #be123c) !important; }
     /* Film bölümünde üst çubuğa sıcak bir vurgu rengi */
     body[data-mode="movies"] nav { border-bottom-color: #f59e0b; box-shadow: 0 1px 0 0 rgba(245,158,11,.35); }
+    /* İzledim tiki: kutu zıplar, yeşil daire dönerek büyür, tik çizilir, bir halka yayılır */
+    @keyframes tick-pop { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 55% { transform: scale(1.22) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+    @keyframes tick-draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+    @keyframes tick-ring { 0% { transform: scale(.7); opacity: .8; } 100% { transform: scale(2.1); opacity: 0; } }
+    @keyframes box-pop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
+    @keyframes tick-fade { from { opacity: 0; } to { opacity: 1; } }
+    .tick-pop { animation: tick-pop .55s cubic-bezier(.2, .9, .3, 1.2) both; }
+    .tick-pop path, .box-pop path { stroke-dasharray: 24; animation: tick-draw .32s .16s ease-out both; }
+    .tick-ring { animation: tick-ring .7s ease-out both; }
+    .box-pop { animation: box-pop .35s ease-out both; }
+    .tick-fade { animation: tick-fade .3s ease-out both; }
+    @media (prefers-reduced-motion: reduce) { .tick-pop, .tick-pop path, .box-pop, .box-pop path, .tick-ring, .tick-fade { animation: none !important; } .tick-ring { display: none; } }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-blackbg text-gray-900 dark:text-gray-100 min-h-screen overflow-x-hidden font-sans transition-colors duration-200">
@@ -123,6 +135,12 @@
         <span id="nav-sort-label" class="hidden xl:inline">Sırala</span>
       </button>
 
+      <!-- İZLEME LİSTEM (sadece Filmler bölümünde) -->
+      <button id="nav-watch-btn" title="İzleme Listem" data-only="movies" onclick="openWatchlist()" style="display:none" class="relative bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 border border-orange-200 dark:border-orange-800 px-3 py-2 rounded-xl text-xs font-medium text-orange-600 dark:text-orange-300 flex items-center gap-1.5">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        <span class="hidden xl:inline">İzleme Listem</span>
+        <span id="nav-watch-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-orange-600 text-white text-[10px] font-bold items-center justify-center leading-none">0</span>
+      </button>
       <button title="Değerlendir" data-only="people" onclick="showSection('rate-section')" class="bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 px-3 py-2 rounded-xl text-xs font-medium text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
         <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
         <span class="hidden xl:inline">Değerlendir</span>
@@ -618,11 +636,6 @@
         <span class="min-w-0"><span class="block font-extrabold">Film Oyunları</span><span class="block text-xs text-white/85">Turnuva, tier list, kör sıralama ve daha fazlası</span></span>
         <svg class="ml-auto w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
-      <button type="button" id="watch-entry" onclick="openWatchlist()" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark hover:border-orange-400 shadow-sm transition">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-600 dark:text-orange-400"><svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></span>
-        <span class="min-w-0"><span class="block font-extrabold text-sm">İzleme Listem</span><span id="watch-entry-sub" class="block text-xs text-gray-500 dark:text-gray-400"></span></span>
-        <svg class="ml-auto w-5 h-5 shrink-0 stroke-current text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
       <div id="movie-controls" class="flex flex-wrap items-center gap-2">
         <div id="movie-filters" class="flex flex-wrap gap-2 flex-1"></div>
         <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Film Ekle</button>
@@ -781,7 +794,7 @@
         </div>
       </div>
       <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        RateBook · Sürüm <span id="app-version">1.4</span>
+        RateBook · Sürüm <span id="app-version">1.5</span>
       </div>
     </section>
 
@@ -1139,7 +1152,7 @@
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
-    const APP_VERSION = '1.4';
+    const APP_VERSION = '1.5';
     window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
 
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
@@ -1767,7 +1780,7 @@
 
     // ----- İzleme listesi (sadece sahibine görünür; izleme_listesi.sql kurulu değilse özellik gizli kalır) -----
     // watchIds: listedekiler, watchDone: "izledim" kutusu işaretlenenler, watchAt: listeye eklenme zamanı
-    let watchIds = new Set(), watchDone = new Set(), watchAt = {}, watchReady = false, watchFilter = 'all';
+    let watchIds = new Set(), watchDone = new Set(), watchAt = {}, watchReady = false, watchFilter = 'all', watchPop = null;
     const BOOKMARK_SVG = on => `<svg class="w-4 h-4 stroke-current" fill="${on ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`;
     const CHECK_SVG = (cls) => `<svg class="${cls || 'w-4 h-4'} stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
     function watchErr(error) { return /TOO_MANY/.test(error.message || '') ? 'İzleme listen dolu (en fazla 1000 yapım). Önce bazılarını çıkar.' : movieErr(error); }
@@ -1788,7 +1801,9 @@
       if (!watchReady || !watchIds.has(id)) return;
       const on = !watchDone.has(id);
       if (on) watchDone.add(id); else watchDone.delete(id);
+      watchPop = on ? id : null;                     // sadece yeni işaretlenen kartta animasyon oynar
       refreshWatchUi();
+      if (on) setTimeout(() => { if (watchPop === id) watchPop = null; }, 900);
       const { error } = await supabaseClient.rpc('set_watched', { p_movie: id, p_watched: on });
       if (error) { if (on) watchDone.delete(id); else watchDone.add(id); refreshWatchUi(); alert(watchErr(error)); }
     }
@@ -1811,9 +1826,11 @@
     }
 
     // ----- İzleme listesi sayfası -----
-    function openWatchlist() {
+    async function openWatchlist() {
+      if (appMode !== 'movies') { appMode = 'movies'; try { localStorage.setItem('rb_mode', 'movies'); } catch (e) {} applyModeUi(); }
+      if (!moviesLoaded) await ensureMovies();
       if (!watchReady) return;
-      watchFilter = 'all';
+      watchFilter = 'all'; movieOpenId = null; seriesOpenId = null;
       showSection('watchlist-section'); renderWatchlist();
       window.scrollTo({ top: 0 });
     }
@@ -1853,10 +1870,13 @@
         <div data-watch-card="${m.id}" class="group rounded-2xl overflow-hidden bg-white dark:bg-carddark border shadow-md transition ${ok ? 'border-emerald-500/60' : 'border-gray-200 dark:border-borderdark hover:border-orange-400'}">
           <div class="relative aspect-[2/3] overflow-hidden">
             <button type="button" onclick="openMovie('${m.id}', 'watch')" aria-label="${escapeHtml(nameOf(m))}" class="absolute inset-0 w-full h-full text-left">${movieArt(m)}</button>
-            ${ok ? `<div class="pointer-events-none absolute inset-0 bg-black/45"></div>
-              <span data-watch-tick class="pointer-events-none absolute inset-0 flex items-center justify-center"><span class="h-16 w-16 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xl ring-4 ring-white/30">${CHECK_SVG('w-9 h-9')}</span></span>` : ''}
+            ${ok ? `<div class="pointer-events-none absolute inset-0 bg-black/45 ${watchPop === m.id ? 'tick-fade' : ''}"></div>
+              <span data-watch-tick class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                ${watchPop === m.id ? '<span class="tick-ring absolute h-16 w-16 rounded-full bg-emerald-400/70"></span>' : ''}
+                <span class="relative h-16 w-16 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xl ring-4 ring-white/30 ${watchPop === m.id ? 'tick-pop' : ''}">${CHECK_SVG('w-9 h-9')}</span>
+              </span>` : ''}
             <button type="button" role="checkbox" aria-checked="${ok}" data-watch-check onclick="toggleWatched('${m.id}')" title="${ok ? 'İzledim işaretini kaldır' : 'İzledim olarak işaretle'}"
-              class="absolute top-2 left-2 h-9 w-9 rounded-xl border-2 flex items-center justify-center shadow-lg transition ${ok ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-black/55 border-white/80 text-transparent hover:bg-black/75'}">${CHECK_SVG('w-5 h-5')}</button>
+              class="absolute top-2 left-2 h-9 w-9 rounded-xl border-2 flex items-center justify-center shadow-lg transition ${ok ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-black/55 border-white/80 text-transparent hover:bg-black/75'} ${ok && watchPop === m.id ? 'box-pop' : ''}">${CHECK_SVG('w-5 h-5')}</button>
             <button type="button" onclick="removeFromWatchlist('${m.id}')" title="Listeden çıkar" aria-label="Listeden çıkar"
               class="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/55 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition"><svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
             ${m.my_score != null ? `<span class="pointer-events-none absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/70 text-white text-[11px] font-bold">Sen: ${fmtScore(m.my_score)}</span>` : ''}
@@ -1868,12 +1888,12 @@
         </div>`;
       }).join('');
     }
-    // Filmler ekranındaki giriş düğmesinin altyazısı
+    // Üst menüdeki "İzleme Listem" düğmesi: liste hazırsa görünür, rozet izlenecek sayısını gösterir
     function renderWatchEntry() {
-      const b = document.getElementById('watch-entry'); if (!b) return;
-      b.classList.toggle('hidden', !watchReady);
-      const sub = document.getElementById('watch-entry-sub');
-      if (sub) sub.textContent = watchIds.size ? `${watchIds.size} yapım · ${watchDone.size} izlendi` : 'İzlemek istediklerini buraya ekle';
+      const b = document.getElementById('nav-watch-btn'); if (!b) return;
+      b.style.display = watchReady ? '' : 'none';
+      const bd = document.getElementById('nav-watch-badge');
+      if (bd) { const todo = watchIds.size - watchDone.size; bd.textContent = todo > 99 ? '99+' : String(todo); bd.classList.toggle('hidden', todo <= 0); bd.classList.toggle('flex', todo > 0); }
     }
 
     function ensureMovies(force) {
