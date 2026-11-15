@@ -769,7 +769,7 @@
         </div>
       </div>
       <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        RateBook · Sürüm <span id="app-version">1.0</span>
+        RateBook · Sürüm <span id="app-version">1.2</span>
       </div>
     </section>
 
@@ -1127,7 +1127,7 @@
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
-    const APP_VERSION = '1.1';
+    const APP_VERSION = '1.2';
     window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
 
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
@@ -4449,8 +4449,57 @@
     window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; refreshInstallUi(); });
     window.addEventListener('appinstalled', () => { deferredInstall = null; refreshInstallUi(); });
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => console.warn('Servis çalışanı kaydedilemedi:', err)));
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(err => console.warn('Servis çalışanı kaydedilemedi:', err)));
     }
+
+    // ===== SÜRÜM KONTROLÜ =====
+    // Telefonda uygulama saklanan eski kopyadan açılabilir. Açılınca sunucudaki güncel sayfanın sürümüne bakılır:
+    // farklıysa saklanan kopyalar silinip sayfa bir kez yenilenir (açılıştan hemen sonra), sonradan fark edilirse
+    // yazdıklarını bozmamak için "Yenile" düğmesi gösterilir.
+    let verCheckAt = 0, verReloading = false;
+    async function checkForNewVersion(initial) {
+      if (verReloading || Date.now() - verCheckAt < 60 * 1000) return;
+      verCheckAt = Date.now();
+      let remote = null;
+      try {
+        const r = await fetch(location.pathname + '?vcheck=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
+        if (!r.ok) return;
+        const m = (await r.text()).match(/const APP_VERSION = '([^']+)'/);
+        remote = m && m[1];
+      } catch (e) { return; }
+      if (!remote || remote === APP_VERSION) return;
+      let tried = null;
+      try { tried = sessionStorage.getItem('rb_ver_reload'); } catch (e) {}
+      if (initial && tried !== remote) {
+        verReloading = true;
+        try { sessionStorage.setItem('rb_ver_reload', remote); } catch (e) {}
+        await freshReload();
+      } else {
+        showUpdateBanner(remote);
+      }
+    }
+    async function freshReload() {
+      try {
+        if (navigator.serviceWorker) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.update().catch(() => {}))); }
+        if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.filter(k => k.startsWith('ratebook-shell')).map(k => caches.delete(k))); }
+      } catch (e) {}
+      location.reload();
+    }
+    function showUpdateBanner(v) {
+      if (document.getElementById('update-banner')) return;
+      const b = document.createElement('div');
+      b.id = 'update-banner';
+      b.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 rounded-2xl bg-indigo-600 text-white shadow-2xl px-4 py-3 text-sm max-w-[92vw]';
+      b.innerHTML = `<span class="font-semibold">Yeni sürüm var (${escapeHtml(v)})</span><button type="button" class="bg-white text-indigo-700 font-bold rounded-xl px-3 py-1.5 text-xs" onclick="freshReload()">Yenile</button>`;
+      document.body.appendChild(b);
+    }
+    window.addEventListener('load', () => setTimeout(() => checkForNewVersion(true), 800));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        checkForNewVersion(false);
+        if (navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.update().catch(() => {}))).catch(() => {});
+      }
+    });
 
     // ===== ÇERÇEVE VE ARKAPLAN =====
     // Hangi öğeyi kimin kullanabildiğine sunucu karar verir (ortalama puan eşiği).

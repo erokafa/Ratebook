@@ -1,6 +1,9 @@
 // RateBook servis çalışanı: uygulamanın kabuğunu ve kütüphaneleri saklar, veriye (Supabase) hiç dokunmaz.
-// Sayfa saklanan kopyadan anında açılır; internet hızlıysa (1,5 sn içinde) güncel sürüm gelir.
-const CACHE = 'ratebook-shell-v3';
+// Sayfa açılırken önce güncel sürüm için internete bakılır (en fazla 4 sn); internet yoksa ya da çok
+// yavaşsa saklanan kopya açılır, güncel kopya arkada saklanır. Sayfanın kendisi de açılınca
+// "yeni sürüm var mı" diye kontrol eder ve gerekirse kendini yeniler (index.html'deki güncelleme kontrolü).
+const CACHE = 'ratebook-shell-v4';
+const NAV_WAIT_MS = 4000;
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 // Sadece bu iki kütüphane saklanır (Tailwind ve Supabase istemcisi); diğer her şey olduğu gibi geçer
 const LIBS = ['https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@'];
@@ -39,14 +42,16 @@ self.addEventListener('fetch', e => {
   // Geri kalan dış istekler (Supabase vb.) olduğu gibi geçer
   if (url.origin !== self.location.origin) return;
 
-  // Sayfa açılışı: saklanan kopya varsa en fazla 1,5 sn internet beklenir, yoksa kopya açılır
+  // Sayfa açılışı: tarayıcının kendi önbelleğini atlayarak güncel sayfa istenir. Saklanan kopya sadece
+  // internet yokken ya da NAV_WAIT_MS içinde cevap gelmediğinde açılır; geç gelen güncel sayfa yine saklanır.
   if (req.mode === 'navigate') {
     e.respondWith((async () => {
       const cache = await caches.open(CACHE);
       const hit = await cache.match('./');
-      const net = fetch(req).then(res => { if (res.ok) cache.put('./', res.clone()); return res; });
+      const net = fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+        .then(res => { if (res.ok) cache.put('./', res.clone()); return res; });
       if (!hit) return net.catch(() => Response.error());
-      return Promise.race([net.catch(() => hit), new Promise(r => setTimeout(() => r(hit), 1500))]);
+      return Promise.race([net.catch(() => hit), new Promise(r => setTimeout(() => r(hit), NAV_WAIT_MS))]);
     })());
     return;
   }
