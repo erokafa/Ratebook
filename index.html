@@ -618,6 +618,11 @@
         <span class="min-w-0"><span class="block font-extrabold">Film Oyunları</span><span class="block text-xs text-white/85">Turnuva, tier list, kör sıralama ve daha fazlası</span></span>
         <svg class="ml-auto w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
+      <button type="button" id="watch-entry" onclick="openWatchlist()" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark hover:border-orange-400 shadow-sm transition">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-600 dark:text-orange-400"><svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></span>
+        <span class="min-w-0"><span class="block font-extrabold text-sm">İzleme Listem</span><span id="watch-entry-sub" class="block text-xs text-gray-500 dark:text-gray-400"></span></span>
+        <svg class="ml-auto w-5 h-5 shrink-0 stroke-current text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
       <div id="movie-controls" class="flex flex-wrap items-center gap-2">
         <div id="movie-filters" class="flex flex-wrap gap-2 flex-1"></div>
         <button type="button" id="movie-add-btn" onclick="toggleMovieForm()" class="hidden bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md">+ Film Ekle</button>
@@ -641,6 +646,13 @@
         </div>
         <div id="series-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"></div>
       </div>
+    </section>
+
+    <section id="watchlist-section" class="space-y-5 hidden">
+      <button type="button" onclick="closeWatchlist()" class="text-sm font-bold text-orange-600 dark:text-orange-400 hover:underline">&larr; Filmler</button>
+      <div id="watch-head"></div>
+      <div id="watch-filters" class="flex flex-wrap gap-2"></div>
+      <div id="watch-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"></div>
     </section>
 
     <section id="series-detail-section" class="space-y-5 hidden">
@@ -769,7 +781,7 @@
         </div>
       </div>
       <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        RateBook · Sürüm <span id="app-version">1.3</span>
+        RateBook · Sürüm <span id="app-version">1.4</span>
       </div>
     </section>
 
@@ -1127,7 +1139,7 @@
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
-    const APP_VERSION = '1.3';
+    const APP_VERSION = '1.4';
     window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
 
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
@@ -1316,7 +1328,7 @@
     }
 
     function showSection(id) {
-      if (id === 'movies-section') ensureMovies();
+      if (id === 'movies-section' || id === 'watchlist-section') ensureMovies();
       if (id !== 'sort-section') { const pl = document.getElementById('sort-play'); if (pl) pl.classList.add('hidden'); sortView = 'hub'; const nv = document.querySelector('nav'); if (nv) nv.style.display = ''; }
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
@@ -1754,30 +1766,114 @@
     }
 
     // ----- İzleme listesi (sadece sahibine görünür; izleme_listesi.sql kurulu değilse özellik gizli kalır) -----
-    let watchIds = new Set(), watchReady = false;
+    // watchIds: listedekiler, watchDone: "izledim" kutusu işaretlenenler, watchAt: listeye eklenme zamanı
+    let watchIds = new Set(), watchDone = new Set(), watchAt = {}, watchReady = false, watchFilter = 'all';
     const BOOKMARK_SVG = on => `<svg class="w-4 h-4 stroke-current" fill="${on ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`;
+    const CHECK_SVG = (cls) => `<svg class="${cls || 'w-4 h-4'} stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+    function watchErr(error) { return /TOO_MANY/.test(error.message || '') ? 'İzleme listen dolu (en fazla 1000 yapım). Önce bazılarını çıkar.' : movieErr(error); }
     async function toggleWatch(id) {
       if (!watchReady || !movieById(id)) return;
-      const on = !watchIds.has(id);
-      if (on) watchIds.add(id); else watchIds.delete(id);
+      const on = !watchIds.has(id), wasDone = watchDone.has(id);
+      if (on) { watchIds.add(id); watchAt[id] = Date.now(); } else { watchIds.delete(id); watchDone.delete(id); }
       refreshWatchUi();
       const { error } = await supabaseClient.rpc('set_watchlist', { p_movie: id, p_on: on });
       if (error) {
-        if (on) watchIds.delete(id); else watchIds.add(id);
+        if (on) { watchIds.delete(id); } else { watchIds.add(id); if (wasDone) watchDone.add(id); }
         refreshWatchUi();
-        alert(/TOO_MANY/.test(error.message || '') ? 'İzleme listen dolu (en fazla 1000 yapım). Önce bazılarını çıkar.' : movieErr(error));
+        alert(watchErr(error));
       }
+    }
+    // "İzledim" kutusu
+    async function toggleWatched(id) {
+      if (!watchReady || !watchIds.has(id)) return;
+      const on = !watchDone.has(id);
+      if (on) watchDone.add(id); else watchDone.delete(id);
+      refreshWatchUi();
+      const { error } = await supabaseClient.rpc('set_watched', { p_movie: id, p_watched: on });
+      if (error) { if (on) watchDone.delete(id); else watchDone.add(id); refreshWatchUi(); alert(watchErr(error)); }
+    }
+    async function removeFromWatchlist(id) {
+      const m = movieById(id);
+      if (watchDone.has(id) && !confirm(`"${m ? nameOf(m) : ''}" listeden çıkarılsın mı? İzledim işareti de gider.`)) return;
+      await toggleWatch(id);
     }
     function refreshWatchUi() {
       renderMovies();
+      renderWatchlist();
       if (movieOpenId) renderMovieHead();
       if (seriesOpenId) renderSeriesDetail();
     }
-    // Puanladığın yapım izleme listenden kendiliğinden çıkar (izlemişsin demektir)
-    async function unwatchAfterRate(id) {
-      if (!watchReady || !watchIds.has(id)) return;
-      watchIds.delete(id); refreshWatchUi();
-      try { await supabaseClient.rpc('set_watchlist', { p_movie: id, p_on: false }); } catch (e) {}
+    // Listendeki bir yapımı puanlayınca izlenmiş sayılır: kutusu kendiliğinden işaretlenir
+    async function markWatchedAfterRate(id) {
+      if (!watchReady || !watchIds.has(id) || watchDone.has(id)) return;
+      watchDone.add(id); refreshWatchUi();
+      try { await supabaseClient.rpc('set_watched', { p_movie: id, p_watched: true }); } catch (e) {}
+    }
+
+    // ----- İzleme listesi sayfası -----
+    function openWatchlist() {
+      if (!watchReady) return;
+      watchFilter = 'all';
+      showSection('watchlist-section'); renderWatchlist();
+      window.scrollTo({ top: 0 });
+    }
+    function closeWatchlist() { showSection('movies-section'); renderMovies(); }
+    function setWatchFilter(f) { watchFilter = f; renderWatchlist(); }
+    function renderWatchlist() {
+      const sec = document.getElementById('watchlist-section');
+      if (!sec || sec.classList.contains('hidden')) return;
+      const all = movies.filter(m => watchIds.has(m.id)).sort((a, b) => (watchAt[b.id] || 0) - (watchAt[a.id] || 0));
+      const done = all.filter(m => watchDone.has(m.id)).length, todo = all.length - done;
+      const pct = all.length ? Math.round(done / all.length * 100) : 0;
+      document.getElementById('watch-head').innerHTML = `
+        <div class="bg-white dark:bg-carddark rounded-3xl border border-gray-200 dark:border-borderdark shadow-xl p-4 sm:p-6">
+          <div class="flex items-center gap-3">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400">${BOOKMARK_SVG(true)}</span>
+            <div class="min-w-0"><h2 class="text-xl sm:text-2xl font-black tracking-tight">İzleme Listem</h2>
+              <p class="text-xs text-gray-500">${all.length ? `${all.length} yapım · ${done} tanesini izledin` : 'Henüz hiçbir şey eklemedin'} · sadece sen görürsün</p></div>
+          </div>
+          ${all.length ? `<div class="mt-4 h-2 rounded-full bg-gray-200 dark:bg-borderdark overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-orange-500 to-emerald-500" style="width:${pct}%"></div></div>` : ''}
+        </div>`;
+      const chip = (f, label, n) => `<button type="button" onclick="setWatchFilter('${f}')" class="px-4 py-2 rounded-full text-xs font-bold transition ${watchFilter === f
+        ? 'bg-orange-600 text-white shadow-md'
+        : 'bg-white dark:bg-carddark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-orange-400'}">${label} <span class="opacity-70">${n}</span></button>`;
+      document.getElementById('watch-filters').innerHTML = chip('all', 'Hepsi', all.length) + chip('todo', 'İzlenecekler', todo) + chip('done', 'İzlediklerim', done);
+      const list = all.filter(m => watchFilter === 'all' || (watchFilter === 'done' ? watchDone.has(m.id) : !watchDone.has(m.id)));
+      const grid = document.getElementById('watch-grid');
+      if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
+      if (!list.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${!all.length
+          ? 'Listen boş. Filmler ekranında bir filmin ya da dizinin köşesindeki işarete basarak buraya ekleyebilirsin.'
+          : (watchFilter === 'done' ? 'Henüz izledim olarak işaretlediğin bir şey yok.' : 'İzlenecek bir şey kalmadı, hepsini izledin! 🎉')}</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(m => {
+        const ok = watchDone.has(m.id);
+        return `
+        <div data-watch-card="${m.id}" class="group rounded-2xl overflow-hidden bg-white dark:bg-carddark border shadow-md transition ${ok ? 'border-emerald-500/60' : 'border-gray-200 dark:border-borderdark hover:border-orange-400'}">
+          <div class="relative aspect-[2/3] overflow-hidden">
+            <button type="button" onclick="openMovie('${m.id}', 'watch')" aria-label="${escapeHtml(nameOf(m))}" class="absolute inset-0 w-full h-full text-left">${movieArt(m)}</button>
+            ${ok ? `<div class="pointer-events-none absolute inset-0 bg-black/45"></div>
+              <span data-watch-tick class="pointer-events-none absolute inset-0 flex items-center justify-center"><span class="h-16 w-16 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xl ring-4 ring-white/30">${CHECK_SVG('w-9 h-9')}</span></span>` : ''}
+            <button type="button" role="checkbox" aria-checked="${ok}" data-watch-check onclick="toggleWatched('${m.id}')" title="${ok ? 'İzledim işaretini kaldır' : 'İzledim olarak işaretle'}"
+              class="absolute top-2 left-2 h-9 w-9 rounded-xl border-2 flex items-center justify-center shadow-lg transition ${ok ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-black/55 border-white/80 text-transparent hover:bg-black/75'}">${CHECK_SVG('w-5 h-5')}</button>
+            <button type="button" onclick="removeFromWatchlist('${m.id}')" title="Listeden çıkar" aria-label="Listeden çıkar"
+              class="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/55 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition"><svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            ${m.my_score != null ? `<span class="pointer-events-none absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/70 text-white text-[11px] font-bold">Sen: ${fmtScore(m.my_score)}</span>` : ''}
+          </div>
+          <button type="button" onclick="openMovie('${m.id}', 'watch')" class="block w-full text-left p-3">
+            <p class="font-bold text-sm leading-snug line-clamp-2 ${ok ? 'text-gray-400 line-through decoration-1' : ''}">${escapeHtml(nameOf(m))}</p>
+            <p class="text-[11px] text-gray-500 mt-0.5">${kindOf(m) === 'dizi' ? '<span class="font-bold text-orange-500">Dizi</span> · ' : ''}${yearsLabel(m) ? yearsLabel(m) : ''}</p>
+          </button>
+        </div>`;
+      }).join('');
+    }
+    // Filmler ekranındaki giriş düğmesinin altyazısı
+    function renderWatchEntry() {
+      const b = document.getElementById('watch-entry'); if (!b) return;
+      b.classList.toggle('hidden', !watchReady);
+      const sub = document.getElementById('watch-entry-sub');
+      if (sub) sub.textContent = watchIds.size ? `${watchIds.size} yapım · ${watchDone.size} izlendi` : 'İzlemek istediklerini buraya ekle';
     }
 
     function ensureMovies(force) {
@@ -1793,8 +1889,10 @@
         const [{ data, error }, cres, wres] = await Promise.all([supabaseClient.rpc('get_movies'), supabaseClient.rpc('get_collections'), supabaseClient.rpc('get_my_watchlist')]);
         moviesLoading = null;
         watchReady = !!(wres && !wres.error);
-        watchIds = new Set(watchReady ? (wres.data || []).map(r => r.movie_id) : []);
-        if (!watchReady && movieFilter === 'watch') movieFilter = 'all';
+        const wrows = watchReady ? (wres.data || []) : [];
+        watchIds = new Set(wrows.map(r => r.movie_id));
+        watchDone = new Set(wrows.filter(r => r.watched).map(r => r.movie_id));
+        watchAt = {}; wrows.forEach(r => { watchAt[r.movie_id] = Date.parse(r.added_at) || 0; });
         collections = cres && !cres.error ? (cres.data || []) : [];   // diziler_seriler.sql yoksa seriler boş kalır
         if (error) {
           const g = document.getElementById('movie-grid');
@@ -1803,7 +1901,7 @@
         }
         movies = data || [];
         moviesLoaded = true; moviesAt = Date.now();
-        renderMovies();
+        renderMovies(); renderWatchlist();
         if (movieOpenId) { renderMovieHead(); renderMovieMine(); renderMovieAdmin(); renderMovieEpisodes(); }
         if (seriesOpenId) renderSeriesDetail();
       })();
@@ -1896,13 +1994,13 @@
         ? 'bg-orange-600 text-white shadow-md'
         : 'bg-white dark:bg-carddark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-orange-400'}">${label} <span class="opacity-70">${n}</span></button>`;
       document.getElementById('movie-filters').innerHTML =
-        chip('all', 'Hepsi', total) + chip('todo', 'Puanlamadıklarım', total - done) + chip('done', 'Puanladıklarım', done)
-        + (watchReady ? chip('watch', 'İzleme listem', pool.filter(m => watchIds.has(m.id)).length) : '');
+        chip('all', 'Hepsi', total) + chip('todo', 'Puanlamadıklarım', total - done) + chip('done', 'Puanladıklarım', done);
+      renderWatchEntry();
       const sel = document.getElementById('movie-sort'); if (sel && sel.value !== movieSort) sel.value = movieSort;
 
       if (!moviesLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
 
-      let list = pool.filter(m => movieFilter === 'all' || (movieFilter === 'watch' ? watchIds.has(m.id) : movieFilter === 'todo' ? m.my_score == null : m.my_score != null));
+      let list = pool.filter(m => movieFilter === 'all' || (movieFilter === 'todo' ? m.my_score == null : m.my_score != null));
       if (movieQuery) list = list.filter(m => foldTr(m.title).includes(movieQuery) || foldTr(m.original_title).includes(movieQuery) || foldTr(m.collection_name).includes(movieQuery) || String(m.year || '').includes(movieQuery));
       const avg = m => (m.avg_score == null ? -1 : Number(m.avg_score));
       const cmp = {
@@ -1920,7 +2018,7 @@
       if (list.length === 0) {
         grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${total === 0
           ? (isModerator ? 'Henüz burada hiçbir şey yok. <b>+ Film Ekle</b> ile ilkini sen ekle!' : 'Henüz hiçbir şey eklenmedi. Moderatörler ekleyince burada görünecek.')
-          : (movieFilter === 'watch' && !movieQuery ? 'İzleme listen boş. Bir filmin ya da dizinin köşesindeki işarete basıp izlemek istediklerini buraya ekleyebilirsin.' : 'Bu filtrede sonuç bulunamadı.')}</div>`;
+          : 'Bu filtrede sonuç bulunamadı.'}</div>`;
         return;
       }
       grid.innerHTML = list.map((m, i) => {
@@ -1950,8 +2048,8 @@
     function movieById(id) { return movies.find(m => m.id === id); }
 
     async function openMovie(id, back) {
-      movieBack = back === 'series' ? 'series' : 'movies'; movieEditOpen = false;
-      document.getElementById('mv-back-btn').innerHTML = movieBack === 'series' ? '&larr; Seri' : '&larr; Filmler';
+      movieBack = back === 'series' ? 'series' : back === 'watch' ? 'watch' : 'movies'; movieEditOpen = false;
+      document.getElementById('mv-back-btn').innerHTML = movieBack === 'series' ? '&larr; Seri' : movieBack === 'watch' ? '&larr; İzleme listem' : '&larr; Filmler';
       // Profilden (Kişiler bölümünden) gelindiyse Filmler bölümüne geç
       if (appMode !== 'movies') { appMode = 'movies'; try { localStorage.setItem('rb_mode', 'movies'); } catch (e) {} applyModeUi(); }
       movieOpenId = id; movieRatings = []; episodeRatings = []; epSeason = 1; epOpen = null;
@@ -1966,6 +2064,7 @@
     function closeMovie() {
       movieOpenId = null; movieEditOpen = false;
       if (movieBack === 'series' && seriesOpenId) { showSection('series-detail-section'); renderSeriesDetail(); return; }
+      if (movieBack === 'watch' && watchReady) { showSection('watchlist-section'); renderWatchlist(); return; }
       showSection('movies-section');
     }
 
@@ -2019,7 +2118,7 @@
                 <span class="text-xs text-gray-500 leading-tight">${m.rating_count} kişi<br>puanladı</span>
               </div>
               ${watchReady ? `<button type="button" onclick="toggleWatch('${m.id}')" class="mt-3 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${watchIds.has(m.id)
-                ? 'bg-orange-600 text-white hover:bg-orange-500' : 'bg-gray-100 dark:bg-blackbg text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-borderdark hover:border-orange-400'}">${BOOKMARK_SVG(watchIds.has(m.id))}${watchIds.has(m.id) ? 'İzleme listemde' : 'İzleme listeme ekle'}</button>` : ''}
+                ? 'bg-orange-600 text-white hover:bg-orange-500' : 'bg-gray-100 dark:bg-blackbg text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-borderdark hover:border-orange-400'}">${BOOKMARK_SVG(watchIds.has(m.id))}${watchIds.has(m.id) ? (watchDone.has(m.id) ? 'İzleme listemde · izlendi ✓' : 'İzleme listemde') : 'İzleme listeme ekle'}</button>` : ''}
               ${canDelete ? `<div class="mt-3 flex gap-4"><button type="button" onclick="toggleMovieEdit()" class="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline">Düzenle</button><button type="button" onclick="deleteMovie()" class="text-[11px] font-bold text-red-500 hover:text-red-400">Sil</button></div>` : ''}
             </div>
           </div>
@@ -2135,7 +2234,7 @@
       btn.disabled = false;
       if (error) { alert(movieErr(error)); return; }
       epOpen = null;
-      await unwatchAfterRate(id);
+      await markWatchedAfterRate(id);
       await afterEpisodeChange(id);
     }
     async function removeEpisode() {
@@ -2183,7 +2282,7 @@
       const { error } = await supabaseClient.rpc('rate_movie', { p_movie: id, p_score: score, p_comment: document.getElementById('comment-mv').value.trim() || null });
       btn.disabled = false;
       if (error) { alert(movieErr(error)); return; }
-      await unwatchAfterRate(id);
+      await markWatchedAfterRate(id);
       await loadMovies();
       if (id !== movieOpenId) return;
       renderMovieMine();
