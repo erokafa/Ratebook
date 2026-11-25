@@ -794,7 +794,7 @@
         </div>
       </div>
       <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        RateBook · Sürüm <span id="app-version">1.6</span>
+        RateBook · Sürüm <span id="app-version">1.7</span>
       </div>
     </section>
 
@@ -1152,7 +1152,7 @@
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
-    const APP_VERSION = '1.6';
+    const APP_VERSION = '1.7';
     window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
 
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
@@ -2145,7 +2145,7 @@
       el.innerHTML = `
         <div class="bg-white dark:bg-carddark rounded-3xl border border-gray-200 dark:border-borderdark shadow-xl p-4 sm:p-6">
           <div class="flex gap-4 sm:gap-6">
-            <div class="relative shrink-0 w-28 sm:w-40 aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">${movieArt(m, 'text-6xl')}</div>
+            <div class="relative shrink-0 self-start w-28 sm:w-40 aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">${movieArt(m, 'text-6xl')}</div>
             <div class="min-w-0 flex-1">
               <div class="flex items-start gap-2">
                 <h2 class="min-w-0 flex-1 text-xl sm:text-3xl font-black tracking-tight leading-tight break-words">${escapeHtml(nameOf(m))}</h2>
