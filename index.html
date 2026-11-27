@@ -42,6 +42,7 @@
     body[data-mode="movies"] #sort-play img.rounded-full { border-radius: .75rem; }
     body[data-mode="movies"] #sort-play img.rounded-full:is(.mx-auto, .ring-4) { height: auto !important; aspect-ratio: 2 / 3; }
     body[data-mode="movies"] #sort-hub > div:first-child { background-image: linear-gradient(135deg, #f59e0b, #f43f5e 55%, #be123c) !important; }
+    body[data-mode="cinema"] nav { border-bottom-color: #14b8a6; box-shadow: 0 1px 0 0 rgba(20,184,166,.35); }
     /* Film bölümünde üst çubuğa sıcak bir vurgu rengi */
     body[data-mode="movies"] nav { border-bottom-color: #f59e0b; box-shadow: 0 1px 0 0 rgba(245,158,11,.35); }
     /* İzledim tiki: kutu zıplar, yeşil daire dönerek büyür, tik çizilir, bir halka yayılır */
@@ -78,10 +79,10 @@
     </div>
 
 
-    <!-- BÖLÜM ANAHTARI: Kişiler | Filmler (mesajlar, ayarlar, profil ikisinde de ortak) -->
+    <!-- BÖLÜM ANAHTARI: Kişiler | Filmler | Sinema (mesajlar, ayarlar, profil ikisinde de ortak) -->
     <div id="mode-switch" class="hidden relative max-sm:order-2 max-sm:w-full shrink-0 sm:ml-2">
-      <div id="mode-frame" role="group" aria-label="Bölüm seç" class="relative grid grid-cols-2 p-1.5 rounded-full bg-gray-200/80 dark:bg-white/[0.07] border-2 border-gray-300/70 dark:border-white/15 shadow-inner select-none">
-        <span id="mode-pill" aria-hidden="true" class="absolute top-1.5 bottom-1.5 left-1.5 rounded-full" style="width:calc(50% - 6px);transition:transform .35s cubic-bezier(.34,1.35,.5,1),background .3s,box-shadow .3s"></span>
+      <div id="mode-frame" role="group" aria-label="Bölüm seç" class="relative grid grid-cols-3 p-1.5 rounded-full bg-gray-200/80 dark:bg-white/[0.07] border-2 border-gray-300/70 dark:border-white/15 shadow-inner select-none">
+        <span id="mode-pill" aria-hidden="true" class="absolute top-1.5 bottom-1.5 left-1.5 rounded-full" style="width:calc((100% - 12px) / 3);transition:transform .35s cubic-bezier(.34,1.35,.5,1),background .3s,box-shadow .3s"></span>
         <button type="button" id="mode-btn-people" onclick="setMode('people')" aria-pressed="true">
           <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           <span>Kişiler</span>
@@ -90,13 +91,17 @@
           <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg>
           <span>Filmler</span>
         </button>
+        <button type="button" id="mode-btn-cinema" onclick="setMode('cinema')" aria-pressed="false">
+          <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a8 8 0 0116 0v3"/><path d="M3 11h18v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3z"/><path d="M6 16v4M18 16v4"/></svg>
+          <span>Sinema</span>
+        </button>
       </div>
       <!-- Tek seferlik ipucu -->
       <div id="mode-hint" class="hidden absolute z-[60] top-full mt-3 left-0 max-sm:right-0 sm:w-72">
         <div class="absolute -top-1.5 left-10 w-3 h-3 rotate-45 bg-orange-500"></div>
         <button type="button" onclick="dismissModeHint()" class="relative w-full text-left rounded-2xl bg-orange-500 text-white px-4 py-3 shadow-2xl shadow-orange-500/30">
-          <span class="block text-sm font-extrabold">Site artık iki bölümlü!</span>
-          <span class="block text-xs text-white/90 mt-0.5">Buradan <b>Kişiler</b> ve <b>Filmler</b> arasında geçiş yapabilirsin. Mesajlar ve ayarlar ikisinde de aynı.</span>
+          <span class="block text-sm font-extrabold">Yeni bölüm: Sinema!</span>
+          <span class="block text-xs text-white/90 mt-0.5">Buradan <b>Kişiler</b>, <b>Filmler</b> ve <b>Sinema</b> arasında geçiş yapabilirsin. Sinemaları puanla, bozuk koltukları bildir. Mesajlar ve ayarlar hepsinde aynı.</span>
           <span class="block text-[11px] font-bold text-white/80 mt-1.5">Anladım ✓</span>
         </button>
       </div>
@@ -115,7 +120,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kişi ara..."
+        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Kullanıcı ara..."
           class="w-full bg-gray-100 dark:bg-blackbg border border-gray-200 dark:border-borderdark rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
         <div id="search-results" class="hidden absolute top-12 left-0 right-0 bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-borderdark">
         </div>
@@ -683,6 +688,33 @@
       <div id="mv-list"></div>
     </section>
 
+    <!-- ===== SİNEMA ===== -->
+    <section id="cinema-section" class="space-y-5 hidden">
+      <div id="cn-top"></div>
+      <div id="cn-panel"></div>
+      <div id="cn-controls" class="flex flex-wrap items-center gap-2">
+        <input id="cn-q" type="text" oninput="cinemaSearch(this.value)" placeholder="Sinema veya şehir ara..." class="flex-1 min-w-[160px] bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-teal-500">
+        <select id="cn-sort" onchange="setCinemaSort(this.value)" class="bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-teal-500">
+          <option value="top">En yüksek puan</option>
+          <option value="many">En çok değerlendirilen</option>
+          <option value="broken">En çok hasarlı koltuk</option>
+          <option value="city">Şehre göre</option>
+          <option value="az">A - Z</option>
+          <option value="new">Yeni eklenen</option>
+        </select>
+      </div>
+      <div id="cn-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
+    </section>
+
+    <section id="cinema-detail-section" class="space-y-5 hidden">
+      <button type="button" onclick="closeCinema()" class="text-sm font-bold text-teal-600 dark:text-teal-400 hover:underline">&larr; Sinemalar</button>
+      <div id="cd-head"></div>
+      <div id="cd-admin"></div>
+      <div id="cd-halls"></div>
+      <div id="cd-mine"></div>
+      <div id="cd-list"></div>
+    </section>
+
     <!-- KAPSAMLI PROFİL -->
     <section id="profile-section" class="relative overflow-hidden bg-white dark:bg-carddark p-5 sm:p-8 rounded-3xl border border-gray-200 dark:border-borderdark max-w-2xl mx-auto shadow-2xl hidden">
       <div id="profile-bg" class="hidden"></div>
@@ -794,7 +826,7 @@
         </div>
       </div>
       <div class="border-t border-gray-200 dark:border-borderdark px-4 py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        RateBook · Sürüm <span id="app-version">1.7</span>
+        RateBook · Sürüm <span id="app-version">1.8</span>
       </div>
     </section>
 
@@ -1152,7 +1184,7 @@
     const TIERS = ['S', 'A', 'B', 'C', 'D', 'E'];
 
     // ===== YARDIMCI FONKSİYONLAR =====
-    const APP_VERSION = '1.7';
+    const APP_VERSION = '1.8';
     window.addEventListener('DOMContentLoaded', () => { const v = document.getElementById('app-version'); if (v) v.innerText = APP_VERSION; });
 
     // Çizgi ikonlar (emoji yerine; diğer ikonlarla aynı stil)
@@ -1342,6 +1374,7 @@
 
     function showSection(id) {
       if (id === 'movies-section' || id === 'watchlist-section') ensureMovies();
+      if (id === 'cinema-section') ensureCinemas();
       if (id !== 'sort-section') { const pl = document.getElementById('sort-play'); if (pl) pl.classList.add('hidden'); sortView = 'hub'; const nv = document.querySelector('nav'); if (nv) nv.style.display = ''; }
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
@@ -1518,6 +1551,7 @@
       chatStop();
       resetSortState();
       movies = []; moviesLoaded = false; movieOpenId = null; movieQuery = '';
+      cinemas = []; cinemasLoaded = false; cinemaOpenId = null; cinemaQuery = ''; cnPanel = null; cnMyReqs = []; cnModReqs = []; cinemaHalls = []; hallOpenId = null; hallEd = null;
       isModerator = false;
       isAdmin = false;
       modRoster = [];
@@ -1590,14 +1624,15 @@
       renderUserRatingCards(allProfiles, allEvaluations);
       chatInit();
       if (appMode === 'movies') ensureMovies(true);
+      if (appMode === 'cinema') ensureCinemas(true);
       await ensureSortLoaded();
     }
 
-    // ===== BÖLÜM ANAHTARI (Kişiler | Filmler) =====
+    // ===== BÖLÜM ANAHTARI (Kişiler | Filmler | Sinema) =====
     // Mesajlar, ayarlar, profil ve moderatör ekranları iki bölümde de aynıdır; sadece ana sayfa ve menü değişir.
     let appMode = 'people';
-    function readMode() { try { return localStorage.getItem('rb_mode') === 'movies' ? 'movies' : 'people'; } catch (e) { return 'people'; } }
-    function homeSection() { return appMode === 'movies' ? 'movies-section' : 'dashboard-section'; }
+    function readMode() { try { const v = localStorage.getItem('rb_mode'); return v === 'movies' || v === 'cinema' ? v : 'people'; } catch (e) { return 'people'; } }
+    function homeSection() { return appMode === 'movies' ? 'movies-section' : appMode === 'cinema' ? 'cinema-section' : 'dashboard-section'; }
     function goHome() { showSection(homeSection()); }
 
     function applyModeUi() {
@@ -1605,14 +1640,15 @@
       // Kayan hap: seçili bölümün altına kayar, rengi bölüme göre değişir
       const pill = document.getElementById('mode-pill');
       if (pill) {
-        pill.style.transform = appMode === 'movies' ? 'translateX(100%)' : 'translateX(0)';
-        pill.style.background = appMode === 'movies' ? 'linear-gradient(135deg,#f59e0b,#f43f5e)' : 'linear-gradient(135deg,#6366f1,#9333ea)';
-        pill.style.boxShadow = appMode === 'movies' ? '0 4px 14px -2px rgba(244,63,94,.55)' : '0 4px 14px -2px rgba(99,102,241,.55)';
+        const look = { people: ['0', 'linear-gradient(135deg,#6366f1,#9333ea)', 'rgba(99,102,241,.55)'], movies: ['100%', 'linear-gradient(135deg,#f59e0b,#f43f5e)', 'rgba(244,63,94,.55)'], cinema: ['200%', 'linear-gradient(135deg,#06b6d4,#0d9488)', 'rgba(13,148,136,.55)'] }[appMode];
+        pill.style.transform = `translateX(${look[0]})`;
+        pill.style.background = look[1];
+        pill.style.boxShadow = `0 4px 14px -2px ${look[2]}`;
       }
-      const base = 'relative z-10 flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-black tracking-wide transition-colors duration-300 ';
+      const base = 'relative z-10 flex items-center justify-center gap-2 px-2.5 sm:px-6 py-2.5 rounded-full text-sm font-black tracking-wide transition-colors duration-300 ';
       const on = 'text-white';
       const off = 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
-      ['people', 'movies'].forEach(m => {
+      ['people', 'movies', 'cinema'].forEach(m => {
         const b = document.getElementById('mode-btn-' + m);
         if (!b) return;
         b.className = base + (appMode === m ? on : off);
@@ -1626,28 +1662,29 @@
       const sl = document.getElementById('nav-sort-label'); if (sl) sl.innerText = isFilm() ? 'Oyunlar' : 'Sırala';
       const sb = document.getElementById('nav-sort-btn'); if (sb) sb.title = isFilm() ? 'Oyunlar' : 'Sırala';
       document.querySelectorAll('[data-only]').forEach(el => el.classList.toggle('hidden', el.dataset.only !== appMode));
-      const ph = appMode === 'movies' ? 'Film veya dizi ara...' : 'Kullanıcı ara...';
+      const ph = appMode === 'movies' ? 'Film veya dizi ara...' : appMode === 'cinema' ? 'Sinema veya şehir ara...' : 'Kullanıcı ara...';
+      const sortBtn = document.getElementById('nav-sort-btn'); if (sortBtn) sortBtn.style.display = appMode === 'cinema' ? 'none' : '';
       ['search-input', 'mobile-search-input'].forEach(id => { const el = document.getElementById(id); if (el) el.placeholder = ph; });
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', appMode === 'movies' ? '#1a0f05' : '#050505');
+      if (meta) meta.setAttribute('content', appMode === 'movies' ? '#1a0f05' : appMode === 'cinema' ? '#04161a' : '#050505');
     }
 
     // Tek seferlik "yeni bölüm" ipucu
-    function modeHintSeen() { try { return localStorage.getItem('rb_mode_hint') === '1'; } catch (e) { return false; } }
+    function modeHintSeen() { try { return localStorage.getItem('rb_mode_hint3') === '1'; } catch (e) { return false; } }
     function showModeHint() {
       if (modeHintSeen()) return;
       document.getElementById('mode-hint').classList.remove('hidden');
       document.getElementById('mode-frame').classList.add('mode-attn');
     }
     function dismissModeHint() {
-      try { localStorage.setItem('rb_mode_hint', '1'); } catch (e) {}
+      try { localStorage.setItem('rb_mode_hint3', '1'); } catch (e) {}
       document.getElementById('mode-hint').classList.add('hidden');
       document.getElementById('mode-frame').classList.remove('mode-attn');
     }
 
     function setMode(m) {
       dismissModeHint();
-      if (m !== 'movies') m = 'people';
+      if (m !== 'movies' && m !== 'cinema') m = 'people';
       const changed = appMode !== m;
       appMode = m;
       try { localStorage.setItem('rb_mode', m); } catch (e) {}
@@ -1655,8 +1692,8 @@
         // arama kutuları ve açık sonuçlar bölümler arası karışmasın
         ['search-input', 'mobile-search-input'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
         ['search-results', 'mobile-search-results'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
-        movieQuery = '';
-        movieOpenId = null;
+        movieQuery = ''; cinemaQuery = '';
+        movieOpenId = null; cinemaOpenId = null;
         sortScope = null;
         if (sortLoadedFor && appMode === 'people') applySortScope();   // film kayıtları initSortPage'de yüklenir
       }
@@ -2782,15 +2819,714 @@
       renderMovieAdmin(); renderMovieHead();
     }
 
+
+    // ===== SİNEMA =====
+    // Sinemaları moderatör / yönetici ekler, salon düzenini de onlar kurar. Herkes puanlar ve koltuk durumu bildirir.
+    let cinemas = [], cinemasLoaded = false, cinemasLoading = null, cinemasAt = 0;
+    let cinemaQuery = '', cinemaSort = 'top', cinemaOpenId = null, cinemaRatings = [], cinemaEditOpen = false;
+    let cnPanel = null, cnMyReqs = [], cnModReqs = [], cnModReqsOk = false;
+    let cinemaHalls = [], hallOpenId = null, hallSeats = {}, seatSelMode = false, seatSel = new Set(), seatInfo = null, seatReports = [], hallEd = null;
+
+    const CINEMA_ERR = {
+      NOT_AUTH: 'Oturumun kapanmış, tekrar giriş yap.', BLOCKED: 'Hesabın engellenmiş. Yönetici ile iletişime geç.', NOT_ALLOWED: 'Bu işlem için yetkin yok.',
+      DUPLICATE: 'Bu isimde bir kayıt zaten var.', BAD_NAME: 'Ad 1-80 karakter olmalı (salon adı en fazla 40).', BAD_CITY: 'Şehir en fazla 60 karakter olabilir.',
+      BAD_ADDRESS: 'Adres en fazla 200 karakter olabilir.', BAD_POSTER: 'Görsel linki https:// ile başlamalı ve boşluk içermemeli.',
+      BAD_LAYOUT: 'Salon düzeni geçersiz: en az 1 koltuk olmalı, her satırda en az bir koltuk bulunmalı (en çok 40 satır, 60 sütun, 1500 koltuk).',
+      TOO_MANY: 'Çok fazla kayıt var (bir sinemada en fazla 12 salon, bir kişinin en fazla 5 bekleyen dilekçesi olabilir).',
+      NO_CINEMA: 'Bu sinema artık yok.', NO_HALL: 'Bu salon artık yok.', NO_SCORE: 'En az bir kategoriyi puanlamalısın.',
+      BAD_SCORE: 'Puan 1 ile 10 arasında, 0,5 adımlarla olmalı.', BAD_SEATS: 'Seçilen koltuklardan biri bu salonda yok. Sayfayı yenileyip tekrar dene.',
+      BAD_STATUS: 'Geçersiz durum.', NOTE_TOO_LONG: 'Not en fazla 200 karakter olabilir.', COMMENT_TOO_LONG: 'Yorum en fazla 500 karakter olabilir.',
+      NO_REQUEST: 'Bu dilekçe artık yok.', ALREADY_RESOLVED: 'Bu dilekçe zaten sonuçlandırılmış.', ALREADY_EXISTS: 'Bu sinema zaten listede.'
+    };
+    function cinemaErr(e) {
+      const m = (e && e.message) || '';
+      if (/could not find the function|schema cache/i.test(m)) return "Sinema bölümü henüz kurulmamış: Supabase'de sinema.sql dosyası çalıştırılmalı.";
+      for (const k in CINEMA_ERR) if (m.includes(k)) return CINEMA_ERR[k];
+      return 'Bir hata oluştu: ' + m;
+    }
+    const cinemaById = id => cinemas.find(c => c.id === id);
+    const numOrNull = v => (v == null ? null : Number(v));
+    const cnAvg = v => (v == null ? '—' : fmtAvg(v));
+    const CN_CATS = [['screen', 'Perde / görüntü', 'my_screen', 'avg_screen'], ['seat', 'Koltuk konforu', 'my_seat', 'avg_seat'], ['clean', 'Temizlik', 'my_clean', 'avg_clean']];
+
+    function ensureCinemas(force) {
+      if (!currentUser) return Promise.resolve();
+      if (!force && cinemasLoaded && Date.now() - cinemasAt < 30000) { renderCinemaList(); return Promise.resolve(); }
+      return loadCinemas();
+    }
+    function loadCinemas() {
+      if (cinemasLoading) return cinemasLoading;
+      if (!cinemasLoaded) renderCinemaList();
+      cinemasLoading = (async () => {
+        const [{ data, error }, mr] = await Promise.all([
+          supabaseClient.rpc('get_cinemas'),
+          isModerator ? supabaseClient.rpc('mod_get_cinema_requests') : Promise.resolve({ data: [], error: null })
+        ]);
+        cinemasLoading = null;
+        cnModReqsOk = !!(mr && !mr.error);
+        cnModReqs = cnModReqsOk ? (mr.data || []) : [];
+        if (error) {
+          const g = document.getElementById('cn-grid');
+          if (g) g.innerHTML = `<p class="col-span-full text-sm text-red-500">${escapeHtml(cinemaErr(error))}</p>`;
+          return;
+        }
+        cinemas = data || []; cinemasLoaded = true; cinemasAt = Date.now();
+        renderCinemaList();
+        if (cinemaOpenId) { renderCinemaHead(); renderCinemaAdmin(); renderCinemaMine(); }
+      })();
+      return cinemasLoading;
+    }
+
+    function cinemaSearch(v) {
+      cinemaQuery = foldTr(v).trim();
+      ['search-input', 'mobile-search-input'].forEach(id => { const el = document.getElementById(id); if (el && el.value !== v) el.value = v; });
+      ['search-results', 'mobile-search-results'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+      const q = document.getElementById('cn-q'); if (q && q.value !== v) q.value = v;
+      if (document.getElementById('cinema-section').classList.contains('hidden')) showSection('cinema-section');
+      renderCinemaList();
+    }
+    function setCinemaSort(v) { cinemaSort = v; renderCinemaList(); }
+
+    // ----- Üst bölüm: butonlar ve açılır paneller -----
+    function cnBtn(label, onclick, cls, extra) {
+      return `<button type="button" onclick="${onclick}" class="text-xs font-extrabold px-4 py-2.5 rounded-xl transition ${cls}">${label}${extra || ''}</button>`;
+    }
+    function renderCinemaTop() {
+      const el = document.getElementById('cn-top'); if (!el) return;
+      const pend = cnModReqs.filter(r => r.status === 'pending').length;
+      const on = 'bg-teal-600 text-white shadow-md', off = 'bg-white dark:bg-carddark text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-borderdark hover:border-teal-400';
+      const badge = n => n ? ` <span class="ml-1 inline-block min-w-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] leading-[18px] text-center">${n}</span>` : '';
+      el.innerHTML = `<div class="flex flex-wrap items-center gap-2">
+        <h2 class="font-black text-lg mr-auto">Sinemalar</h2>
+        ${cnBtn('Sinema öner', "setCnPanel('suggest')", cnPanel === 'suggest' ? on : off)}
+        ${cnBtn('Dilekçelerim', "setCnPanel('mine')", cnPanel === 'mine' ? on : off)}
+        ${isModerator ? cnBtn('Dilekçeler', "setCnPanel('modreq')", cnPanel === 'modreq' ? on : off, badge(pend)) : ''}
+        ${isModerator ? cnBtn('+ Sinema Ekle', "setCnPanel('add')", 'bg-orange-600 hover:bg-orange-500 text-white shadow-md') : ''}
+      </div>`;
+    }
+    function setCnPanel(p) {
+      cnPanel = cnPanel === p ? null : p;
+      renderCinemaTop(); renderCnPanel();
+      if (cnPanel === 'mine') loadMyCinemaReqs();
+      if (cnPanel === 'modreq') loadCinemas();
+    }
+    const CN_INPUT = 'w-full bg-gray-50 dark:bg-blackbg border border-gray-300 dark:border-borderdark rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-teal-500';
+    const CN_CARD = 'bg-white dark:bg-carddark p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-borderdark shadow-lg space-y-3';
+    function renderCnPanel() {
+      const el = document.getElementById('cn-panel'); if (!el) return;
+      if (!cnPanel) { el.innerHTML = ''; return; }
+      if (cnPanel === 'suggest') {
+        el.innerHTML = `<form onsubmit="submitCinemaRequest(event)" class="${CN_CARD}">
+          <h3 class="font-extrabold text-teal-600 dark:text-teal-400">Eklenmesini istediğin sinema</h3>
+          <p class="text-[11px] text-gray-500">Moderatörlere iletilir. Onaylanırsa sinema listeye eklenir. En fazla 5 bekleyen dilekçen olabilir.</p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <input id="cn-sg-name" type="text" required maxlength="80" placeholder="Sinema adı" class="${CN_INPUT}">
+            <input id="cn-sg-city" type="text" maxlength="60" placeholder="Şehir / semt" class="${CN_INPUT}">
+          </div>
+          <textarea id="cn-sg-note" rows="2" maxlength="300" placeholder="Not (isteğe bağlı): adres, neden eklensin..." class="${CN_INPUT} resize-none"></textarea>
+          <div class="flex items-center gap-2"><button type="submit" id="cn-sg-btn" class="bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">Gönder</button>
+          <span id="cn-sg-msg" class="text-xs font-semibold text-emerald-500"></span></div>
+        </form>`;
+      } else if (cnPanel === 'add') {
+        el.innerHTML = `<form onsubmit="submitCinemaAdd(event)" class="${CN_CARD}">
+          <h3 class="font-extrabold text-orange-600 dark:text-orange-400">Yeni sinema ekle</h3>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <input id="cn-ad-name" type="text" required maxlength="80" placeholder="Sinema adı" class="${CN_INPUT}">
+            <input id="cn-ad-city" type="text" maxlength="60" placeholder="Şehir / semt" class="${CN_INPUT}">
+          </div>
+          <input id="cn-ad-addr" type="text" maxlength="200" placeholder="Adres (isteğe bağlı)" class="${CN_INPUT}">
+          <input id="cn-ad-photo" type="url" maxlength="500" placeholder="Görsel linki (isteğe bağlı, https://)" class="${CN_INPUT}">
+          <p class="text-[11px] text-gray-500">Ekledikten sonra sinemanın sayfasında salon düzenini kurabilirsin.</p>
+          <div class="flex gap-2"><button type="submit" id="cn-ad-btn" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">Ekle</button>
+          <button type="button" onclick="setCnPanel('add')" class="bg-gray-100 dark:bg-borderdark text-sm font-semibold px-5 py-2.5 rounded-xl">Vazgeç</button></div>
+        </form>`;
+      } else if (cnPanel === 'mine') {
+        el.innerHTML = `<div class="${CN_CARD}"><h3 class="font-extrabold text-teal-600 dark:text-teal-400">Dilekçelerim</h3>${cnMyReqs === null
+          ? '<p class="text-sm text-gray-500">Yükleniyor...</p>'
+          : !cnMyReqs.length ? '<p class="text-sm text-gray-500">Henüz bir dilekçe göndermedin.</p>'
+          : `<div class="space-y-2">${cnMyReqs.map(r => `
+            <div class="rounded-xl border border-gray-200 dark:border-borderdark p-3 flex items-start gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="font-bold text-sm break-words">${escapeHtml(r.name)}${r.city ? ` <span class="text-gray-400 font-semibold">· ${escapeHtml(r.city)}</span>` : ''}</p>
+                ${r.note ? `<p class="text-xs text-gray-500 mt-0.5 break-words">${escapeHtml(r.note)}</p>` : ''}
+                ${r.mod_note ? `<p class="text-xs mt-1 break-words"><b>Moderatör notu:</b> ${escapeHtml(r.mod_note)}</p>` : ''}
+              </div>
+              ${reqBadge(r.status)}
+              ${r.status === 'pending' ? `<button type="button" onclick="cancelCinemaRequest('${r.id}')" class="text-[11px] font-bold text-red-500 hover:text-red-400 shrink-0">Geri çek</button>` : ''}
+            </div>`).join('')}</div>`}</div>`;
+      } else if (cnPanel === 'modreq') {
+        const pend = cnModReqs.filter(r => r.status === 'pending'), done = cnModReqs.filter(r => r.status !== 'pending');
+        el.innerHTML = `<div class="${CN_CARD}"><h3 class="font-extrabold text-orange-600 dark:text-orange-400">Sinema dilekçeleri</h3>
+          ${!pend.length ? '<p class="text-sm text-gray-500">Bekleyen dilekçe yok.</p>' : `<div class="space-y-2">${pend.map(r => `
+            <div class="rounded-xl border border-gray-200 dark:border-borderdark p-3 space-y-2">
+              <p class="font-bold text-sm break-words">${escapeHtml(r.name)}${r.city ? ` <span class="text-gray-400 font-semibold">· ${escapeHtml(r.city)}</span>` : ''}</p>
+              <p class="text-[11px] text-gray-400">${escapeHtml(r.full_name || 'Kullanıcı')} · ${new Date(r.created_at).toLocaleDateString('tr-TR')}</p>
+              ${r.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 break-words whitespace-pre-line">${escapeHtml(r.note)}</p>` : ''}
+              <input id="rq-note-${r.id}" type="text" maxlength="200" placeholder="Not (isteğe bağlı, dilekçe sahibi görür)" class="${CN_INPUT}">
+              <div class="flex gap-2">
+                <button type="button" onclick="resolveCinemaRequest('${r.id}', true)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl">Onayla ve ekle</button>
+                <button type="button" onclick="resolveCinemaRequest('${r.id}', false)" class="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-4 py-2 rounded-xl">Reddet</button>
+              </div>
+            </div>`).join('')}</div>`}
+          ${done.length ? `<p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1">Son 14 gün</p><div class="space-y-1.5">${done.map(r => `
+            <div class="flex items-center gap-2 text-xs"><span class="font-semibold truncate">${escapeHtml(r.name)}</span><span class="text-gray-400 truncate">${escapeHtml(r.full_name || '')}</span><span class="ml-auto shrink-0">${reqBadge(r.status)}</span></div>`).join('')}</div>` : ''}
+        </div>`;
+      }
+    }
+    function reqBadge(s) {
+      const m = { pending: ['Bekliyor', 'bg-amber-500/15 text-amber-600 dark:text-amber-400'], approved: ['Onaylandı', 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'], rejected: ['Reddedildi', 'bg-red-500/15 text-red-600 dark:text-red-400'] }[s] || [s, 'bg-gray-500/15 text-gray-500'];
+      return `<span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${m[1]}">${m[0]}</span>`;
+    }
+
+    // ----- Dilekçeler -----
+    async function loadMyCinemaReqs() {
+      cnMyReqs = null; renderCnPanel();
+      const { data, error } = await supabaseClient.rpc('get_my_cinema_requests');
+      if (error) { cnMyReqs = []; renderCnPanel(); alert(cinemaErr(error)); return; }
+      cnMyReqs = data || []; if (cnPanel === 'mine') renderCnPanel();
+    }
+    async function submitCinemaRequest(e) {
+      e.preventDefault();
+      const btn = document.getElementById('cn-sg-btn'); btn.disabled = true;
+      const { error } = await supabaseClient.rpc('submit_cinema_request', {
+        p_name: document.getElementById('cn-sg-name').value.trim(),
+        p_city: document.getElementById('cn-sg-city').value.trim() || null,
+        p_note: document.getElementById('cn-sg-note').value.trim() || null
+      });
+      btn.disabled = false;
+      if (error) { alert(cinemaErr(error)); return; }
+      cnPanel = 'mine'; renderCinemaTop(); loadMyCinemaReqs();
+    }
+    async function cancelCinemaRequest(id) {
+      if (!confirm('Bu dilekçeyi geri çekmek istiyor musun?')) return;
+      const { error } = await supabaseClient.rpc('cancel_cinema_request', { p_id: id });
+      if (error) { alert(cinemaErr(error)); return; }
+      loadMyCinemaReqs();
+    }
+    async function resolveCinemaRequest(id, approve) {
+      const note = (document.getElementById('rq-note-' + id) || {}).value || '';
+      if (!approve && !confirm('Bu dilekçe reddedilsin mi?')) return;
+      const { error } = await supabaseClient.rpc('mod_resolve_cinema_request', { p_id: id, p_approve: approve, p_note: note.trim() || null });
+      if (error) { alert(cinemaErr(error)); await loadCinemas(); renderCinemaTop(); renderCnPanel(); return; }
+      await loadCinemas(); renderCinemaTop(); renderCnPanel();
+    }
+    async function submitCinemaAdd(e) {
+      e.preventDefault();
+      const btn = document.getElementById('cn-ad-btn'); btn.disabled = true;
+      const { data, error } = await supabaseClient.rpc('add_cinema', {
+        p_name: document.getElementById('cn-ad-name').value.trim(),
+        p_city: document.getElementById('cn-ad-city').value.trim() || null,
+        p_address: document.getElementById('cn-ad-addr').value.trim() || null,
+        p_photo: document.getElementById('cn-ad-photo').value.trim() || null
+      });
+      btn.disabled = false;
+      if (error) { alert(cinemaErr(error)); return; }
+      cnPanel = null; renderCinemaTop(); renderCnPanel();
+      await loadCinemas();
+      if (data) openCinema(data);
+    }
+
+    // ----- Liste -----
+    function cinemaThumb(c, cls) {
+      const letter = escapeHtml((c.name || '?').trim().charAt(0).toLocaleUpperCase('tr-TR'));
+      const fb = `<div class="w-full h-full flex items-center justify-center text-white font-black text-2xl bg-gradient-to-br ${movieGradient(c.name)}">${letter}</div>`;
+      if (!c.photo_url) return `<div class="${cls} overflow-hidden bg-gray-200 dark:bg-borderdark">${fb}</div>`;
+      return `<div class="${cls} overflow-hidden bg-gray-200 dark:bg-borderdark"><img src="${escapeHtml(c.photo_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML=decodeURIComponent('${encodeURIComponent(fb)}')"></div>`;
+    }
+    function miniScore(label, v) {
+      return `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-gray-600 dark:text-gray-300">${label}
+        <span class="px-1.5 py-0.5 rounded-md text-white text-[11px] font-black ${v == null ? 'bg-gray-400 dark:bg-gray-600' : movieScoreBg(v)}">${cnAvg(v)}</span></span>`;
+    }
+    function renderCinemaList() {
+      renderCinemaTop();
+      const grid = document.getElementById('cn-grid'); if (!grid) return;
+      const sel = document.getElementById('cn-sort'); if (sel && sel.value !== cinemaSort) sel.value = cinemaSort;
+      if (!cinemasLoaded) { grid.innerHTML = '<p class="col-span-full text-sm text-gray-500">Yükleniyor...</p>'; return; }
+      let list = cinemas.slice();
+      if (cinemaQuery) list = list.filter(c => foldTr(c.name).includes(cinemaQuery) || foldTr(c.city).includes(cinemaQuery) || foldTr(c.address).includes(cinemaQuery));
+      const avg = c => (c.avg_all == null ? -1 : Number(c.avg_all));
+      const cmp = {
+        top: (a, b) => avg(b) - avg(a) || b.rating_count - a.rating_count,
+        many: (a, b) => b.rating_count - a.rating_count || avg(b) - avg(a),
+        broken: (a, b) => Number(b.broken_seats) - Number(a.broken_seats) || a.name.localeCompare(b.name, 'tr'),
+        city: (a, b) => (a.city || '~').localeCompare(b.city || '~', 'tr') || a.name.localeCompare(b.name, 'tr'),
+        az: (a, b) => a.name.localeCompare(b.name, 'tr'),
+        new: (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      }[cinemaSort] || (() => 0);
+      list.sort(cmp);
+      if (!list.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-sm text-gray-500">${!cinemas.length
+          ? (isModerator ? 'Henüz sinema yok. <b>+ Sinema Ekle</b> ile ilkini ekle!' : 'Henüz sinema eklenmedi. <b>Sinema öner</b> ile moderatörlere bildirebilirsin.')
+          : 'Aramana uyan sinema bulunamadı.'}</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(c => {
+        const broken = Number(c.broken_seats) || 0;
+        return `<button type="button" onclick="openCinema('${c.id}')" class="text-left flex gap-3 p-3 rounded-2xl bg-white dark:bg-carddark border border-gray-200 dark:border-borderdark shadow hover:shadow-lg hover:border-teal-400 transition active:scale-[.99]">
+          ${cinemaThumb(c, 'w-16 h-16 shrink-0 self-start rounded-xl')}
+          <span class="min-w-0 flex-1">
+            <span class="flex items-start gap-2">
+              <span class="min-w-0 flex-1"><span class="block font-extrabold truncate">${escapeHtml(c.name)}</span><span class="block text-xs text-gray-500 truncate">${escapeHtml(c.city || '')}</span></span>
+              ${c.avg_all != null ? `<span class="shrink-0 px-2 py-1 rounded-lg text-xs font-black text-white shadow ${movieScoreBg(c.avg_all)}">&#9733; ${fmtAvg(c.avg_all)}</span>` : '<span class="shrink-0 text-[11px] text-gray-400 font-semibold">puan yok</span>'}
+            </span>
+            <span class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">${miniScore('Perde', numOrNull(c.avg_screen))}${miniScore('Koltuk', numOrNull(c.avg_seat))}${miniScore('Temizlik', numOrNull(c.avg_clean))}</span>
+            <span class="mt-1.5 flex flex-wrap items-center gap-x-3 text-[11px] text-gray-500">
+              <span>${c.rating_count} değerlendirme</span>
+              ${Number(c.hall_count) ? `<span>${c.hall_count} salon</span>` : ''}
+              ${broken ? `<span class="font-bold text-red-500">${broken} hasarlı koltuk</span>` : ''}
+            </span>
+          </span></button>`;
+      }).join('');
+    }
+
+    // ----- Detay -----
+    async function openCinema(id) {
+      cinemaOpenId = id; cinemaRatings = []; cinemaHalls = []; hallOpenId = null; hallSeats = {}; seatSelMode = false; seatSel = new Set(); seatInfo = null; hallEd = null; cinemaEditOpen = false;
+      if (appMode !== 'cinema') { appMode = 'cinema'; try { localStorage.setItem('rb_mode', 'cinema'); } catch (e) {} applyModeUi(); }
+      showSection('cinema-detail-section');
+      window.scrollTo({ top: 0 });
+      if (!cinemaById(id)) await loadCinemas();
+      if (!cinemaById(id)) { closeCinema(); return; }
+      renderCinemaHead(); renderCinemaAdmin(); renderCinemaMine(); renderHalls();
+      document.getElementById('cd-list').innerHTML = '<p class="text-sm text-gray-500">Yükleniyor...</p>';
+      await Promise.all([loadCinemaRatings(), loadHalls()]);
+    }
+    function closeCinema() {
+      cinemaOpenId = null; hallEd = null;
+      showSection('cinema-section'); renderCinemaList();
+    }
+
+    function renderCinemaHead() {
+      const c = cinemaById(cinemaOpenId), el = document.getElementById('cd-head'); if (!c || !el) return;
+      const bar = (label, v) => `<div>
+        <div class="flex items-center justify-between text-xs font-bold mb-1"><span>${label}</span><span class="${v == null ? 'text-gray-400' : ''}">${cnAvg(v)}</span></div>
+        <div class="h-2 rounded-full bg-gray-200 dark:bg-borderdark overflow-hidden"><div class="h-full rounded-full ${v == null ? '' : movieScoreBg(v)}" style="width:${v == null ? 0 : Math.round(Number(v) * 10)}%"></div></div></div>`;
+      const broken = Number(c.broken_seats) || 0;
+      const map = (c.address || c.name) ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([c.name, c.address || c.city || ''].filter(Boolean).join(' '))}` : '';
+      el.innerHTML = `<div class="bg-white dark:bg-carddark rounded-3xl border border-gray-200 dark:border-borderdark shadow-xl overflow-hidden">
+        ${c.photo_url ? `<div class="h-36 sm:h-48 w-full overflow-hidden bg-gray-200 dark:bg-borderdark"><img src="${escapeHtml(c.photo_url)}" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.parentNode.remove()"></div>` : ''}
+        <div class="p-4 sm:p-6">
+          <div class="flex items-start gap-3">
+            <div class="min-w-0 flex-1">
+              <h2 class="text-xl sm:text-2xl font-black break-words">${escapeHtml(c.name)}</h2>
+              <p class="text-sm text-gray-500 break-words">${escapeHtml([c.city, c.address].filter(Boolean).join(' · '))}</p>
+              ${map ? `<a href="${map}" target="_blank" rel="noopener noreferrer" class="inline-block mt-1 text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline">Haritada aç &rarr;</a>` : ''}
+            </div>
+            <div class="shrink-0 text-center">
+              <div class="min-w-[64px] px-3 py-2 rounded-2xl text-2xl leading-none font-black text-white shadow-lg ${c.avg_all != null ? movieScoreBg(c.avg_all) : 'bg-gray-400 dark:bg-gray-600'}">${cnAvg(c.avg_all)}</div>
+              <div class="text-[11px] text-gray-500 mt-1">${c.rating_count} değerlendirme</div>
+            </div>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-3 mt-4">${CN_CATS.map(k => bar(k[1], numOrNull(c[k[3]]))).join('')}</div>
+          ${broken ? `<p class="mt-3 text-xs font-bold text-red-500">${broken} koltuk hasarlı bildirilmiş</p>` : ''}
+        </div></div>`;
+    }
+
+    function renderCinemaAdmin() {
+      const c = cinemaById(cinemaOpenId), el = document.getElementById('cd-admin'); if (!el) return;
+      if (!c || !isModerator) { el.innerHTML = ''; return; }
+      if (!cinemaEditOpen) {
+        el.innerHTML = `<div class="flex gap-2"><button type="button" onclick="toggleCinemaEdit(true)" class="text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">Sinemayı düzenle</button>
+          <button type="button" onclick="deleteCinema()" class="text-xs font-bold px-4 py-2 rounded-xl text-red-500 border border-red-500/30 hover:bg-red-500/10">Sinemayı sil</button></div>`;
+        return;
+      }
+      el.innerHTML = `<form onsubmit="saveCinemaEdit(event)" class="${CN_CARD}">
+        <h3 class="font-extrabold text-amber-600 dark:text-amber-400">Sinemayı düzenle</h3>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <input id="cn-ed-name" type="text" required maxlength="80" value="${escapeHtml(c.name)}" placeholder="Sinema adı" class="${CN_INPUT}">
+          <input id="cn-ed-city" type="text" maxlength="60" value="${escapeHtml(c.city || '')}" placeholder="Şehir / semt" class="${CN_INPUT}">
+        </div>
+        <input id="cn-ed-addr" type="text" maxlength="200" value="${escapeHtml(c.address || '')}" placeholder="Adres" class="${CN_INPUT}">
+        <input id="cn-ed-photo" type="url" maxlength="500" value="${escapeHtml(c.photo_url || '')}" placeholder="Görsel linki (https://)" class="${CN_INPUT}">
+        <div class="flex gap-2"><button type="submit" id="cn-ed-btn" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl">Kaydet</button>
+        <button type="button" onclick="toggleCinemaEdit(false)" class="bg-gray-100 dark:bg-borderdark text-sm font-semibold px-5 py-2.5 rounded-xl">Vazgeç</button></div>
+      </form>`;
+    }
+    function toggleCinemaEdit(v) { cinemaEditOpen = v; renderCinemaAdmin(); }
+    async function saveCinemaEdit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('cn-ed-btn'); btn.disabled = true;
+      const { error } = await supabaseClient.rpc('update_cinema', {
+        p_id: cinemaOpenId,
+        p_name: document.getElementById('cn-ed-name').value.trim(),
+        p_city: document.getElementById('cn-ed-city').value.trim() || null,
+        p_address: document.getElementById('cn-ed-addr').value.trim() || null,
+        p_photo: document.getElementById('cn-ed-photo').value.trim() || null
+      });
+      btn.disabled = false;
+      if (error) { alert(cinemaErr(error)); return; }
+      cinemaEditOpen = false; await loadCinemas(); renderCinemaAdmin();
+    }
+    async function deleteCinema() {
+      const c = cinemaById(cinemaOpenId); if (!c) return;
+      if (!confirm(`"${c.name}" silinsin mi? Tüm puanlar, salonlar ve koltuk bildirimleri de silinir.`)) return;
+      const { error } = await supabaseClient.rpc('delete_cinema', { p_id: c.id });
+      if (error) { alert(cinemaErr(error)); return; }
+      await loadCinemas(); closeCinema();
+    }
+
+    // ----- Puanlama -----
+    function renderCinemaMine() {
+      const c = cinemaById(cinemaOpenId), el = document.getElementById('cd-mine'); if (!c || !el) return;
+      const has = c.my_screen != null || c.my_seat != null || c.my_clean != null;
+      const hints = { screen: 'Görüntü netliği, parlaklık, ses', seat: 'Rahatlık, bacak mesafesi, görüş açısı', clean: 'Salon, koltuklar ve tuvaletlerin temizliği' };
+      el.innerHTML = `<div class="${CN_CARD}">
+        <h3 class="font-extrabold text-teal-600 dark:text-teal-400">${has ? 'Değerlendirmen' : 'Bu sinemayı değerlendir'}</h3>
+        <p class="text-[11px] text-gray-500 -mt-1">İstediğin kategorileri puanla, bilmediklerini boş bırak (en az biri gerekli).</p>
+        ${CN_CATS.map(k => { const id = 'cn-' + k[0], v = Number(c[k[2]]) || 0; return `
+          <div>
+            <div class="flex items-baseline justify-between gap-2 mb-1.5"><span class="text-sm font-extrabold">${k[1]} <span class="text-[11px] font-medium text-gray-400">${hints[k[0]]}</span></span>
+            <button type="button" onclick="applyScore('${id}', 0)" class="text-[11px] font-bold text-gray-400 hover:text-red-500 shrink-0">Boş bırak</button></div>
+            <input type="hidden" id="score-${id}" value="${v || ''}"><div id="picker-${id}">${scorePickerHtml(id, v)}</div>
+          </div>`; }).join('')}
+        <textarea id="comment-cn" rows="2" maxlength="500" placeholder="Yorum (isteğe bağlı)" class="${CN_INPUT} resize-none">${escapeHtml(c.my_comment || '')}</textarea>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="cn-save" onclick="saveCinemaRating()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition">${has ? 'Güncelle' : 'Kaydet'}</button>
+          ${has ? '<button type="button" onclick="removeCinemaRating()" class="text-xs font-bold text-red-500 hover:text-red-400 px-3 py-2">Değerlendirmemi sil</button>' : ''}
+          <span id="cn-msg" class="text-xs font-semibold text-emerald-500"></span>
+        </div></div>`;
+    }
+    async function saveCinemaRating() {
+      const id = cinemaOpenId; if (!id) return;
+      const g = k => Number(document.getElementById('score-cn-' + k).value) || null;
+      const screen = g('screen'), seat = g('seat'), clean = g('clean');
+      if (!screen && !seat && !clean) { alert('En az bir kategoriyi puanla.'); return; }
+      const btn = document.getElementById('cn-save'); btn.disabled = true;
+      const { error } = await supabaseClient.rpc('rate_cinema', { p_cinema: id, p_screen: screen, p_seat: seat, p_clean: clean, p_comment: document.getElementById('comment-cn').value.trim() || null });
+      btn.disabled = false;
+      if (error) { alert(cinemaErr(error)); return; }
+      await loadCinemas(); if (id !== cinemaOpenId) return;
+      renderCinemaMine();
+      const msg = document.getElementById('cn-msg'); if (msg) msg.innerText = 'Kaydedildi ✓';
+      await loadCinemaRatings();
+    }
+    async function removeCinemaRating() {
+      const id = cinemaOpenId; if (!id || !confirm('Bu sinemadaki değerlendirmeni silmek istediğine emin misin?')) return;
+      const { error } = await supabaseClient.rpc('delete_my_cinema_rating', { p_cinema: id });
+      if (error) { alert(cinemaErr(error)); return; }
+      await loadCinemas(); if (id !== cinemaOpenId) return;
+      renderCinemaMine(); await loadCinemaRatings();
+    }
+    async function modClearCinemaRating(uid) {
+      if (!confirm('Bu kullanıcının değerlendirmesi kaldırılsın mı?')) return;
+      const { error } = await supabaseClient.rpc('mod_clear_cinema_rating', { p_cinema: cinemaOpenId, p_user: uid });
+      if (error) { alert(cinemaErr(error)); return; }
+      await loadCinemas(); renderCinemaHead(); await loadCinemaRatings();
+    }
+    async function loadCinemaRatings() {
+      const id = cinemaOpenId; if (!id) return;
+      const { data, error } = await supabaseClient.rpc('get_cinema_ratings', { p_cinema: id });
+      if (id !== cinemaOpenId) return;
+      if (error) { document.getElementById('cd-list').innerHTML = `<p class="text-sm text-red-500">${escapeHtml(cinemaErr(error))}</p>`; return; }
+      cinemaRatings = data || []; renderCinemaRatingList();
+    }
+    function renderCinemaRatingList() {
+      const el = document.getElementById('cd-list'); if (!el) return;
+      if (!cinemaRatings.length) { el.innerHTML = '<div class="text-center py-8 text-sm text-gray-500">Henüz kimse değerlendirmedi. İlk puanı sen ver!</div>'; return; }
+      const chip = (l, v) => v == null ? '' : `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-gray-500">${l}<span class="px-1.5 py-0.5 rounded-md text-white font-black ${movieScoreBg(v)}">${fmtScore(v)}</span></span>`;
+      el.innerHTML = `<h3 class="font-extrabold mb-3">Değerlendirmeler <span class="text-gray-400 font-bold">${cinemaRatings.length}</span></h3>
+        <div class="space-y-3">${cinemaRatings.map(r => {
+          const me = currentUser && r.user_id === currentUser.id;
+          const when = r.updated_at ? new Date(r.updated_at).toLocaleDateString('tr-TR') : '';
+          return `<div class="bg-white dark:bg-carddark rounded-2xl border ${me ? 'border-teal-400/60' : 'border-gray-200 dark:border-borderdark'} p-3.5 flex gap-3">
+            <img src="${avatarOf({ avatar_url: r.avatar_url, full_name: r.full_name })}" alt="" class="w-10 h-10 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-borderdark">
+            <div class="min-w-0 flex-1">
+              <span class="font-bold text-sm">${escapeHtml(r.full_name || 'Kullanıcı')}${me ? ' <span class="text-teal-500 text-xs">(sen)</span>' : ''}</span>
+              <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1">${chip('Perde', numOrNull(r.screen))}${chip('Koltuk', numOrNull(r.seat))}${chip('Temizlik', numOrNull(r.clean))}</div>
+              ${r.comment ? `<p class="text-sm text-gray-700 dark:text-gray-300 mt-1 break-words whitespace-pre-line">${escapeHtml(r.comment)}</p>` : ''}
+              <div class="flex items-center gap-3 mt-1"><span class="text-[11px] text-gray-400">${when}</span>
+                ${isModerator && !me ? `<button type="button" onclick="modClearCinemaRating('${r.user_id}')" class="text-[11px] font-bold text-red-500 hover:text-red-400">Kaldır</button>` : ''}</div>
+            </div></div>`;
+        }).join('')}</div>`;
+    }
+
+    // ----- Salonlar ve koltuk haritası -----
+    const rowLabel = i => { let s = '', n = i; do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } while (n >= 0); return s; };
+    const seatKey = (r, c) => r + ',' + c;
+    const hallById = id => cinemaHalls.find(h => h.id === id);
+    function seatNo(layout, r, c) { return layout[r - 1].slice(0, c).replace(/_/g, '').length; }   // sıra içi koltuk numarası (boşluklar sayılmaz)
+    function seatLabel(h, r, c) { return rowLabel(r - 1) + '-' + seatNo(h.layout, r, c); }
+    function seatState(r, c) {
+      const s = hallSeats[seatKey(r, c)];
+      if (!s) return 'unknown';
+      const ok = Number(s.ok_n), bad = Number(s.broken_n);
+      if (bad > 0 && bad >= ok) return 'broken';
+      return ok > 0 ? 'ok' : 'unknown';
+    }
+
+    async function loadHalls() {
+      const id = cinemaOpenId; if (!id) return;
+      const { data, error } = await supabaseClient.rpc('get_halls', { p_cinema: id });
+      if (id !== cinemaOpenId) return;
+      if (error) { document.getElementById('cd-halls').innerHTML = `<p class="text-sm text-red-500">${escapeHtml(cinemaErr(error))}</p>`; return; }
+      cinemaHalls = data || [];
+      if (!hallById(hallOpenId)) hallOpenId = cinemaHalls.length ? cinemaHalls[0].id : null;
+      renderHalls();
+      if (hallOpenId) await loadHallSeats();
+    }
+    async function loadHallSeats() {
+      const hid = hallOpenId; if (!hid) return;
+      const { data, error } = await supabaseClient.rpc('get_hall_seats', { p_hall: hid });
+      if (hid !== hallOpenId) return;
+      if (error) { alert(cinemaErr(error)); return; }
+      hallSeats = {}; (data || []).forEach(s => { hallSeats[seatKey(s.row_no, s.col_no)] = s; });
+      renderHalls();
+    }
+    function selectHall(id) {
+      if (hallOpenId === id) return;
+      hallOpenId = id; seatSelMode = false; seatSel = new Set(); seatInfo = null; seatReports = []; hallSeats = {}; hallEd = null;
+      renderHalls(); loadHallSeats();
+    }
+
+    function renderHalls() {
+      const el = document.getElementById('cd-halls'); if (!el) return;
+      if (!cinemaOpenId) { el.innerHTML = ''; return; }
+      hallEdSync();
+      const keepScroll = (document.getElementById('hall-scroll') || {}).scrollLeft || 0;
+      const h = hallById(hallOpenId);
+      const tabs = cinemaHalls.map(x => `<button type="button" onclick="selectHall('${x.id}')" class="shrink-0 px-4 py-2 rounded-full text-xs font-bold transition ${x.id === hallOpenId
+        ? 'bg-teal-600 text-white shadow-md' : 'bg-white dark:bg-carddark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-borderdark hover:border-teal-400'}">${escapeHtml(x.name)}</button>`).join('');
+      const modBar = isModerator ? `<div class="flex flex-wrap gap-2">
+        <button type="button" onclick="openHallEditor(null)" class="text-xs font-bold px-3 py-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/30">+ Salon ekle</button>
+        ${h ? `<button type="button" onclick="openHallEditor('${h.id}')" class="text-xs font-bold px-3 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">Salon düzenini değiştir</button>` : ''}</div>` : '';
+      let body = '';
+      if (hallEd) body = hallEditorHtml();
+      else if (!h) body = `<p class="text-sm text-gray-500">${isModerator ? 'Bu sinemada henüz salon yok. <b>+ Salon ekle</b> ile koltuk düzenini kur.' : 'Bu sinemanın salon düzeni henüz hazırlanmadı.'}</p>`;
+      else body = hallMapHtml(h);
+      el.innerHTML = `<div class="${CN_CARD}">
+        <div class="flex items-center gap-2"><h3 class="font-extrabold text-teal-600 dark:text-teal-400 mr-auto">Koltuk durumu</h3></div>
+        ${cinemaHalls.length ? `<div class="flex gap-2 overflow-x-auto pb-1" role="tablist">${tabs}</div>` : ''}
+        ${modBar}
+        ${body}
+      </div>`;
+      const sc = document.getElementById('hall-scroll'); if (sc) sc.scrollLeft = keepScroll;
+    }
+
+    function hallMapHtml(h) {
+      const cols = Math.max(...h.layout.map(r => r.length));
+      const sizeStyle = 'width:26px;height:26px;flex:none';
+      const rows = h.layout.map((line, i) => {
+        const r = i + 1;
+        let cells = '', n = 0;
+        for (let c = 1; c <= cols; c++) {
+          if (line[c - 1] !== 's') { cells += `<span style="${sizeStyle}"></span>`; continue; }
+          n++;
+          const st = seatState(r, c), k = seatKey(r, c), mine = hallSeats[k] && hallSeats[k].my_status;
+          const sel = seatSel.has(k), info = !seatSelMode && seatInfo === k;
+          const cls = st === 'broken' ? 'bg-red-500 text-white' : st === 'ok' ? 'bg-emerald-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-transparent';
+          const ring = sel ? 'outline outline-2 outline-offset-1 outline-cyan-400 scale-110' : info ? 'outline outline-2 outline-offset-1 outline-indigo-400' : '';
+          const label = `${rowLabel(i)}-${n}`;
+          const stText = st === 'broken' ? 'hasarlı' : st === 'ok' ? 'sağlam' : 'bilinmiyor';
+          cells += `<button type="button" data-seat="${k}" onclick="seatTap(${r},${c})" title="${label}: ${stText}" aria-label="${label}, ${stText}${sel ? ', seçili' : ''}"
+            style="${sizeStyle};font-size:11px;line-height:1;padding:0;position:relative" class="rounded-t-lg rounded-b-sm font-black transition ${cls} ${ring}">${st === 'broken' ? '✕' : st === 'ok' ? '✓' : ''}${mine ? `<i style="position:absolute;right:2px;top:2px;width:6px;height:6px;border-radius:9999px;background:${mine === 'broken' ? '#fff' : '#fff'};box-shadow:0 0 0 1px rgba(0,0,0,.45)"></i>` : ''}</button>`;
+        }
+        return `<div style="display:flex;gap:4px;align-items:center;margin-bottom:4px">
+          <button type="button" ${seatSelMode ? `onclick="seatSelectRow(${r})" title="Satırı seç"` : 'tabindex="-1"'} style="width:22px;flex:none;font-size:10px" class="font-bold text-gray-400 ${seatSelMode ? 'hover:text-cyan-500 cursor-pointer' : 'cursor-default'}">${rowLabel(i)}</button>${cells}</div>`;
+      }).join('');
+      const tot = Object.keys(hallSeats).length;
+      return `
+        <div id="hall-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pb-2">
+          <div style="width:max-content;margin:0 auto">
+            <div style="margin:0 0 14px 26px;height:10px;border-radius:50% 50% 0 0 / 100% 100% 0 0;background:linear-gradient(to bottom,rgba(45,212,191,.9),rgba(45,212,191,.15))" aria-hidden="true"></div>
+            <div style="margin:-4px 0 12px 26px;text-align:center;font-size:10px;font-weight:800;letter-spacing:.3em" class="text-gray-400">PERDE</div>
+            ${rows}
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
+          <span class="inline-flex items-center gap-1.5"><i class="inline-block w-3.5 h-3.5 rounded-t bg-gray-300 dark:bg-gray-600"></i>Bilinmiyor</span>
+          <span class="inline-flex items-center gap-1.5"><i class="inline-block w-3.5 h-3.5 rounded-t bg-emerald-500"></i>Sağlam</span>
+          <span class="inline-flex items-center gap-1.5"><i class="inline-block w-3.5 h-3.5 rounded-t bg-red-500"></i>Hasarlı</span>
+          <span class="inline-flex items-center gap-1.5"><i class="inline-block w-1.5 h-1.5 rounded-full bg-gray-700 dark:bg-white"></i>Senin bildirdiğin</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="seat-mode-btn" onclick="toggleSeatMode()" class="text-xs font-bold px-4 py-2 rounded-xl border-2 transition ${seatSelMode ? 'border-cyan-500 bg-cyan-500/10 text-cyan-600 dark:text-cyan-300' : 'border-gray-200 dark:border-borderdark text-gray-600 dark:text-gray-300 hover:border-cyan-400'}">${seatSelMode ? 'Çoklu seçim açık' : 'Birden çok koltuk seç'}</button>
+          <span class="text-[11px] text-gray-400">${seatSelMode ? 'Koltuklara dokun; satır harfine dokunursan tüm satır seçilir.' : 'Bir koltuğa dokunup durumunu bildir.'}</span>
+        </div>
+        <p class="text-[11px] text-gray-400">Son 180 günün bildirimleri sayılır; çoğunluk ne diyorsa o görünür (eşitlikte hasarlı).</p>
+        <div id="seat-panel">${seatPanelHtml(h)}</div>`;
+    }
+
+    function seatPanelHtml(h) {
+      const noteBox = `<input id="seat-note" type="text" maxlength="200" placeholder="Not (isteğe bağlı): kırık kol, çökük oturak, görüşü kapatıyor..." class="${CN_INPUT}">`;
+      const btns = (clear) => `<div class="flex flex-wrap gap-2">
+        <button type="button" onclick="sendSeatReport('ok')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl">Sağlam</button>
+        <button type="button" onclick="sendSeatReport('broken')" class="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl">Hasarlı</button>
+        ${clear ? `<button type="button" onclick="sendSeatReport('clear')" class="bg-gray-200 dark:bg-borderdark hover:bg-gray-300 dark:hover:bg-gray-800 text-xs font-bold px-4 py-2.5 rounded-xl">Bildirimimi sil</button>` : ''}</div>`;
+      if (seatSelMode) {
+        if (!seatSel.size) return '';
+        return `<div class="rounded-2xl border-2 border-cyan-500/40 bg-cyan-500/5 p-3 space-y-2.5">
+          <div class="flex items-center gap-2"><b class="text-sm">${seatSel.size} koltuk seçili</b>
+          <button type="button" onclick="clearSeatSel()" class="ml-auto text-[11px] font-bold text-gray-500 hover:text-red-500">Seçimi bırak</button></div>
+          ${noteBox}${btns(true)}</div>`;
+      }
+      if (!seatInfo) return '';
+      const [r, c] = seatInfo.split(',').map(Number);
+      const s = hallSeats[seatInfo] || { ok_n: 0, broken_n: 0, my_status: null, my_note: null };
+      const st = seatState(r, c);
+      const stTxt = { broken: ['Hasarlı', 'text-red-500'], ok: ['Sağlam', 'text-emerald-500'], unknown: ['Henüz bildirilmedi', 'text-gray-400'] }[st];
+      const mine = { ok: 'Senin bildirimin: sağlam', broken: 'Senin bildirimin: hasarlı' }[s.my_status] || '';
+      return `<div class="rounded-2xl border-2 border-indigo-500/30 bg-indigo-500/5 p-3 space-y-2.5">
+        <div class="flex items-center gap-2"><b class="text-base">Koltuk ${seatLabel(h, r, c)}</b><span class="text-sm font-extrabold ${stTxt[1]}">${stTxt[0]}</span>
+        <button type="button" onclick="closeSeatInfo()" class="ml-auto text-[11px] font-bold text-gray-500 hover:text-red-500">Kapat</button></div>
+        <p class="text-xs text-gray-500">${Number(s.ok_n)} kişi sağlam, ${Number(s.broken_n)} kişi hasarlı dedi.${mine ? ` <b>${mine}</b>` : ''}</p>
+        ${noteBox}${btns(!!s.my_status)}
+        ${isModerator && (Number(s.ok_n) + Number(s.broken_n)) ? `<button type="button" onclick="modResetSeat()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline">Onarıldı / tüm bildirimleri sıfırla (moderatör)</button>` : ''}
+        <div id="seat-reports">${seatReportsHtml()}</div></div>`;
+    }
+    function seatReportsHtml() {
+      if (seatReports === null) return '<p class="text-xs text-gray-400">Yükleniyor...</p>';
+      if (!seatReports.length) return '';
+      return `<div class="space-y-1.5 pt-1">${seatReports.map(r => `<div class="text-xs flex flex-wrap gap-x-2">
+        <b class="${r.status === 'broken' ? 'text-red-500' : 'text-emerald-500'}">${r.status === 'broken' ? 'Hasarlı' : 'Sağlam'}</b>
+        <span class="text-gray-500">${escapeHtml(r.full_name || 'Kullanıcı')} · ${new Date(r.updated_at).toLocaleDateString('tr-TR')}</span>
+        ${r.note ? `<span class="w-full break-words text-gray-700 dark:text-gray-300">${escapeHtml(r.note)}</span>` : ''}</div>`).join('')}</div>`;
+    }
+
+    function toggleSeatMode() { seatSelMode = !seatSelMode; seatSel = new Set(); seatInfo = null; renderHalls(); }
+    function clearSeatSel() { seatSel = new Set(); renderHalls(); }
+    function closeSeatInfo() { seatInfo = null; renderHalls(); }
+    function seatTap(r, c) {
+      const k = seatKey(r, c);
+      if (seatSelMode) { if (seatSel.has(k)) seatSel.delete(k); else seatSel.add(k); renderHalls(); return; }
+      if (seatInfo === k) { seatInfo = null; renderHalls(); return; }
+      seatInfo = k; seatReports = null; renderHalls();
+      const hid = hallOpenId;
+      supabaseClient.rpc('get_seat_reports', { p_hall: hid, p_row: r, p_col: c }).then(({ data, error }) => {
+        if (hid !== hallOpenId || seatInfo !== k) return;
+        seatReports = error ? [] : (data || []);
+        const el = document.getElementById('seat-reports'); if (el) el.innerHTML = seatReportsHtml();
+      });
+    }
+    function seatSelectRow(r) {
+      const h = hallById(hallOpenId); if (!h) return;
+      const line = h.layout[r - 1], keys = [];
+      for (let c = 1; c <= line.length; c++) if (line[c - 1] === 's') keys.push(seatKey(r, c));
+      const all = keys.every(k => seatSel.has(k));
+      keys.forEach(k => all ? seatSel.delete(k) : seatSel.add(k));
+      renderHalls();
+    }
+    async function sendSeatReport(status) {
+      const hid = hallOpenId; if (!hid) return;
+      const keys = seatSelMode ? [...seatSel] : (seatInfo ? [seatInfo] : []);
+      if (!keys.length) return;
+      const note = ((document.getElementById('seat-note') || {}).value || '').trim() || null;
+      const seats = keys.map(k => k.split(',').map(Number));
+      for (let i = 0; i < seats.length; i += 40) {
+        const { error } = await supabaseClient.rpc('report_seats', { p_hall: hid, p_seats: seats.slice(i, i + 40), p_status: status, p_note: status === 'clear' ? null : note });
+        if (error) { alert(cinemaErr(error)); await loadHallSeats(); return; }
+      }
+      if (seatSelMode) seatSel = new Set();
+      await loadHallSeats();
+      if (seatInfo && !seatSelMode) { const [r, c] = seatInfo.split(',').map(Number); seatTapReload(r, c); }
+      loadCinemas().then(() => { if (cinemaOpenId) renderCinemaHead(); });
+    }
+    function seatTapReload(r, c) {   // bildirim sonrası aynı koltuğun bildirim listesini tazele
+      const hid = hallOpenId, k = seatKey(r, c);
+      supabaseClient.rpc('get_seat_reports', { p_hall: hid, p_row: r, p_col: c }).then(({ data, error }) => {
+        if (hid !== hallOpenId || seatInfo !== k) return;
+        seatReports = error ? [] : (data || []);
+        const el = document.getElementById('seat-reports'); if (el) el.innerHTML = seatReportsHtml();
+      });
+    }
+    async function modResetSeat() {
+      if (!seatInfo || !confirm('Bu koltuğun tüm bildirimleri silinsin mi?')) return;
+      const [r, c] = seatInfo.split(',').map(Number);
+      const { error } = await supabaseClient.rpc('mod_reset_seat', { p_hall: hallOpenId, p_row: r, p_col: c });
+      if (error) { alert(cinemaErr(error)); return; }
+      seatReports = []; await loadHallSeats();
+      loadCinemas().then(() => { if (cinemaOpenId) renderCinemaHead(); });
+    }
+
+    // ----- Salon düzeni editörü (moderatör) -----
+    function openHallEditor(id) {
+      if (!isModerator) return;
+      seatSelMode = false; seatSel = new Set(); seatInfo = null;
+      if (id) {
+        const h = hallById(id); if (!h) return;
+        const cols = Math.max(...h.layout.map(r => r.length));
+        hallEd = { id: h.id, name: h.name, rows: h.layout.length, cols, grid: h.layout.map(l => Array.from({ length: cols }, (_, i) => l[i] === 's')), orig: h.layout.join('|') };
+      } else {
+        hallEd = { id: null, name: '', rows: 8, cols: 12, grid: Array.from({ length: 8 }, () => Array(12).fill(true)), orig: null };
+      }
+      renderHalls();
+    }
+    function closeHallEditor() { hallEd = null; renderHalls(); }
+    function hallEdSync() {   // alanlardaki yazıları duruma al
+      if (!hallEd) return;
+      const n = document.getElementById('he-name'); if (n) hallEd.name = n.value;
+    }
+    function hallEdResize() {
+      hallEdSync();
+      const r = Math.min(40, Math.max(1, parseInt(document.getElementById('he-rows').value, 10) || hallEd.rows));
+      const c = Math.min(60, Math.max(1, parseInt(document.getElementById('he-cols').value, 10) || hallEd.cols));
+      hallEd.grid = Array.from({ length: r }, (_, i) => Array.from({ length: c }, (_, j) => (hallEd.grid[i] && hallEd.grid[i][j] !== undefined ? hallEd.grid[i][j] : true)));
+      hallEd.rows = r; hallEd.cols = c; renderHalls();
+    }
+    function hallEdToggle(i, j) { hallEdSync(); hallEd.grid[i][j] = !hallEd.grid[i][j]; renderHalls(); }
+    function hallEdRow(i) { hallEdSync(); const v = !hallEd.grid[i].every(Boolean); hallEd.grid[i] = hallEd.grid[i].map(() => v); renderHalls(); }
+    function hallEdCol(j) { hallEdSync(); const v = !hallEd.grid.every(r => r[j]); hallEd.grid.forEach(r => { r[j] = v; }); renderHalls(); }
+    function hallEdAll(v) { hallEdSync(); hallEd.grid = hallEd.grid.map(r => r.map(() => v)); renderHalls(); }
+    function hallEdLayout() { return hallEd.grid.map(r => r.map(x => (x ? 's' : '_')).join('')); }
+    function hallEditorHtml() {
+      const e = hallEd, seats = e.grid.reduce((a, r) => a + r.filter(Boolean).length, 0);
+      const cell = 24;
+      const head = `<div style="display:flex;gap:3px;margin-bottom:3px"><span style="width:${cell}px;flex:none"></span>${Array.from({ length: e.cols }, (_, j) => `<button type="button" onclick="hallEdCol(${j})" style="width:${cell}px;flex:none;font-size:9px" class="font-bold text-gray-400 hover:text-teal-500" title="Sütunu aç/kapat">${j + 1}</button>`).join('')}</div>`;
+      const rows = e.grid.map((r, i) => `<div style="display:flex;gap:3px;margin-bottom:3px"><button type="button" onclick="hallEdRow(${i})" style="width:${cell}px;flex:none;font-size:10px" class="font-bold text-gray-400 hover:text-teal-500" title="Satırı aç/kapat">${rowLabel(i)}</button>${r.map((on, j) => `<button type="button" onclick="hallEdToggle(${i},${j})" aria-label="${rowLabel(i)}${j + 1}: ${on ? 'koltuk' : 'boşluk'}" style="width:${cell}px;height:${cell}px;flex:none;padding:0" class="rounded-t-md rounded-b-sm transition ${on ? 'bg-teal-500' : 'bg-transparent border border-dashed border-gray-300 dark:border-gray-600'}"></button>`).join('')}</div>`).join('');
+      return `<div class="rounded-2xl border-2 border-orange-500/30 bg-orange-500/5 p-3 space-y-3">
+        <h4 class="font-extrabold text-orange-600 dark:text-orange-400">${e.id ? 'Salon düzenini değiştir' : 'Yeni salon'}</h4>
+        <div class="grid gap-2 grid-cols-[1fr_80px_80px]">
+          <input id="he-name" type="text" maxlength="40" value="${escapeHtml(e.name)}" placeholder="Salon adı (ör. Salon 1)" class="${CN_INPUT}">
+          <input id="he-rows" type="number" min="1" max="40" value="${e.rows}" title="Satır sayısı" aria-label="Satır sayısı" class="${CN_INPUT}">
+          <input id="he-cols" type="number" min="1" max="60" value="${e.cols}" title="Sütun sayısı" aria-label="Sütun sayısı" class="${CN_INPUT}">
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="hallEdResize()" class="text-xs font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-borderdark">Boyutu uygula</button>
+          <button type="button" onclick="hallEdAll(true)" class="text-xs font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-borderdark">Hepsi koltuk</button>
+          <button type="button" onclick="hallEdAll(false)" class="text-xs font-bold px-3 py-2 rounded-xl bg-gray-100 dark:bg-borderdark">Hepsi boş</button>
+        </div>
+        <p class="text-[11px] text-gray-500">Kare = koltuk, kesikli = boşluk (koridor). Harfe ya da sayıya dokunursan satır / sütun toplu değişir. Önce satır ve sütun sayısını yazıp <b>Boyutu uygula</b>'ya bas.</p>
+        <div style="overflow-x:auto" class="pb-1"><div style="width:max-content">${head}${rows}</div></div>
+        <p class="text-xs font-bold text-gray-500">${seats} koltuk</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="he-save" onclick="saveHallEd()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl">Kaydet</button>
+          <button type="button" onclick="closeHallEditor()" class="bg-gray-100 dark:bg-borderdark text-sm font-semibold px-5 py-2.5 rounded-xl">Vazgeç</button>
+          ${e.id ? '<button type="button" onclick="deleteHallEd()" class="ml-auto text-xs font-bold text-red-500 hover:text-red-400 px-3 py-2">Salonu sil</button>' : ''}
+        </div></div>`;
+    }
+    async function saveHallEd() {
+      hallEdSync();
+      const e = hallEd, name = e.name.trim();
+      if (!name) { alert('Salon adı yaz.'); return; }
+      const layout = hallEdLayout();
+      if (layout.some(r => !r.includes('s'))) { alert('Her satırda en az bir koltuk olmalı. Koltuksuz satırı küçültüp (Boyutu uygula) kaldır.'); return; }
+      if (layout.join('').replace(/_/g, '').length > 1500) { alert('Bir salonda en fazla 1500 koltuk olabilir.'); return; }
+      if (e.id && e.orig !== layout.join('|') && !confirm('Düzen değişirse artık koltuk olmayan yerlerin bildirimleri silinir. Devam edilsin mi?')) return;
+      const btn = document.getElementById('he-save'); btn.disabled = true;
+      const { data, error } = await supabaseClient.rpc('save_hall', { p_id: e.id, p_cinema: cinemaOpenId, p_name: name, p_layout: layout });
+      btn.disabled = false;
+      if (error) { alert(cinemaErr(error)); return; }
+      hallEd = null; hallOpenId = data || e.id; hallSeats = {};
+      await loadHalls(); loadCinemas().then(() => { if (cinemaOpenId) renderCinemaHead(); });
+    }
+    async function deleteHallEd() {
+      const e = hallEd; if (!e || !e.id || !confirm('Bu salon ve tüm koltuk bildirimleri silinsin mi?')) return;
+      const { error } = await supabaseClient.rpc('delete_hall', { p_id: e.id });
+      if (error) { alert(cinemaErr(error)); return; }
+      hallEd = null; hallOpenId = null; hallSeats = {};
+      await loadHalls(); loadCinemas().then(() => { if (cinemaOpenId) renderCinemaHead(); });
+    }
+
     // ===== ARAMA =====
     function handleSearch() {
       if (appMode === 'movies') return movieSearch(document.getElementById('search-input').value);
+      if (appMode === 'cinema') return cinemaSearch(document.getElementById('search-input').value);
       const query = document.getElementById('search-input').value.toLowerCase().trim();
       renderSearchResults(query, 'search-results');
     }
 
     function handleSearchMobile() {
       if (appMode === 'movies') return movieSearch(document.getElementById('mobile-search-input').value);
+      if (appMode === 'cinema') return cinemaSearch(document.getElementById('mobile-search-input').value);
       const query = document.getElementById('mobile-search-input').value.toLowerCase().trim();
       renderSearchResults(query, 'mobile-search-results');
     }
